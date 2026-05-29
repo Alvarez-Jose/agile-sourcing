@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.env
+*.env.local
+
+# Vector DB
+chroma_db/
+*.index
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Data
+data/raw/*.pdf
+data/raw/*.csv
+*.sqlite
+*.db
+
+# Logs
+logs/
+*.log
