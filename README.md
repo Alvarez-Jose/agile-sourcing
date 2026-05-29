@@ -114,10 +114,4 @@ ng serve
 UCSC Procurement + Dev Team — Spring 2026
 ## System Architecture Diagram
 
-\![Architecture](docs/architecture.png)
-## System Architecture Diagram
-
-\![Architecture](docs/architecture.png)
-## System Architecture Diagram
-
-\![Architecture](docs/architecture.png)
+![Architecture](docs/updated%20system%20design.drawio.png)
