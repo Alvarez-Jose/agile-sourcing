@@ -2,6 +2,7 @@
 ### Install Packages
 Make sure you have Node.js 26 (Latest) installed and then in the frontend folder run:
 ```sh
+cd frontend
 npm install -g corepack
 corepack enable pnpm
 pnpm approve-builds
