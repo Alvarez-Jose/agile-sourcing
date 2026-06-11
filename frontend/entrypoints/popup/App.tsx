@@ -1,14 +1,23 @@
+import { Sidebar } from '../../components/Sidebar';
+
 function App() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleOpenNewTab = () => {
+    browser.tabs.create({ 
+      url: browser.runtime.getURL('/home.html') 
+    });
+  };
+
   return (
-    <>
-      <h1>Test</h1>
-      <button
-        onClick={() => browser.tabs.create({ 
-          url: browser.runtime.getURL('/home.html') 
-        })}
-        className="mt-4 p-2 bg-blue-500 text-white rounded"
-      ></button>
-    </>
+    <div className="flex h-[500px] w-[400px] overflow-hidden bg-[#f8f4fb] text-slate-800 font-sans">
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onOpenNewTab={handleOpenNewTab} />
+      <main className="flex-1 p-4 overflow-y-auto">
+        <div className="text-sm text-gray-400 italic text-center mt-10">
+          Main content area
+        </div >
+      </main>
+    </div>
   );
 }
 
