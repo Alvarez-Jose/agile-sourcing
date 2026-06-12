@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
@@ -23,8 +25,8 @@ export function Sidebar({ isCollapsed, setIsCollapsed, onOpenNewTab }: SidebarPr
           </svg>
         </button>
 
-        <button
-          onClick={() => console.log('Start chat clicked')}
+        <Link
+          to="chat.html"
           className={`flex ${isCollapsed ? 'flex-col' : 'flex-row items-center'} items-center justify-center transition-all duration/300 rounded-md bg-[#00539b] hover:bg-[#003d6f] active:scale-95 cursor-pointer text-white ${isCollapsed ? 'w-10 h-10' : 'w-full p-2 text-xs font-semibold'}`}
         >
           <svg 
@@ -39,7 +41,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, onOpenNewTab }: SidebarPr
             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
           </svg>
           {!isCollapsed && <span className="whitespace-nowrap">Start Chat</span>}
-        </button>
+        </Link>
       </div>
 
       {onOpenNewTab && (
