@@ -26,7 +26,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, onOpenNewTab }: SidebarPr
         </button>
 
         <Link
-          to="chat.html"
+          to="/chat.html"
           className={`flex ${isCollapsed ? 'flex-col' : 'flex-row items-center'} items-center justify-center transition-all duration/300 rounded-md bg-[#00539b] hover:bg-[#003d6f] active:scale-95 cursor-pointer text-white ${isCollapsed ? 'w-10 h-10' : 'w-full p-2 text-xs font-semibold'}`}
         >
           <svg 
