@@ -1,7 +1,7 @@
 # Frontend Setup Instructions
 ### Install Packages
 Make sure you have Node.js 26.3.0 (Latest) installed. \
-If you haven't installed pnpm on this device yet, do so by running:
+If you haven't installed pnpm on this version of node.js yet, do so by running:
 ```sh
 npm install -g corepack
 corepack enable pnpm
