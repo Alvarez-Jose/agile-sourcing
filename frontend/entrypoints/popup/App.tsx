@@ -1,33 +1,23 @@
 import { useState } from 'react';
-import reactLogo from '@/assets/react.svg';
-import wxtLogo from '/wxt.svg';
+import { Sidebar } from '../../components/Sidebar';
+import { AppRouter } from '../../components/AppRouter';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleOpenNewTab = () => {
+    browser.tabs.create({ 
+      url: browser.runtime.getURL('/home.html') 
+    });
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://wxt.dev" target="_blank">
-          <img src={wxtLogo} className="logo" alt="WXT logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>WXT + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the WXT and React logos to learn more
-      </p>
-    </>
+    <div className="flex h-[600px] w-[500px] overflow-hidden bg-[#f8f4fb] text-slate-800 font-sans">
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onOpenNewTab={handleOpenNewTab} />
+      <main className="flex-1 p-4 overflow-y-auto">
+        <AppRouter />
+      </main>
+    </div>
   );
 }
 
