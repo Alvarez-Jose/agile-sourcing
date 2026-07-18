@@ -26,6 +26,8 @@ Thumbs.db
 # Data
 data/raw/*.pdf
 data/raw/*.csv
+data/raw_policies/
+data/embeddings/chroma_store/
 *.sqlite
 *.db
 
