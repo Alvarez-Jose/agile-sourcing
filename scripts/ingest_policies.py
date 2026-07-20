@@ -142,19 +142,6 @@ def retrieve(question, collection, top_k=TOP_K):
 
 
 def rewrite_query(question):
-    q = question.lower()
-
-    if any(w in q for w in ['leave', 'leaving', 'left', 'former', 'ex-employee',
-                             'after employment', 'post-employment', 'departed',
-                             'departing', 'resign', 'retire', 'retired']):
-        return "post-employment conflict of interest restrictions former UC employee ban"
-
-    if any(w in q for w in ['split', 'divide', 'divided', 'break up', 'smaller orders']):
-        return "split order prohibition artificially divided purchase orders"
-
-    if any(w in q for w in ['gaming', 'personal use', 'appropriate use', 'grant laptop']):
-        return "appropriate use university funds personal benefit grant equipment"
-
     prompt = (
         "/no_think\n"
         "Convert this question into UC procurement policy search keywords only.\n"
