@@ -22,6 +22,7 @@ tiktoken==0.13.0
 
 # ---- Embeddings ----
 sentence-transformers==5.5.1
+scikit-learn==1.6.1
 
 # ---- PDF Processing ----
 pypdf==6.12.2

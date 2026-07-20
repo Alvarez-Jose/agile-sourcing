@@ -16,6 +16,7 @@ from rag_pipeline.parser.docx_extractor import extract_docx
 from rag_pipeline.parser.section_parser import chunk_by_section
 from rag_pipeline.parser.metadata_tagger import tag_chunk
 from rag_pipeline.indexer.hybrid_index import HybridRetriever
+from rag_pipeline.retriever.intent_classifier import get_search_keywords
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
@@ -51,6 +52,12 @@ def _get_retriever(collection):
 
 
 def _rewrite_query(question: str) -> str:
+    # Try intent classifier first
+    keywords = get_search_keywords(question)
+    if keywords:
+        return keywords
+
+    # Fall back to LLM keyword rewrite
     prompt = (
         "/no_think\n"
         "Convert this question into UC procurement policy search keywords only.\n"
