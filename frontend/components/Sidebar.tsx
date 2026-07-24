@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Login from './pages/Login';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -42,6 +43,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, onOpenNewTab }: SidebarPr
           </svg>
           {!isCollapsed && <span className="whitespace-nowrap">Start Chat</span>}
         </Link>
+        <Login />
       </div>
 
         <div className="p-1 border-t border-gray-100 flex flex-col items-center">
