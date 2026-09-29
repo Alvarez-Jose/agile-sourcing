@@ -14,8 +14,11 @@ import argparse
 import json
 import random
 import re
+import sys
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # so rules/ can be imported
 
 import chromadb
 import ollama
@@ -25,6 +28,7 @@ COLLECTION_NAME = "uc_policies"
 OUTPUT_DIR = Path("training/dataset")
 TRAIN_FILE = OUTPUT_DIR / "train.jsonl"
 EVAL_FILE = OUTPUT_DIR / "eval.jsonl"
+EDGE_CASE_FILE = OUTPUT_DIR / "edge_cases.jsonl"
 LLM_MODEL = "qwen3:8b"
 EVAL_SPLIT = 0.15
 MAX_PAIRS = 500
@@ -112,6 +116,190 @@ MUST_INCLUDE_SCENARIOS = [
         "doc_type": "Procurement"
     },
 ]
+
+
+# edge cases the model kept getting wrong (benchmark Q7, Q9, Q32, Q41).
+# I wrote these answers from the policy docs instead of having qwen generate them,
+# since qwen generating them is how we got the wrong answers in the first place.
+# each one also gets run through the rule engine (the `request` part) and has to
+# match `expect`, so the training data can't disagree with the rules.
+EDGE_CASE_SCENARIOS = [
+    # equipment tagging around $5,000 (BUS-29)
+    {"question": "Our lab bought a spectrometer for exactly $5,000. Does it need to be tagged?",
+     "answer": "Yes. Under BFB-BUS-29, equipment costing $5,000 or more is inventorial: it must be tagged, tracked, "
+               "and assigned a Capital Asset Account Number (CAAN). At exactly $5,000 the spectrometer meets the threshold.",
+     "request": {"items": [("spectrometer", 5_000)]}, "expect": {"tagged": [True]}},
+    {"question": "One pump cost $4,999 and another cost $5,001. Which one goes into the equipment inventory?",
+     "answer": "Only the $5,001 pump. BFB-BUS-29 requires equipment costing $5,000 or more to be inventoried, tagged, "
+               "and assigned a CAAN. The $4,999 pump is below the threshold and is not inventorial equipment.",
+     "request": {"items": [("pump A", 4_999), ("pump B", 5_001)]}, "expect": {"tagged": [False, True]}},
+    {"question": "I bought a $4,800 centrifuge and a $5,200 microscope. Which need tagging?",
+     "answer": "Only the microscope ($5,200) must be tagged and tracked per BFB-BUS-29, because it meets the $5,000 "
+               "inventorial equipment threshold. The centrifuge ($4,800) is below the threshold and does not require tagging.",
+     "request": {"items": [("centrifuge", 4_800), ("microscope", 5_200)]}, "expect": {"tagged": [False, True]}},
+    {"question": "We purchased a $3,200 laptop, a $12,000 incubator, and a $5,000 freezer. What has to be tagged?",
+     "answer": "The incubator ($12,000) and the freezer ($5,000) must be inventoried, tagged, and assigned a CAAN under "
+               "BFB-BUS-29 because each costs $5,000 or more. The $3,200 laptop is below the threshold and is not tagged "
+               "as inventorial equipment.",
+     "request": {"items": [("laptop", 3_200), ("incubator", 12_000), ("freezer", 5_000)]},
+     "expect": {"tagged": [False, True, True]}},
+    {"question": "A year after buying a microscope we added a $6,500 camera attachment. Does the accessory get capitalized?",
+     "answer": "Yes. Under BFB-BUS-29, accessories costing $5,000 or more that are acquired after the initial purchase "
+               "must also be capitalized and added to the equipment record.",
+     "request": {"items": [("camera attachment", 6_500, False, True)]}, "expect": {"tagged": [True]}},
+    # federal grant SSPR at $50K
+    {"question": "My NSF grant is paying exactly $50,000 for an instrument. Do I need an SSPR?",
+     "answer": "Yes. The SSPR form is required for federal grant/cooperative agreement purchases of $50,000 or more, "
+               "so an exactly $50,000 grant-funded purchase requires it. (Competitive bidding is not required below $100,000.)",
+     "request": {"amount": 50_000, "funding": "federal_grant"}, "expect": {"sspr": True, "bid": False}},
+    {"question": "Is an SSPR required for a $49,500 purchase on an NIH grant?",
+     "answer": "No. For federal grant/cooperative agreement funds the SSPR threshold is $50,000, so a $49,500 purchase "
+               "does not require the SSPR. Federal contract funds have a lower $15,000 SSPR threshold.",
+     "request": {"amount": 49_500, "funding": "federal_grant"}, "expect": {"sspr": False}},
+    # federal contract SSPR at $15K
+    {"question": "We're buying $15,000 of supplies on a federal DOE contract. Is an SSPR form needed?",
+     "answer": "Yes. For federal contract funds the SSPR form is required for purchases of $15,000 or more (including "
+               "tax and shipping). At $15,000 the SSPR is required; for a purchase under $100,000 you document three "
+               "competitive quotes in Section II per 2 CFR 200.320(a)(2)(i).",
+     "request": {"amount": 15_000, "funding": "federal_contract"}, "expect": {"sspr": True, "bid": False}},
+    {"question": "What are the SSPR thresholds for federal contracts, federal grants, and non-federal purchases?",
+     "answer": "The SSPR form is required for federal contract purchases of $15,000 or more, federal grant/cooperative "
+               "agreement purchases of $50,000 or more, and non-federal purchases of $100,000 or more.",
+     "request": None, "expect": {}},
+    # mixed funding right at $10K
+    {"question": "A $60,000 purchase is paid with exactly $10,000 of federal funds and $50,000 of state funds. Which rules apply?",
+     "answer": "Only UC/State rules apply. Under the SSPR FAQ, federal requirements govern the whole transaction only "
+               "when the federal portion exceeds $10,000. A federal portion of exactly $10,000 does not exceed it.",
+     "request": {"amount": 60_000, "funding": "federal_grant", "federal_amount": 10_000}, "expect": {"federal": False}},
+    {"question": "A $60,000 purchase uses $10,500 from an NIH grant and the rest from department funds. Do federal rules apply?",
+     "answer": "Yes, to the entire $60,000 transaction. Because the federal portion ($10,500) exceeds $10,000, federal "
+               "requirements apply to the whole purchase, not only the federal share. At $60,000 on grant funds the SSPR "
+               "is required ($50,000 threshold).",
+     "request": {"amount": 60_000, "funding": "federal_grant", "federal_amount": 10_500},
+     "expect": {"federal": True, "sspr": True}},
+    # every covered service type
+    *[{"question": f"Can our department contract out {svc} services to an outside company?",
+       "answer": f"Generally no. {svc.capitalize()} is a covered service under Regents Policy 5402 and AFSCME 3299 "
+                 "Article 5, which generally prohibit contracting out services that UC employees can perform. It is "
+                 "permitted only under limited exceptions: emergency; insufficient UC staff; specialized expertise not "
+                 "available internally; services incidental to a property lease; an urgent, temporary, or occasional "
+                 "need; a remote facility more than 10 miles from campus; registry personnel in clinical operations; or "
+                 "when required by law, federal requirement, or court order. It must not displace UC employees. "
+                 "Contracts over $100,000 require advance notice to AFSCME 3299, and contracts over $100,000 lasting "
+                 "more than 90 days require wage and benefit parity.",
+       "request": {"amount": 1, "description": f"{svc} services"}, "expect": {"covered": True}}
+      for svc in ["janitorial", "custodial", "food service", "laundry", "grounds keeping", "parking", "security guard",
+                  "housekeeping"]],
+    {"question": "Our department wants to contract out a $50,000 janitorial service contract for a new building, and it "
+                 "would eliminate the jobs of three UC janitorial staff. Is it allowed?",
+     "answer": "No. Janitorial work is a covered service under Regents Policy 5402, and a contract that displaces UC "
+               "employees (demotion, layoff, or involuntary reduction in time) is prohibited regardless of the contract "
+               "value. At $50,000 AFSCME advance notice would not be triggered, but the displacement alone makes the "
+               "contract impermissible.",
+     "request": {"amount": 50_000, "description": "janitorial services", "displaces_uc_employees": True},
+     "expect": {"prohibited": True, "afscme": False}},
+    {"question": "We plan a $150,000, one-year custodial contract. What union requirements apply?",
+     "answer": "Custodial work is a covered service. Because the contract exceeds $100,000, AFSCME 3299 must be notified "
+               "before entering, extending, or renewing it: 30 calendar days' notice, or a copy of the RFP at issuance, "
+               "and AFSCME has 14 calendar days to respond. Because it also runs longer than 90 days, the contractor must "
+               "pay wages and benefits equivalent to UC employees doing the same work. A Regents Policy 5402 exception "
+               "must also apply, and the contract may not displace UC employees.",
+     "request": {"amount": 150_000, "description": "custodial services"}, "expect": {"afscme": True, "parity": True}},
+    {"question": "Is an $80,000 security guard contract subject to AFSCME notice?",
+     "answer": "No. Security services are a covered service under Regents Policy 5402, so an exception must still "
+               "apply, but AFSCME 3299 advance notice is only required for covered-service contracts over $100,000.",
+     "request": {"amount": 80_000, "description": "security guard services"}, "expect": {"afscme": False}},
+    {"question": "Is a $200,000 IT consulting engagement a covered service under Regents Policy 5402?",
+     "answer": "No. IT consulting is not among the covered services (cleaning, custodial, janitorial, housekeeping, food "
+               "service, laundry, grounds keeping, building maintenance excluding skilled crafts, transportation, parking, "
+               "security, nursing assistant, medical imaging, medical technician). The $200,000 value does trigger "
+               "competitive bidding and the SSPR under BUS-43.",
+     "request": {"amount": 200_000, "description": "IT consulting"}, "expect": {"covered": False, "bid": True}},
+    # contracting out exceptions
+    *[{"question": f"Can we contract out grounds keeping services when {why}?",
+       "answer": f"Possibly. Grounds keeping is a covered service under Regents Policy 5402, but contracting out is "
+                 f"permitted under the '{label}' exception. The exception must be documented, the contract must not "
+                 "displace UC employees, and contracts over $100,000 still require AFSCME 3299 notice.",
+       "request": {"amount": 1, "description": "grounds keeping services", "contracting_out_exception": code},
+       "expect": {"prohibited": False}}
+      for code, why, label in [
+          ("emergency", "a storm has created an emergency", "emergency"),
+          ("specialized_expertise", "the work needs specialized equipment no UC crew has",
+           "specialized expertise not available internally"),
+          ("remote_facility", "the site is a field station 40 miles from campus", "remote facility"),
+          ("urgent_temporary", "we only need a one-time cleanup after an event", "urgent, temporary, or occasional need"),
+      ]],
+    # multi-year contracts
+    {"question": "A 5-year service agreement costs $25,000 per year and is paid from a federal grant. Must it be bid?",
+     "answer": "Yes. With federal funds, the threshold applies to the anticipated total value: 5 x $25,000 = $125,000, "
+               "which exceeds $100,000, so it must be competitively bid and the SSPR used (SSPR FAQ), even though each "
+               "year is under $100,000.",
+     "request": {"amount": 125_000, "funding": "federal_grant", "contract_years": 5}, "expect": {"bid": True, "sspr": True}},
+    {"question": "A 3-year non-federal maintenance contract is $40,000 per year. Is a bid required under BUS-43?",
+     "answer": "No. BUS-43 applies the bid threshold to annual expenditures of more than $100,000; at $40,000 per year a "
+               "bid is not compelled for non-federal funds, although seeking competition is encouraged. If federal "
+               "funds were used, the $120,000 total would require a bid.",
+     "request": {"amount": 120_000, "contract_years": 3}, "expect": {"bid": False}},
+    # sole source reasons that aren't allowed (pre-work, price, brand)
+    {"question": "The vendor helped us customize the equipment specs so only their product qualifies. Can we sole source "
+                 "this $150,000 grant-funded purchase?",
+     "answer": "No. Per the SSPR form, pre-work with the selected supplier to customize the equipment, thereby excluding "
+               "competition, is not an allowable sole source justification. The $150,000 purchase must be competitively bid.",
+     "request": {"amount": 150_000, "funding": "federal_grant", "source_selection": "sole_source",
+                 "sole_source_justification": "pre_work"}, "expect": {"bid": True, "sole_source_invalid": True}},
+    {"question": "Can I sole source a $120,000 purchase because the vendor has the lowest price?",
+     "answer": "No. Price is not an allowable sole source justification. Allowable non-federal justifications are "
+               "one-of-a-kind/unique or matching existing equipment; otherwise the $120,000 purchase must be bid.",
+     "request": {"amount": 120_000, "source_selection": "sole_source", "sole_source_justification": "price"},
+     "expect": {"bid": True, "sole_source_invalid": True}},
+    {"question": "Our team prefers one brand of software. Can we sole source a $110,000 license on that basis?",
+     "answer": "No. Brand names and staff preference or familiarity are not allowable sole source justifications. "
+               "Sole source requires that only one supplier can meet the requirement.",
+     "request": {"amount": 110_000, "source_selection": "sole_source", "sole_source_justification": "brand"},
+     "expect": {"bid": True, "sole_source_invalid": True}},
+    {"question": "What SSPR sections do I complete for a $175,000 one-of-a-kind instrument on an NIH grant?",
+     "answer": "A valid one-of-a-kind sole source is exempt from competitive bidding, but the SSPR is required. Complete "
+               "Sections I, III (price reasonableness), IV (sole source justification), VII (conflict of interest), and "
+               "VIII (representation). The purchase also needs the Federal Funds Checklist, Debarment & Suspension and "
+               "Anti-Lobbying verifications, and the Uniform Guidance flow-down articles.",
+     "request": {"amount": 175_000, "funding": "federal_grant", "source_selection": "sole_source",
+                 "sole_source_justification": "one_of_a_kind"},
+     "expect": {"bid": False, "sections": ["I", "III", "IV", "VII", "VIII"]}},
+]
+
+
+def _check_edge_case(scenario) -> list:
+    # run it through the rule engine, returns a list of mismatches (empty = all good)
+    from rules import PurchaseRequest, RuleEngine
+    if scenario["request"] is None:
+        return []
+    r = RuleEngine().evaluate(PurchaseRequest(**scenario["request"]))
+    cs = r.categories.covered_service
+    actual = {
+        "tagged": [e.must_tag for e in r.categories.equipment],
+        "sspr": r.sspr_required, "bid": r.competitive_bid_required, "federal": r.federal_rules_apply,
+        "covered": cs is not None, "prohibited": bool(cs and cs.prohibited),
+        "afscme": bool(cs and cs.afscme_notice_required), "parity": bool(cs and cs.wage_parity_required),
+        "sole_source_invalid": r.has_flag("SOLE_SOURCE_INVALID"), "sections": r.sspr_sections,
+    }
+    return [f"{k}: expected {v}, engine says {actual[k]}" for k, v in scenario["expect"].items() if actual[k] != v]
+
+
+def build_edge_case_pairs() -> list[dict]:
+    pairs = []
+    for s in EDGE_CASE_SCENARIOS:
+        problems = _check_edge_case(s)
+        if problems:
+            raise ValueError(f"Edge case label disagrees with rule engine: {s['question']}\n  " + "\n  ".join(problems))
+        pairs.append({
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": s["question"]},
+                {"role": "assistant", "content": s["answer"]},
+            ],
+            "metadata": {"source": "edge case (rule-engine verified)", "doc_type": "Procurement", "page": ""},
+        })
+    return pairs
 
 
 def load_chunks():
@@ -273,14 +461,22 @@ def main():
     parser = argparse.ArgumentParser(description="Generate UC policy training dataset")
     parser.add_argument("--max", type=int, default=MAX_PAIRS, help="Max Q&A pairs to generate")
     parser.add_argument("--review", action="store_true", help="Print sample pairs for review")
+    parser.add_argument("--edge-cases-only", action="store_true",
+                        help=f"Only write the rule-engine-verified edge cases to {EDGE_CASE_FILE}")
     args = parser.parse_args()
+
+    edge_pairs = build_edge_case_pairs()
+    if args.edge_cases_only:
+        write_jsonl(edge_pairs, EDGE_CASE_FILE)
+        print(f"Merge into the fine-tuning set with the train file of your choice, e.g. train_large.jsonl")
+        return
 
     chunks = load_chunks()
 
     client = chromadb.PersistentClient(path=CHROMA_DIR)
     collection = client.get_collection(COLLECTION_NAME)
 
-    all_pairs = []
+    all_pairs = list(edge_pairs)
 
     # step 1: must-include scenarios first so they always make it in
     print(f"\nGenerating {len(MUST_INCLUDE_SCENARIOS)} must-include scenarios...")
