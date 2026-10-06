@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Sidebar } from '../../components/Sidebar';
 import { AppRouter } from '../../components/AppRouter';
+import { AuthProvider } from '../../context/AuthContext';
 
-function App() {
+function AppContent() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -12,6 +13,14 @@ function App() {
         <AppRouter />
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

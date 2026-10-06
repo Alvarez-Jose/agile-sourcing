@@ -8,7 +8,7 @@ export default defineConfig({
         plugins: [tailwindcss()],
     }),
     manifest: {
-        permissions: ['identity'],
+        permissions: ['identity', 'storage'],
         oauth2: {
             client_id: "933132683609-minc10snome0g6gv56nsd03tviqseoon.apps.googleusercontent.com", // REPLACE with your OAuth client ID
             scopes: [

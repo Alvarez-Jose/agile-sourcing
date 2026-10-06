@@ -1,143 +1,148 @@
 import { useState } from "react";
-import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
-import { auth } from "../../firebase/firebaseConfig";
+import { useAuth } from "../../context/AuthContext";
 
 type LoginProps = {
     isOpen: boolean;
     onClose: () => void;
 };
 
-const CLIENT_ID = "YOUR_CLIENT_ID.apps.googleusercontent.com"; // same one from wxt.config.ts
-
 export default function Login({ isOpen, onClose }: LoginProps) {
     const [email, setEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { loginWithGoogle, loginWithEmail } = useAuth();
 
     if (!isOpen) return null;
 
     // Generic Google sign-in (account chooser, no email pre-filled)
     const handleGoogle = async () => {
-        if (isLoading) return;
-        setIsLoading(true);
+        if (submitting) return;
+        setSubmitting(true);
         setError(null);
 
         try {
-            const token = await new Promise<string>((resolve, reject) => {
-                chrome.identity.getAuthToken({ interactive: true }, (token) => {
-                    if (chrome.runtime.lastError || !token) {
-                        reject(new Error(chrome.runtime.lastError?.message || "No token returned"));
-                    } else {
-                        resolve(token as string);
-                    }
-                });
-            });
-
-            const credential = GoogleAuthProvider.credential(null, token);
-            const result = await signInWithCredential(auth, credential);
-            console.log("Signed in:", result.user.email);
+            await loginWithGoogle();
             onClose();
         } catch (err: any) {
             console.error("Google sign-in failed:", err);
             setError(`Sign-in failed: ${err.message || err}`);
         } finally {
-            setIsLoading(false);
+            setSubmitting(false);
         }
     };
 
     // Email-specific sign-in — routes straight to that account's SSO/2FA
-    const handleEmailSubmit = async () => {
-        if (isLoading || !email) return;
-        setIsLoading(true);
+    const handleEmailSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (submitting || !email.trim()) return;
+        setSubmitting(true);
         setError(null);
 
         try {
-            const redirectUri = chrome.identity.getRedirectURL();
-            const authUrl =
-                `https://accounts.google.com/o/oauth2/auth` +
-                `?client_id=${CLIENT_ID}` +
-                `&response_type=token` +
-                `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-                `&scope=${encodeURIComponent("openid email profile")}` +
-                `&login_hint=${encodeURIComponent(email)}`; // <-- pre-fills/routes to this account
-
-            const responseUrl = await new Promise<string>((resolve, reject) => {
-                chrome.identity.launchWebAuthFlow(
-                    { url: authUrl, interactive: true },
-                    (responseUrl) => {
-                        if (chrome.runtime.lastError || !responseUrl) {
-                            reject(new Error(chrome.runtime.lastError?.message || "Auth flow failed"));
-                        } else {
-                            resolve(responseUrl);
-                        }
-                    }
-                );
-            });
-
-            // Extract access_token from the redirect URL fragment
-            const params = new URLSearchParams(responseUrl.split("#")[1]);
-            const token = params.get("access_token");
-            if (!token) throw new Error("No access token returned");
-
-            const credential = GoogleAuthProvider.credential(null, token);
-            const result = await signInWithCredential(auth, credential);
-            console.log("Signed in:", result.user.email);
+            await loginWithEmail(email.trim());
             onClose();
         } catch (err: any) {
             console.error("Email sign-in failed:", err);
             setError(`Sign-in failed: ${err.message || err}`);
         } finally {
-            setIsLoading(false);
+            setSubmitting(false);
         }
     };
 
     return (
         <div
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all"
             onClick={onClose}
         >
             <div
-                className="bg-[#eefbf1] border border-gray-800 rounded-md p-10 max-w-md w-full mx-4 flex flex-col items-center gap-6"
+                className="bg-[#eefbf1] border border-gray-800 rounded-xl p-8 max-w-md w-full mx-auto flex flex-col items-center gap-6 shadow-2xl relative"
                 onClick={(e) => e.stopPropagation()}
             >
-                <h2 className="text-3xl font-serif text-[#2e1a3e]">
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 p-1 rounded-full hover:bg-gray-200/60 transition-colors"
+                    aria-label="Close modal"
+                >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <h2 className="text-2xl sm:text-3xl font-serif text-[#2e1a3e] text-center">
                     Log in or create an account
                 </h2>
 
-                <div className="w-full">
-                    <label className="block font-serif text-lg mb-2">Email Address:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-3 outline-none placeholder-white/70"
-                    />
-                </div>
+                <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-4">
+                    <div className="w-full">
+                        <label htmlFor="login-email" className="block font-serif text-base sm:text-lg mb-1.5 text-gray-800">
+                            Email Address:
+                        </label>
+                        <input
+                            id="login-email"
+                            type="email"
+                            placeholder="cruzid@ucsc.edu"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={submitting}
+                            className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-3 outline-none placeholder-white/60 focus:ring-2 focus:ring-[#00539b] focus:ring-offset-2 transition-all disabled:opacity-60"
+                        />
+                    </div>
 
-                <button
-                    onClick={handleEmailSubmit}
-                    disabled={isLoading || !email}
-                    className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-2 font-serif text-lg hover:bg-[#173d6b] disabled:opacity-50"
-                >
-                    {isLoading ? "Signing in..." : "Submit"}
-                </button>
+                    <button
+                        type="submit"
+                        disabled={submitting || !email.trim()}
+                        className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-2.5 font-serif text-lg hover:bg-[#173d6b] disabled:opacity-50 transition-all cursor-pointer shadow-sm active:scale-[0.99] flex items-center justify-center gap-2"
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <span>Signing in...</span>
+                            </>
+                        ) : (
+                            "Submit"
+                        )}
+                    </button>
+                </form>
 
                 <div className="w-full flex items-center gap-4">
-                    <div className="flex-1 border-t border-gray-700" />
-                    <span className="font-serif text-lg">Or</span>
-                    <div className="flex-1 border-t border-gray-700" />
+                    <div className="flex-1 border-t border-gray-400" />
+                    <span className="font-serif text-base text-gray-600">Or</span>
+                    <div className="flex-1 border-t border-gray-400" />
                 </div>
 
                 <button
                     onClick={handleGoogle}
-                    disabled={isLoading}
-                    className="w-full border border-gray-800 bg-white rounded-md px-5 py-3 flex items-center justify-center gap-3 font-serif text-2xl hover:bg-gray-50 disabled:opacity-50"
+                    disabled={submitting}
+                    className="w-full border border-gray-800 bg-white rounded-lg px-5 py-3 flex items-center justify-center gap-3 font-serif text-lg sm:text-xl hover:bg-gray-50 disabled:opacity-50 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
                 >
-                    <span className="w-8 h-8 rounded-full bg-gray-300 inline-block" />
-                    {isLoading ? "Signing in..." : "Sign in with Google"}
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                        />
+                        <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                        />
+                    </svg>
+                    <span>{submitting ? "Signing in..." : "Sign in with Google"}</span>
                 </button>
 
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && (
+                    <div className="w-full p-3 bg-red-100 border border-red-300 text-red-700 text-sm rounded-lg text-center">
+                        {error}
+                    </div>
+                )}
             </div>
         </div>
     );
