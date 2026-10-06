@@ -2,12 +2,109 @@ import { GoogleAuthProvider, signInWithCredential, signOut as firebaseSignOut } 
 import { auth } from "../firebase/firebaseConfig";
 import { UserProfile, StoredAuthData } from "../types/auth";
 
-export const CLIENT_ID =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  "933132683609-minc10snome0g6gv56nsd03tviqseoon.apps.googleusercontent.com";
+export const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+/**
+ * Builds standard Google OAuth 2.0 URL for launchWebAuthFlow.
+ * Uses response_type: "id_token" with nonce to exchange directly for Firebase credential.
+ */
+function buildGoogleAuthUrl(emailHint?: string): string {
+  if (!CLIENT_ID) {
+    throw new Error("Missing VITE_GOOGLE_CLIENT_ID in your .env file");
+  }
+  const redirectUri = chrome.identity.getRedirectURL();
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    response_type: "id_token",
+    redirect_uri: redirectUri,
+    scope: "openid email profile",
+    nonce: crypto.randomUUID(), // Required when requesting id_token via implicit flow
+  });
+
+  if (emailHint) {
+    params.append("login_hint", emailHint);
+  }
+
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+/**
+ * Executes Chrome Web Auth Flow, parses Google id_token from redirect URL fragment,
+ * signs in to Firebase with the credential, saves the token, and establishes a backend session.
+ */
+async function executeGoogleAuthFlow(emailHint?: string): Promise<{
+  idToken: string;
+  profile: UserProfile;
+}> {
+  const authUrl = buildGoogleAuthUrl(emailHint);
+
+  const responseUrl = await new Promise<string>((resolve, reject) => {
+    chrome.identity.launchWebAuthFlow(
+      { url: authUrl, interactive: true },
+      (responseUrl) => {
+        if (chrome.runtime.lastError || !responseUrl) {
+          reject(
+            new Error(
+              chrome.runtime.lastError?.message || "Authentication flow was cancelled or failed"
+            )
+          );
+        } else {
+          resolve(responseUrl);
+        }
+      }
+    );
+  });
+
+  // Google returns id_token in the URL fragment (#id_token=...&token_type=Bearer...)
+  const url = new URL(responseUrl);
+  const params = new URLSearchParams(url.hash.substring(1));
+  const googleIdToken = params.get("id_token");
+
+  if (!googleIdToken) {
+    const errorParam = params.get("error");
+    throw new Error(
+      errorParam
+        ? `Google Authentication Error: ${errorParam}`
+        : "No id_token returned from Google"
+    );
+  }
+
+  // Exchange Google ID Token for Firebase Credential
+  const credential = GoogleAuthProvider.credential(googleIdToken);
+  const result = await signInWithCredential(auth, credential);
+  const idToken = await result.user.getIdToken(true);
+
+  // Store in chrome.storage.local
+  await chrome.storage.local.set({ idToken });
+
+  // Call session endpoint stub
+  const profile = await establishSession(idToken);
+
+  return { idToken, profile };
+}
+
+/**
+ * Sign in with Google (account chooser) via launchWebAuthFlow.
+ */
+export async function signInWithGoogle(): Promise<{
+  idToken: string;
+  profile: UserProfile;
+}> {
+  return executeGoogleAuthFlow();
+}
+
+/**
+ * Sign in with specific email hint via launchWebAuthFlow (pre-fills user / SSO).
+ */
+export async function signInWithEmailHint(email: string): Promise<{
+  idToken: string;
+  profile: UserProfile;
+}> {
+  return executeGoogleAuthFlow(email);
+}
 
 /**
  * Exchange ID token with backend session endpoint.
@@ -57,107 +154,6 @@ export async function establishSession(idToken: string): Promise<UserProfile> {
     await chrome.storage.local.set({ userProfile: finalProfile });
     return finalProfile;
   }
-}
-
-/**
- * Step 1: Sign in with Google (account chooser) via Chrome Identity API.
- * Extracts access token, exchanges for Firebase credential, retrieves Firebase ID token,
- * persists to chrome.storage.local, and establishes backend session.
- */
-export async function signInWithGoogle(): Promise<{
-  idToken: string;
-  profile: UserProfile;
-}> {
-  const token = await new Promise<string>((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: true }, (token) => {
-      if (chrome.runtime.lastError || !token) {
-        reject(
-          new Error(
-            chrome.runtime.lastError?.message || "No Google access token returned"
-          )
-        );
-      } else {
-        resolve(token as string);
-      }
-    });
-  });
-
-  const credential = GoogleAuthProvider.credential(null, token);
-  const result = await signInWithCredential(auth, credential);
-  const idToken = await result.user.getIdToken(true);
-
-  // Save token to chrome.storage.local
-  await chrome.storage.local.set({ idToken });
-
-  // Call session endpoint stub
-  const profile = await establishSession(idToken);
-
-  return { idToken, profile };
-}
-
-/**
- * Step 1: Sign in with email hint via Chrome Web Auth Flow (for pre-filled SSO/2FA).
- * Parses redirect URL fragment for access_token, exchanges for Firebase credential,
- * retrieves Firebase ID token, persists to chrome.storage.local, and establishes session.
- */
-export async function signInWithEmailHint(email: string): Promise<{
-  idToken: string;
-  profile: UserProfile;
-}> {
-  const redirectUri = chrome.identity.getRedirectURL();
-  const authUrl =
-    `https://accounts.google.com/o/oauth2/auth` +
-    `?client_id=${CLIENT_ID}` +
-    `&response_type=token` +
-    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-    `&scope=${encodeURIComponent("openid email profile")}` +
-    `&login_hint=${encodeURIComponent(email)}`;
-
-  const responseUrl = await new Promise<string>((resolve, reject) => {
-    chrome.identity.launchWebAuthFlow(
-      { url: authUrl, interactive: true },
-      (responseUrl) => {
-        if (chrome.runtime.lastError || !responseUrl) {
-          reject(
-            new Error(
-              chrome.runtime.lastError?.message || "Web Auth Flow failed"
-            )
-          );
-        } else {
-          resolve(responseUrl);
-        }
-      }
-    );
-  });
-
-  // Extract access_token from the redirect URL fragment (#access_token=...)
-  const hash = responseUrl.split("#")[1];
-  if (!hash) {
-    throw new Error("No URL fragment received in redirect response");
-  }
-
-  const params = new URLSearchParams(hash);
-  const accessToken = params.get("access_token");
-  if (!accessToken) {
-    const errorParam = params.get("error");
-    throw new Error(
-      errorParam
-        ? `Authentication error: ${errorParam}`
-        : "No access token found in redirect URL"
-    );
-  }
-
-  const credential = GoogleAuthProvider.credential(null, accessToken);
-  const result = await signInWithCredential(auth, credential);
-  const idToken = await result.user.getIdToken(true);
-
-  // Store token in chrome.storage.local
-  await chrome.storage.local.set({ idToken });
-
-  // Call session establishment stub
-  const profile = await establishSession(idToken);
-
-  return { idToken, profile };
 }
 
 /**
