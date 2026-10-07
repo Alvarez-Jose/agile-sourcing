@@ -1,6 +1,7 @@
 import { GoogleAuthProvider, signInWithCredential, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
 import { UserProfile, StoredAuthData } from "../types/auth";
+import { browser } from "wxt/browser";
 
 export const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -15,7 +16,7 @@ function buildGoogleAuthUrl(emailHint?: string): string {
   if (!CLIENT_ID) {
     throw new Error("Missing VITE_GOOGLE_CLIENT_ID in your .env file");
   }
-  const redirectUri = chrome.identity.getRedirectURL();
+  const redirectUri = browser.identity.getRedirectURL();
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     response_type: "id_token",
@@ -40,24 +41,14 @@ async function executeGoogleAuthFlow(emailHint?: string): Promise<{
   profile: UserProfile;
 }> {
   const authUrl = buildGoogleAuthUrl(emailHint);
-
-  const responseUrl = await new Promise<string>((resolve, reject) => {
-    chrome.identity.launchWebAuthFlow(
-      { url: authUrl, interactive: true },
-      (responseUrl) => {
-        if (chrome.runtime.lastError || !responseUrl) {
-          reject(
-            new Error(
-              chrome.runtime.lastError?.message || "Authentication flow was cancelled or failed"
-            )
-          );
-        } else {
-          resolve(responseUrl);
-        }
-      }
-    );
+  const responseUrl = await browser.identity.launchWebAuthFlow({
+    url: authUrl,
+    interactive: true,
   });
 
+  if (!responseUrl) {
+    throw new Error("Authentication flow was cancelled or failed");
+  }
   // Google returns id_token in the URL fragment (#id_token=...&token_type=Bearer...)
   const url = new URL(responseUrl);
   const params = new URLSearchParams(url.hash.substring(1));
@@ -77,8 +68,8 @@ async function executeGoogleAuthFlow(emailHint?: string): Promise<{
   const result = await signInWithCredential(auth, credential);
   const idToken = await result.user.getIdToken(true);
 
-  // Store in chrome.storage.local
-  await chrome.storage.local.set({ idToken });
+  // Store in browser.storage.local
+  await browser.storage.local.set({ idToken });
 
   // Call session endpoint stub
   const profile = await establishSession(idToken);
@@ -125,7 +116,7 @@ export async function establishSession(idToken: string): Promise<UserProfile> {
     }
 
     const profile: UserProfile = await res.json();
-    await chrome.storage.local.set({ userProfile: profile });
+    await browser.storage.local.set({ userProfile: profile });
     return profile;
   } catch (error) {
     console.warn(
@@ -146,21 +137,21 @@ export async function establishSession(idToken: string): Promise<UserProfile> {
     };
 
     // Check if we already have a saved local approval state to preserve testing toggles
-    const existing = (await chrome.storage.local.get("userProfile")) as { userProfile?: UserProfile };
+    const existing = (await browser.storage.local.get("userProfile")) as { userProfile?: UserProfile };
     const finalProfile: UserProfile = existing.userProfile
       ? { ...mockProfile, is_approved: existing.userProfile.is_approved }
       : mockProfile;
 
-    await chrome.storage.local.set({ userProfile: finalProfile });
+    await browser.storage.local.set({ userProfile: finalProfile });
     return finalProfile;
   }
 }
 
 /**
- * Retrieve persisted auth data from chrome.storage.local.
+ * Retrieve persisted auth data from browser.storage.local.
  */
 export async function getStoredAuth(): Promise<StoredAuthData> {
-  const data = (await chrome.storage.local.get(["idToken", "userProfile"])) as StoredAuthData;
+  const data = (await browser.storage.local.get(["idToken", "userProfile"])) as StoredAuthData;
   return {
     idToken: data.idToken,
     userProfile: data.userProfile,
@@ -176,7 +167,7 @@ export async function signOutUser(): Promise<void> {
   } catch (e) {
     console.error("Firebase sign-out error:", e);
   }
-  await chrome.storage.local.remove(["idToken", "userProfile"]);
+  await browser.storage.local.remove(["idToken", "userProfile"]);
 }
 
 /**
@@ -193,6 +184,6 @@ export async function setMockApproval(isApproved: boolean): Promise<UserProfile>
         is_approved: isApproved,
       };
 
-  await chrome.storage.local.set({ userProfile: updated });
+  await browser.storage.local.set({ userProfile: updated });
   return updated;
 }
