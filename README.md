@@ -44,7 +44,7 @@ agile-sourcing/
 │   ├── models/           # Pydantic schemas & DB models
 │   ├── utils/            # Config, logging
 │   └── main.py           # FastAPI app entry point
-├── frontend/             # Angular app (ng new)
+├── frontend/             # WXT browser extension (React + Tailwind)
 ├── data/
 │   ├── policies/         # Policy PDFs for RAG ingestion
 │   ├── raw/              # Raw data exports
@@ -104,7 +104,7 @@ ng serve
 - **LLM:** OpenAI GPT-4o / Claude (prototype) → self-hosted (production)
 - **Orchestration:** Raw API calls (prototype) → LangGraph (production)
 - **Vector DB:** Chroma (prototype) → pgvector (production)
-- **Frontend:** Streamlit (prototype) → Angular (production)
+- **Frontend:** WXT browser extension (React + Tailwind)
 - **Database:** SQLite (prototype) → PostgreSQL (production)
 - **Auth:** UC SSO (Cisco Duo / CruzID) — production only
 - **Forms:** PDF fill or HTML → PDF

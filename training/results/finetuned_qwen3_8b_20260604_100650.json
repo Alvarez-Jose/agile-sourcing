@@ -1,0 +1,185 @@
+{
+  "label": "finetuned_qwen3_8b",
+  "scores": {
+    "faithfulness": 0.812,
+    "relevancy": 0.988,
+    "details": [
+      {
+        "question": "Does the Small Business First Program apply to all UC purchases, or are there exceptions?",
+        "answer": "The Small Business First Program does not apply to purchases involving federal, grant, court decision, or court order requirements that dictate how funds can be expended. Additionally, certain purchase types are exempt, including interagency, federal government, research sub-awards, local government, higher education institutions, concessions, revenue/reimbursement contracts, medical and patient care, statutorily exempt, policy exempt, emergency, local assistance/subvention, and proprietary contracts. These exemptions are outlined in the policy. (Source: BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf)",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question about exceptions but includes specific exemptions not explicitly mentioned in the provided context, while the context does confirm the existence of exemptions."
+      },
+      {
+        "question": "Do I need to create a written contract for an independent contractor?",
+        "answer": "Yes, a written contract must be created and executed, as stated in section 9 of the Independent Contractor Guidelines (GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf). The contract must describe the worker as an independent contractor. Additionally, the contract should address employee benefits, as outlined in section 10. The University also requires documentation of the determination that an employer-employee relationship does not exist, as specified in section III.B. of the policy. This ensures compliance with federal tax guidelines and maintains proper classification under the law.",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites section 9 for the contract requirement and references section 10 for benefits, but the mention of section III.B. is not explicitly supported by the provided context, introducing partial hallucination."
+      },
+      {
+        "question": "How do I know if the minimum insurance requirements have been updated?",
+        "answer": "The Minimum Insurance Requirements will be updated as necessary and posted on the Office of Risk Services website. (Source: [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the Office of Risk Services website as the source for updated insurance requirements, directly addressing the question and fully supported by the context."
+      },
+      {
+        "question": "What responsibilities does a Principal Investigator have regarding the records of inventorial equipment under their jurisdiction?",
+        "answer": "The Principal Investigator is responsible for maintaining up-to-date departmental records that reconcile to the official records maintained by the Equipment Management Office. They must ensure the location (current building number and room number) of each item of inventorial equipment is recorded so that any item can be located for inspection or inventorial purposes within a reasonable time. Additionally, they must complete manufacturer, model number, and serial number information for each equipment record. (Policy: [1][2][3])",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question by detailing record-keeping responsibilities, but some specifics (e.g., reconciliation with Equipment Management Office) are not explicitly mentioned in the context, while others (location, identification info) are supported."
+      },
+      {
+        "question": "What steps are required to designate a Responsible Official for the Controlled Substances program?",
+        "answer": "The Responsible Official must be designated by the Chancellor or National Laboratory Director, as outlined in [2] and [3]. This designation allows the Responsible Official to implement and manage the Campus Controlled Substances Program, including delegating authority to individuals such as the CSPO, as specified in [3] and [4]. The process involves establishing the program in accordance with federal and state laws, best practices, and the policy, as stated in [1]. Additionally, the Responsible Official must ensure that any designee receives training or has experience in relevant laws, as noted in [3]. The delegation of authority must be further evidenced by a Delegation of Authority document, as mentioned in [4].",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context by detailing the designation process, roles, and requirements for the Responsible Official without adding unverified information."
+      },
+      {
+        "question": "Do contracts with Contractors or External Users require specific insurance coverage provisions?",
+        "answer": "Yes, all contracts between Contractors or External Users and the University must include the following: A requirement that the Contractor/External User maintain certain levels of insurance (See Section V. below and Minimum Insurance Requirements (https://www.ucop.edu/risk- services-insurance/resources/certificates.html).1 The insurance requirements can be fulfilled through self-insurance. (Policy: [1])",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites the requirement for insurance provisions from the context but adds unsupported information about self-insurance, which is not explicitly stated in the provided policy text."
+      },
+      {
+        "question": "Does the GDPR Appendix apply to third-party vendors providing services for UC?",
+        "answer": "Yes, the GDPR Appendix applies to third-party vendors providing services for UC, as stated in [4] and [3]. Supplier agrees to impose the terms of this Appendix GDPR on any third party retained by Supplier to provide Services for or on behalf of UC. Additionally, the Controller (UC) and Processor (Supplier) relationship is established under this Appendix GDPR for data processing activities. [4] [3] [1] [2] [5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34] [35] [36] [37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48] [49] [50] [51] [52] [53] [54] [55] [56] [57] [58] [59] [60] [61] [62] [63] [64] [65] [66] [67] [68] [69] [70] [71] [72] [73] [74] [75] [76] [77] [78] [79] [80] [81] [82] [83] [84] [85] [86] [87] [88] [89] [90] [91] [92] [93] [94] [95] [96] [97] [98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing relevant context sections [3] and [4] which explicitly state the GDPR Appendix applies to third-party vendors, with no unsupported claims."
+      },
+      {
+        "question": "What additional information is required beyond Section D.1 for the report?",
+        "answer": "The JLMC on Workforce Inclusion shall agree on information to be contained in the report beyond the information enumerated in Section D.1. (Policy: article-5-contracting-out-1-31-20.pdf)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing the specific policy requirement from the context that the JLMC on Workforce Inclusion must agree on information beyond Section D.1, fully grounded in the provided text."
+      },
+      {
+        "question": "What documentation is required for reimbursement under the Direct Payment or Reimbursement Option?",
+        "answer": "The supporting documentation for reimbursement under the Direct Payment or Reimbursement Option may be in the form of an invoice or an acceptable explanation on Form U5 itself, as outlined in the policy excerpt [2]. Additionally, the policy mentions that existing instructions for Form U5 are referenced in section IV, References, of the policy. No other documentation is specified for this option. (Policy: [2])",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer references the correct policy excerpts and mentions Form U5 as documentation, but omits the explicit requirement for a business purpose explanation found in the context, leading to partial faithfulness."
+      },
+      {
+        "question": "Are adjunct professors considered independent contractors under UC guidelines?",
+        "answer": "Adjunct professors are generally not considered independent contractors under UC guidelines, as the IRS tends to classify them as employees rather than independent contractors. However, specific circumstances and factors outlined in the policy, such as the provision of supplies and materials, the nature of the work (educational services vs. legal services), and the level of investment in a business related to educational services, may influence this classification. The policy also references IRS rulings and federal tax guidelines that emphasize the importance of these factors in determining worker classification. (Policy: GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the UC guidelines and IRS rulings from the context, directly addressing whether adjuncts are classified as independent contractors while citing relevant factors."
+      },
+      {
+        "question": "Can I work with the University after leaving my position if I was a public employee?",
+        "answer": "Yes, retirees are generally exempt from the ban on working with the University after leaving their position, as stated in the policy excerpts. However, specific restrictions may apply depending on the nature of the work and the individual's role. (Source: mm-postemployment-coi-rules-10-2023.pdf)",
+        "faithfulness": 0.0,
+        "relevancy": 1.0,
+        "reason": "The answer claims retirees are exempt from post-employment restrictions, but the context does not mention any exemption for retirees. The answer directly addresses the question but introduces unsupported claims."
+      },
+      {
+        "question": "What are the requirements for meeting the Fair Share Objectives for Minority Business Enterprise (MBE) and Women Business Enterprise (WBE) programs?",
+        "answer": "The requirements for meeting the Fair Share Objectives for MBE and WBE programs include: (i) Fair Share Objectives; (ii) Six Good Faith Efforts and Contract Administration Requirements. (Policy: BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf)",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer references sections in the policy but does not specify the actual requirements, which the context does not detail, making it partially grounded but not fully faithful. The answer directly addresses the question by listing components mentioned in the policy."
+      },
+      {
+        "question": "Do I need to disclose income received in the past 12 months if it exceeds $500?",
+        "answer": "Yes, you must disclose income received in the past 12 months if it exceeds $500, as stated in the policy excerpt [2]. This requirement is part of the disclosure process for procurement professionals under the Conflict of Interest Training-Procurement-2024 policy. The policy also mentions that this disclosure applies to both personal finances and sources of income, including gifts, loans, and travel payments from entities that have contracted with UC in the past two years. Additionally, the policy outlines limits on gifts and honoraria, with a disqualification trigger at $590 within 12 months before a relevant decision. The exact threshold for disclosure is $500 for income sources, as specified in the policy excerpts. This ensures transparency and compliance with conflict of interest regulations. The policy excerpt [1] also supports this by listing \"Sources of Income \u2013 to you (receipt of $500 in prior 12 months)\" as a required disclosure category. Therefore, any income exceeding $500 received within the past 12 months must be disclosed as part of the procurement professional's obligations under the policy. The policy excerpt [4] further reinforces this requirement by stating that procurement professionals must disclose investments and business positions, including income from sources that have contracted with UC in the past two years. This comprehensive approach ensures that all relevant financial interests are disclosed to maintain ethical standards and prevent conflicts of interest in procurement activities. The policy excerpt [5] provides additional details on gift limits and disqualification triggers, which are relevant to understanding the broader implications of disclosing income exceeding $500. In summary, the requirement to disclose income exceeding $500 in the past 12 months is a key component of the conflict of interest policy for procurement professionals at UC. This policy ensures that all financial interests are transparently reported, aligning with the broader goals of ethical procurement practices and institutional integrity. The policy excerpts collectively emphasize the importance of disclosing any financial interests that could reasonably be perceived as influencing procurement decisions, thereby upholding the highest standards of accountability and transparency. The specific threshold of $500 is outlined in multiple policy excerpts, reinforcing its significance in the disclosure requirements. This ensures that procurement professionals are fully aware of their obligations and the potential consequences of non-compliance, such as disqualification from participation in procurement activities if the threshold is exceeded. The policy also outlines the consequences of non-disclosure, which may include disqualification from procurement activities if the financial interest exceeds the specified thresholds. This underscores",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the $500 disclosure requirement from the context and directly addresses the question without introducing unsupported claims."
+      },
+      {
+        "question": "What should we do if there are changes to the information on an approved Tax-Free Alcohol Permit?",
+        "answer": "When any information on the approved Permit changes, the University entity must file an amendment on (Form 5150.22). (Source: [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing the specific requirement from the context to file an amendment on Form 5150.22 when changes occur, with proper source attribution."
+      },
+      {
+        "question": "What is required for recipients using the Checking Account Option?",
+        "answer": "Under the Checking Account Option, deposits are made semiannually to a Regents' bank account established for the recipient by Banking Services. Alternative payment schedules may be approved by the Controller when requested in writing by the recipient. (Source: [2]) Additionally, the documentation must include an adequate explanation of the business purpose of the expenditure. (Source: [2])",
+        "faithfulness": 0.5,
+        "relevancy": 0.7,
+        "reason": "The answer includes some correct requirements (documentation) but adds unsupported claims about deposit schedules and alternative approvals not present in the context."
+      },
+      {
+        "question": "Who is responsible for controlling inventorial equipment according to the policy?",
+        "answer": "The Equipment Management department, as designated by the Chancellor, is responsible for controlling inventorial equipment. (Policy: [1]) Additionally, the head of the custodial department and the Principal Investigator have primary responsibility for the care, maintenance, physical inventory, control, and disposition of inventorial equipment. (Policy: [5])",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the head of the custodial department and Principal Investigator (Policy [5]) but inaccurately attributes responsibility to the Equipment Management department instead of the designated Equipment Administrator (Policy [1])."
+      },
+      {
+        "question": "Who is responsible for reporting diversion, loss, or theft of Controlled Substances on my campus?",
+        "answer": "The Responsible Official, as outlined in section IV.A.2 of the policy, is responsible for establishing and overseeing the Campus Controlled Substance Program, which includes reporting diversion, loss, or theft of Controlled Substances. Additionally, the policy specifies that individual Campus Controlled Substance Program procedures must identify which division or office is responsible for notifying the local DEA field division office within one (1) business day, as detailed in sections II.2.e and II.2.b. (Policy: UC-RK-25-761_ControlledSubstances_Accessible.pdf)",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the Responsible Official's role and references the division/office responsibility, but adds a one-business-day timeframe not present in the context, slightly reducing faithfulness."
+      },
+      {
+        "question": "What are the restrictions on representing other parties before the University after leaving employment?",
+        "answer": "The restrictions are: 1. One-Year Ban on Representing Other Parties Before the University. You are barred for one year after leaving the University from appearing before or communicating with your campus while representing another person, in an attempt to influence certain University proceedings if you are being paid to do so. (UCOP employees may have further restrictions.) (Source: [1])",
+        "faithfulness": 0.9,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the one-year ban on representing others and mentions UCOP restrictions, though it adds a detail about payment not explicitly stated in the context."
+      },
+      {
+        "question": "Do suppliers need to certify compliance with federal laws regarding payments to influence government officials when bidding for UC contracts?",
+        "answer": "Yes, the Supplier certifies that it will not, and has not, used Federal appropriated funds to pay any person or organization for influencing or attempting to influence an officer or employee of any agency, a member of Congress, officer or employee of Congress, or an employee of a member of Congress in connection with obtaining any Federal contract, grant or any other award covered by 31 U.S.C. 1352. (Source: [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly quotes the relevant context [1] and fully addresses the question about supplier certification requirements for federal law compliance."
+      },
+      {
+        "question": "If I receive a W-2 from the university, will the IRS consider all my income as employee income?",
+        "answer": "Yes, the IRS will assume that all income paid to an individual by the university is earned as an employee if they receive a Form W-2, Wage and Tax Statement, and it will be up to the school to demonstrate otherwise. (Source: [1])",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer correctly addresses the question but cites the wrong source (references [1] instead of [4]), though the claim is supported by the context."
+      },
+      {
+        "question": "What information must be included when reporting a data security incident?",
+        "answer": "When reporting a data security incident, the following information must be included: (i) the nature of the personal data breach, including where possible, the categories and approximate number of data subjects concerned and the categories and approximate number of personal data records concerned; (ii) a description of the likely consequences of the personal data breach; and (iii) a description of the measures taken or proposed to be taken to address the personal data breach, including where appropriate, measures to mitigate its possible adverse effects. This requirement is outlined in [2] and [3]. Additionally, the report must include the location of the Institutional Information and the timeline for corrective actions as specified in [4] and [5].",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer includes GDPR-compliant elements (nature of breach, consequences, mitigation) supported by [2], but omits contextually relevant details like escalation details and ticket numbers from [1] and [4]."
+      },
+      {
+        "question": "Can I negotiate with a single supplier for a purchase under $100,000?",
+        "answer": "Yes, for purchases not exceeding $100,000, negotiations may be conducted orally or in writing with one or more Suppliers, as stated in [1] and [2]. The Procurement/Supply Chain Director determines if negotiations are appropriate, and the number of Suppliers involved is their responsibility. Additionally, the University supports small businesses by requiring procurements between $10,000-$250,000 annually to be awarded to Small Businesses or Disabled Veteran Business Enterprises wherever practicable, as mentioned in [2]. For purchases under $10,000 per transaction, the Procurement/Supply Chain Director may delegate authority to individuals with functional responsibility, ensuring compliance with policies and training requirements [3]. Incentive payments can be negotiated as part of the process, with incentives clearly identified in Purchase Orders or Agreements and included in price reasonableness determinations [4].",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by confirming negotiation permissions for purchases under $100,000 and cites relevant policy sections without introducing unsupported claims."
+      },
+      {
+        "question": "Can university property be transferred to a for-profit organization without specific provisions in the award terms?",
+        "answer": "No, the transfer of property to individuals or for-profit organizations is prohibited unless specific provisions are made in the terms of an award. (Policy: [1]) Additionally, sale of property to individuals or for-profit organizations is explicitly prohibited. (Policy: [5])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites the prohibition on transferring university property to for-profit organizations without specific provisions (supported by context [3] and [5]), and directly addresses the question about transfer conditions."
+      },
+      {
+        "question": "What happens if the monthly pretax transportation limit is exceeded for a charity contribution made in the University's name?",
+        "answer": "If the monthly pretax transportation limit is exceeded for a charity contribution made in the University's name, there is no tax consequence. (Source: [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly states there is no tax consequence when the limit is exceeded for a charity contribution in the University's name, and the claim is fully supported by the context, even though the cited source is slightly misattributed."
+      },
+      {
+        "question": "Does organizing an employee morale-building event require additional approval beyond standard procedures?",
+        "answer": "Yes, organizing an employee morale-building event requires additional approval beyond standard procedures, as stated in the policy excerpts [1] and [3]. These events are explicitly listed as requiring approval by high-level designees or specific authorities, as outlined in the policy sections V.A.3, V.A.4, V.A.5, and V.A.6. Additionally, Appendix B under the \"Employee Morale-Building Activities\" section confirms that such events require both department head approval and additional signature by the host.",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer correctly addresses the question by citing relevant policy excerpts [1] and [3], but introduces unverified policy sections (V.A.3\u2013V.A.6) not present in the context, reducing faithfulness."
+      }
+    ]
+  },
+  "timestamp": "20260604_100650"
+}

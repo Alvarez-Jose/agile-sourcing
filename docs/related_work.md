@@ -183,7 +183,7 @@ agile-sourcing/
 │   ├── baselines/             # naive RAG, keyword, LLM-only
 │   ├── metrics/               # retrieval accuracy, hallucination rate
 │   └── scenarios/             # real purchase test cases
-├── frontend/                  # Angular app
+├── frontend/                  # WXT browser extension (React + Tailwind)
 ├── data/policies/             # the actual policy PDFs
 ├── experiments/               # notebooks + configs
 ├── paper/                     # LaTeX writeup
@@ -199,7 +199,7 @@ agile-sourcing/
 | vector DB | Chroma | pgvector |
 | graph | NetworkX | NetworkX or Neo4j |
 | backend | FastAPI | FastAPI |
-| frontend | Streamlit | Angular |
+| frontend | WXT browser extension (React + Tailwind) |
 | database | SQLite | PostgreSQL |
 | auth | none | UC SSO (CruzID) |
 

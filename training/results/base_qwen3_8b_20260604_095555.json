@@ -1,0 +1,185 @@
+{
+  "label": "base_qwen3_8b",
+  "scores": {
+    "faithfulness": 0.792,
+    "relevancy": 1.0,
+    "details": [
+      {
+        "question": "Does the Small Business First Program apply to all UC purchases, or are there exceptions?",
+        "answer": "The Small Business First Program **does not apply to all UC purchases**; there are specific exceptions. According to **[2]**, the following purchase and/or agreement types are exempt and do not require a waiver:  \n- Interagency, federal government, research sub-awards, local government, higher education institutions, concessions, revenue/reimbursement contracts, medical and patient care, statutorily exempt, policy exempt, emergency, local assistance/subvention, and proprietary contracts.  \n- Circumstances where **Federal, grant, court decision, or court order requirements** dictate how funds can be expended.  \n\nAdditionally, **[2]** clarifies that all contracting associated with **construction** is governed by the UC Facilities Manual and its policies, which are separate from the Small Business First Program.  \n\n**Source citations**: [2], [3].",
+        "faithfulness": 0.4,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies exceptions exist (per [2]) but invents specific exempt categories not present in the context, leading to partial hallucination."
+      },
+      {
+        "question": "Do I need to create a written contract for an independent contractor?",
+        "answer": "Yes, you need to create a written contract for an independent contractor. According to **Policy Excerpt [1]** (Question 9) and **Excerpt [4]** (Question 9), a written contract must be executed to describe the worker as an independent contractor. This is a key requirement under the UC Independent Contractor Guidelines to ensure the worker is properly classified and the relationship is documented. \n\nAdditionally, **Excerpt [3]** references Exhibit A, which contains the University Policy on the Use of Independent Contractors, further emphasizing the necessity of formal written agreements. \n\n**Source:**  \n- [1] GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf (Question 9)  \n- [4] GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf (Question 9)  \n- [3] GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf (Exhibit A reference)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites the policy excerpts to support the requirement for a written contract, directly addressing the question without hallucination or irrelevance."
+      },
+      {
+        "question": "How do I know if the minimum insurance requirements have been updated?",
+        "answer": "To determine if the minimum insurance requirements have been updated, you should check the **Office of Risk Services website**, as the policy states that the Minimum Insurance Requirements are updated \"as necessary and posted on the Office of Risk Services website\" (Source [1]). \n\nAdditionally, the **University Chief Risk Officer (or designee)** may periodically audit and review compliance, and the Office of the President and Office of Risk Services assist in developing exceptions to the requirements (Source [2] and [5]). However, the **primary source for updates** is the Office of Risk Services website. \n\nIf you are unsure, contact the Office of Risk Services directly for confirmation.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the Office of Risk Services website as the primary source for updates (per context [1]) and mentions the University Chief Risk Officer's role in audits (context [2]), with no unsupported claims."
+      },
+      {
+        "question": "What responsibilities does a Principal Investigator have regarding the records of inventorial equipment under their jurisdiction?",
+        "answer": "The Principal Investigator (PI) has the following responsibilities regarding the records of inventorial equipment under their jurisdiction, as outlined in the UC policy excerpts:\n\n1. **Maintain Up-to-Date Departmental Records**: The PI must ensure departmental records reconcile with official records maintained by the Equipment Management Office. These records must include the current **building number and room number** for each item to enable quick location for inspection or inventorial purposes.  \n   - **Source**: [1], [2], [3]  \n\n2. **Complete Equipment Identification Information**: All records must include **manufacturer, model number, and serial number** details for each piece of equipment.  \n   - **Source**: [1], [2]  \n\nThese responsibilities ensure accountability for tracking and documenting inventorial equipment, aligning departmental records with institutional requirements. Other excerpts emphasize collaboration with custodial departments for physical inventory verification but do not expand on the PI\u2019s record-keeping duties.",
+        "faithfulness": 0.0,
+        "relevancy": 1.0,
+        "reason": "The answer includes unsupported claims about 'building number and room number' records not present in the context, but it directly addresses the question about PI responsibilities for inventorial equipment records."
+      },
+      {
+        "question": "What steps are required to designate a Responsible Official for the Controlled Substances program?",
+        "answer": "The steps required to designate a Responsible Official for the Controlled Substances program, based on the provided policy excerpts, are as follows:  \n\n1. **Designation by Authority**: The Responsible Official must be designated by the **Chancellor or National Laboratory Director** (per [2] and [4]). This is the primary step in the process.  \n\n2. **Appointment of a Designee**: The Responsible Official may designate one or more individuals (e.g., the Controlled Substances Program Officer, or CSPO) to implement and manage the program. This designee must receive training or have experience in California and federal laws governing controlled substances (per [3]).  \n\n3. **Delegation of Authority**: The Responsible Official may delegate authority to a designee (e.g., Environment, Health and Safety personnel) to act on their behalf, including signing registrations or executing order forms for Schedule II substances, if authorized through a Power of Attorney (per [5]).  \n\n**Note**: The policy excerpts do not specify formal procedural steps (e.g., application processes, approvals, or documentation) for designating the Responsible Official beyond the authority of the Chancellor or National Laboratory Director. The focus is on roles, responsibilities, and delegation.  \n\n**Cited Sources**: [2], [3], [4], [5]",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context's requirements for designating a Responsible Official, including designation by authority and appointing a designee, directly addressing the question without hallucination or irrelevance."
+      },
+      {
+        "question": "Do contracts with Contractors or External Users require specific insurance coverage provisions?",
+        "answer": "**Answer:**  \nYes, contracts with Contractors or External Users require specific insurance coverage provisions. The UC policy mandates that all contracts include:  \n1. **Minimum insurance requirements** (see [1](#1) and [3](#3)), which may be fulfilled through self-insurance. These requirements are outlined in the *Minimum Insurance Requirements* resource (https://www.ucop.edu/risk-services-insurance/resources/certificates.html).  \n2. A **Certificate of Insurance** to evidence compliance with these requirements (see [5](#5)).  \n3. An **indemnity clause** to legally obligate the Contractor/External User to indemnify the University, which acts as a trigger for insurance coverage (see [4](#4)).  \n\nExceptions to these requirements may only be granted under extenuating circumstances after review by the local Risk Management Office (see [3](#3)).  \n\n**Citations:** [1](#1), [3](#3), [4](#4), [5](#5)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context's requirements for insurance provisions in contracts, citing specific sections and resources without hallucination, and directly addresses the question."
+      },
+      {
+        "question": "Does the GDPR Appendix apply to third-party vendors providing services for UC?",
+        "answer": "Yes, the GDPR Appendix applies to third-party vendors providing services for UC. \n\n**Answer:**  \nThe GDPR Appendix (Appendix GDPR) applies to third-party vendors (Suppliers) providing services for UC, as well as any third parties retained by the Supplier to provide services on behalf of UC. This is explicitly stated in **[4]**, which requires the Supplier to impose the terms and conditions of the Appendix GDPR on such third parties. Additionally, **[1]** clarifies that the Supplier (as the data processor) is bound by the obligations in the Appendix GDPR when processing personal data for UC. \n\n**Citations:**  \n- [4] (\"Supplier also agrees to impose... on any third party retained by Supplier...\")  \n- [1] (\"Supplier agrees to be bound by the obligations set forth in this Appendix GDPR\")",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites context [4] and [1] to support that the GDPR Appendix applies to third-party vendors and their retained third parties, directly addressing the question without hallucination or irrelevance."
+      },
+      {
+        "question": "What additional information is required beyond Section D.1 for the report?",
+        "answer": "The additional information required beyond Section D.1 for the report is determined by the JLMC on Workforce Inclusion, which shall agree on information to be contained in the report beyond the information enumerated in Section D.1.  \n\n**Source:** [2] [article-5-contracting-out-1-31-20.pdf]",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly cites the relevant context [2] and accurately states that the JLMC on Workforce Inclusion determines the additional information beyond Section D.1, fully addressing the question without adding unverified claims."
+      },
+      {
+        "question": "What documentation is required for reimbursement under the Direct Payment or Reimbursement Option?",
+        "answer": "The documentation required for reimbursement under the Direct Payment or Reimbursement Option includes:  \n- For payments made on a **Form U5 (Check Request)** or campus equivalent, the supporting document may be in the form of an **invoice** or an **acceptable explanation on Form U5 itself**, made in accordance with existing instructions.  \n\nThis guidance is specified in **[UC-FO-00-0180_a-000-7.pdf]** (excerpt [2]). For further details, refer to section IV, References, within the same policy.  \n\n**Note:** If the reimbursement falls under a different option (e.g., Option 11 or 4), additional guidelines may apply, but the above applies specifically to the Direct Payment/Reimbursement Option as described.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing required documentation (Form U5 and acceptable explanations) from the relevant context, with proper citation and alignment to the provided excerpts."
+      },
+      {
+        "question": "Are adjunct professors considered independent contractors under UC guidelines?",
+        "answer": "Under UC guidelines, adjunct professors may be classified as independent contractors **if they meet specific criteria** outlined in the policies. Here's the analysis based on the provided excerpts:\n\n1. **Classification Criteria**:  \n   - Excerpt [2] states that individuals **not University employees** should be treated as independent contractors **if they participate as guest lecturers** in University Extension courses or programs. This suggests that adjunct professors serving as guest lecturers could qualify as independent contractors.  \n   - However, Excerpt [3] notes that the IRS generally leans toward classifying University Extension instructors as **employees** rather than independent contractors, emphasizing that classification depends on **facts and circumstances** (e.g., control, benefits, and integration into the university\u2019s operations).  \n\n2. **Key Factors from IRS Guidelines**:  \n   - Excerpt [4] highlights that the IRS considers whether the individual provides **educational services** (not other services like legal services). For example, adjunct law professors were deemed employees because their role was **educational**, not tied to their status as practicing attorneys. This implies that if an adjunct\u2019s primary role is **teaching**, they may be classified as employees, even if they are not full-time faculty.  \n\n3. **Insurance and Compliance**:  \n   - Excerpt [1] mandates that independent contractors must demonstrate **adequate insurance coverage**, but this is a compliance requirement rather than a classification criterion.  \n\n**Conclusion**:  \nAdjunct professors are **not automatically** considered independent contractors under UC guidelines. Their classification depends on **specific roles** (e.g., guest lecturer vs. regular instructor) and **factors outlined in IRS guidelines** (e.g., control, benefits, and nature of work). If they are guest lecturers, they may qualify as independent contractors, but if they are teaching regular courses, they are more likely to be classified as employees.  \n\n**Citations**:  \n- [2] UC Independent Contractor Guidelines for Federal Tax Purposes (guest lecturer criteria).  \n- [3] IRS classification factors for University Extension instructors.  \n- [4] IRS ruling on educational vs. non-educational services (adjunct law professors case).",
+        "faithfulness": 0.6,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question but partially cites context (excerpts [2] and [3]) while omitting key factors from [4] that explicitly disqualify adjuncts as independent contractors under UC guidelines."
+      },
+      {
+        "question": "Can I work with the University after leaving my position if I was a public employee?",
+        "answer": "**Answer:**  \nIf you were a public employee and are now a **retiree**, you are **generally exempt** from the two-year ban on entering into contracts with the University for goods or services, and may be hired back by the University. However, if you are not a retiree, the policy prohibits working for compensation with the University for **two years** if you were involved in negotiations, planning, or decision-making related to a contract while employed. Additionally, there is a **one-year ban** on representing others before the University after leaving (see [4]).  \n\n**Citations:**  \n- [2] (Public Contract Code restrictions, 2-year ban for non-retirees; retirees exempt)  \n- [4] (One-year ban on representing others before the University)  \n\nIf you are a retiree, you may still work with the University, but specific terms would depend on the University\u2019s hiring policies and any applicable exemptions. Always consult the full policy for nuances.",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer partially addresses the question but includes claims (e.g., two-year ban for non-retirees) not explicitly supported by the context, while correctly citing the one-year ban from [4]."
+      },
+      {
+        "question": "What are the requirements for meeting the Fair Share Objectives for Minority Business Enterprise (MBE) and Women Business Enterprise (WBE) programs?",
+        "answer": "The provided policy excerpts do not specify the exact requirements for meeting the **Fair Share Objectives** for **Minority Business Enterprise (MBE)** and **Women Business Enterprise (WBE)** programs. The excerpts mention these terms in the context of UC procurement policies and reference their inclusion in the **Environmental Protection Agency (EPA)** programs, but they do not outline the specific criteria, processes, or contractual obligations required to meet these objectives.  \n\nFor detailed requirements, refer to the full UC procurement policy documents or the EPA\u2019s guidelines for Fair Share Objectives.  \n\n**Source:** Excerpts [1]\u2013[5] (no specific source number directly addresses the requirements for Fair Share Objectives).",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context by noting the absence of specific requirements in the provided excerpts and correctly directs to the full policy for details, without hallucination or deviation from the question."
+      },
+      {
+        "question": "Do I need to disclose income received in the past 12 months if it exceeds $500?",
+        "answer": "Yes, you need to disclose income received in the past 12 months if it exceeds $500. This requirement is explicitly stated in the policy excerpts:  \n\n- **Source 1**: \"Sources of Income \u2013 to you (receipt of $500 in prior 12 months)\"  \n- **Source 2**: \"Sources of Income \u2013 to you (receipt of $500 in prior 12 months)\"  \n\nThese sections indicate that income exceeding $500 within the past 12 months is a required disclosure for procurement professionals.  \n\n**Answer:** Yes, you must disclose income exceeding $500 received in the past 12 months, as specified in **Source 1** and **Source 2**.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer is fully grounded in the context's explicit mention of $500 income thresholds and directly addresses the question about disclosure requirements."
+      },
+      {
+        "question": "What should we do if there are changes to the information on an approved Tax-Free Alcohol Permit?",
+        "answer": "If there are changes to the information on an approved Tax-Free Alcohol Permit, the University entity must **file an amendment** using **Form 5150.22** (as specified in **Policy Excerpt [1](#1)**). This ensures the permit remains compliant with regulatory requirements. \n\n**Source:** UC-PS-12-0031_Tax-Free Alcohol Permits, Records, and Operations (3).pdf, Section 2.C. Obligations of University Permit Holders.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by specifying the required action (filing an amendment on Form 5150.22) and correctly cites the relevant policy section from the context."
+      },
+      {
+        "question": "What is required for recipients using the Checking Account Option?",
+        "answer": "Recipients using the **Checking Account Option** must meet the following requirements:  \n1. **Documentation**: Expenditures under this option must be supported by documentation submitted to the accounting office. This documentation must include an adequate explanation of the **business purpose** of the expenditure. (Source: [2])  \n2. **Payment Schedule**: Deposits are made **semiannually** to a Regents' bank account established for the recipient by Banking Services. (Source: [2])  \n3. **Alternative Schedules**: Alternative payment schedules may be approved by the **Controller** if requested in writing by the recipient. (Source: [2])  \n\nThese requirements apply to all recipients using the Checking Account Option.",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question but includes a hallucinated requirement about Controller approval of alternative schedules, which is not explicitly stated in the context."
+      },
+      {
+        "question": "Who is responsible for controlling inventorial equipment according to the policy?",
+        "answer": "The responsibility for controlling inventorial equipment is assigned to the **Equipment Management** department, as designated by the Chancellor. This is explicitly stated in **Policy Excerpt 1** under the definition of \"EQUIPMENT MANAGEMENT.\" \n\nAdditionally, the **Equipment Administrator** (an individual designated by the Chancellor or Laboratory Director) may also have authority over inventorial equipment, but the departmental responsibility lies with Equipment Management. \n\n**Source:** UC-FA-21-0555_BUS-29 (Policy Excerpt 1).",
+        "faithfulness": 0.6,
+        "relevancy": 1.0,
+        "reason": "The answer partially addresses the question by mentioning the Equipment Administrator (correctly) but incorrectly attributes primary responsibility to the Equipment Management department, which is not explicitly stated in the context."
+      },
+      {
+        "question": "Who is responsible for reporting diversion, loss, or theft of Controlled Substances on my campus?",
+        "answer": "The responsibility for reporting diversion, loss, or theft of Controlled Substances on your campus lies with the **division or office** specified in your campus's Controlled Substance Program procedures. According to **Policy Excerpt 1** and **Excerpt 2**, these procedures must explicitly designate which division or office is responsible for notifying the local DEA field division office within one business day and submitting DEA Form 106. \n\nWhile **Policy Excerpt 4** identifies the \"Responsible Official\" (who oversees the program), the actual reporting duty is assigned to the specific division or office as outlined in the campus's internal procedures. \n\n**Source:** UC-RK-25-761_ControlledSubstances_Accessible.pdf (Excerpts 1, 2, and 4).",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately identifies the division/office specified in campus procedures as responsible, directly citing relevant policy excerpts without hallucination or deviation from the question."
+      },
+      {
+        "question": "What are the restrictions on representing other parties before the University after leaving employment?",
+        "answer": "The restrictions on representing other parties before the University after leaving employment are as follows:  \n\n1. **One-Year Ban**: Former employees are barred for **one year after leaving the University** from appearing before or communicating with the University while representing **another person** (not themselves) in an attempt to influence certain University proceedings, **if they are being paid to do so**. This restriction applies regardless of whether they were previously involved in the specific proceedings. (See **[1]**, **[3]**, **[5]**).  \n\n2. **Prohibition on Representing Others**: During this one-year period, former employees may not represent **any other person** (e.g., clients, employers, or third parties) before the University. This includes activities such as lobbying, advocating, or providing legal/strategic counsel on behalf of another party. (See **[1]**, **[5]**).  \n\n3. **Political Reform Act Context**: The restriction is grounded in the **Political Reform Act**, which prohibits former employees from using their former position for personal gain or influencing University decisions post-employment. (See **[3]**).  \n\n**Note**: UCOP employees may have **additional restrictions** beyond this policy. (See **[1]**).  \n\nFor further details, refer to **[1]** (pages 3\u20135) and **[5]**.",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question directly but adds the condition about being paid to do so, which is not explicitly stated in the context, reducing faithfulness."
+      },
+      {
+        "question": "Do suppliers need to certify compliance with federal laws regarding payments to influence government officials when bidding for UC contracts?",
+        "answer": "Yes, suppliers must certify compliance with federal laws regarding payments to influence government officials when bidding for UC contracts that involve federal funds. This requirement is explicitly stated in **[1] [UC Terms and Conditions-04-01-25.pdf]**, which mandates that suppliers certify they have not used Federal appropriated funds to pay for influencing government officials, in accordance with 31 U.S.C. 1352. This certification is a material condition of the agreement and must be upheld for all federal contract, grant, or award-related obligations. \n\n**Source:** [1] UC Terms and Conditions-04-01-25.pdf (Article 8.1, clause (a) \"Commercial Transactions\").",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the certification requirement from context [1] but adds the legal reference (31 U.S.C. 1352) not explicitly mentioned in the provided context, slightly reducing faithfulness. The answer directly addresses the question about compliance certification for UC contracts involving federal funds."
+      },
+      {
+        "question": "If I receive a W-2 from the university, will the IRS consider all my income as employee income?",
+        "answer": "Yes, if you receive a **Form W-2** from a UC campus, the **IRS will generally assume that all income paid to you by the university is earned as an employee**, unless the university can demonstrate otherwise. This is explicitly stated in **Policy Excerpt [1]**, which notes that the IRS \"normally will assume that all income paid to the individual by the college or university is earned as an employee\" and emphasizes that the university must provide evidence to the contrary. \n\nFor example, **Policy Excerpt [1]** states that if a full-time professor teaches an out-of-town seminar and receives a W-2, the IRS will typically treat that income as employee compensation. This principle applies broadly to any individual receiving a W-2 from a UC entity. \n\n**Source:** [1] GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf (Section VIII.E., Dual Status Workers).",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question directly but includes unsupported claims about specific policy excerpts not explicitly stated in the context."
+      },
+      {
+        "question": "What information must be included when reporting a data security incident?",
+        "answer": "The UC policy excerpts do not specify the exact information required when reporting a data security incident. However, the GDPR (source 2) outlines specific requirements for reporting personal data breaches, which may apply if the incident involves personal data and GDPR obligations. According to GDPR section 5, the Processor must notify the Controller immediately upon discovering a breach, including:  \n1. The **nature of the breach**, including categories and approximate number of data subjects and personal data records affected.  \n2. A **description of the likely consequences** of the breach.  \n3. A **description of measures taken or proposed** to address the breach and mitigate its effects.  \n\nFor UC-specific reporting, the policy requires Workforce Members to promptly report incidents to their managers or the CISO (source 1, section 16.1.2), and the CISO to report incidents involving Protection Level 3 or higher to the Location privacy officer. However, the UC excerpts do not detail the specific content of the report.  \n\n**Answer:**  \nThe UC policy excerpts do not specify the exact information required for reporting a data security incident. However, under GDPR (source 2), the Processor must include details such as the nature of the breach, affected data subjects, likely consequences, and mitigation measures. UC policies emphasize prompt reporting to the CISO or privacy officer but do not outline specific content requirements for the report.  \n\n**Citations:**  \n- UC-IT-19-0480_IS-3_Accessible.pdf (source 1, section 16.1.2)  \n- appendix-gdpr-eea-uk-4-27-21.pdf (source 2, section 5)",
+        "faithfulness": 0.0,
+        "relevancy": 1.0,
+        "reason": "The answer references GDPR (source 2) which is part of the context, but the question specifically asks about UC procurement policy requirements. The answer does not fully align with the UC policies in the context (e.g., appendix-data-security.pdf) and instead focuses on GDPR, which is not the primary focus of the UC procurement policy."
+      },
+      {
+        "question": "Can I negotiate with a single supplier for a purchase under $100,000?",
+        "answer": "Yes, you can negotiate with a single supplier for a purchase under $100,000. According to **[1]**, for purchases not exceeding $100,000, negotiations may be conducted orally or in writing with **one or more Suppliers** when advantageous to the University. The number of Suppliers involved is the responsibility of the purchasing authority. This explicitly allows negotiation with a single supplier for such purchases. \n\nAdditionally, **[2]** supports this by stating that negotiation is permitted for agreements or transactions where annual expenditures with a specific supplier do not exceed $100,000, further confirming that single-supplier negotiations are acceptable under this threshold. \n\n**Answer:** Yes, you may negotiate with a single supplier for a purchase under $100,000, as outlined in **[1]** and **[2]**.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing the policy sections that explicitly permit negotiation with a single supplier for purchases under $100,000, aligning with the context provided."
+      },
+      {
+        "question": "Can university property be transferred to a for-profit organization without specific provisions in the award terms?",
+        "answer": "No, university property **cannot** be transferred to a for-profit organization without specific provisions in the award terms.  \n\n**Policy basis**:  \n- **Excerpt [1]** explicitly prohibits transfer of property to individuals or for-profit organizations *unless specific provisions are made in the terms of an award*.  \n- **Excerpt [5]** reinforces this prohibition by stating that \"sale of property to individuals or for-profit organizations is prohibited.\"  \n- **Excerpt [3]** further clarifies that no-cost transfers are subject to restrictions, and transfers to for-profit entities are prohibited unless explicitly allowed by the award terms or approved by the delegated officer.  \n\nThus, **transfers to for-profit organizations are strictly prohibited** unless the award terms explicitly permit such transfers.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context's prohibition on transferring university property to for-profit organizations without specific award terms, citing relevant excerpts without hallucination or contradiction."
+      },
+      {
+        "question": "What happens if the monthly pretax transportation limit is exceeded for a charity contribution made in the University's name?",
+        "answer": "If the monthly pretax transportation limit is exceeded for a charity contribution made in the name of the University, **there is no tax consequence**. This is explicitly stated in the policy excerpt:  \n\n> *\"e. Since a contribution made to a charity must be made in the name of the University, there is no tax consequence if the limit is exceeded.\"* **[1]**  \n\nThis provision clarifies that exceeding the pretax transportation limit for University-named charitable contributions does not result in tax liability for the employee or the University.",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately reflects the context's explicit statement about no tax consequence for exceeding the limit on University-named charity contributions and directly answers the question."
+      },
+      {
+        "question": "Does organizing an employee morale-building event require additional approval beyond standard procedures?",
+        "answer": "Yes, organizing an employee morale-building event requires additional approval beyond standard procedures. According to **Section IV (Approval Authority Table)** and **Section V.A.3** of the policy, expenses related to **employee morale-building and recognition events** must be approved by high-level designees with written authority. Additionally, **Appendix B** explicitly states that meals provided for employee morale-building activities require approval by both the host and the department head.  \n\n**Citations:**  \n- [2] (Section IV and V.A.3)  \n- [3] (Expenses Requiring Additional Approval)  \n- [4] (Appendix B: Employee Morale-Building Activities)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by citing specific sections of the context that require additional approval for employee morale-building events, with no unsupported claims."
+      }
+    ]
+  },
+  "timestamp": "20260604_095555"
+}

@@ -1,0 +1,185 @@
+{
+  "label": "finetuned_qwen3_8b",
+  "scores": {
+    "faithfulness": 0.616,
+    "relevancy": 0.944,
+    "details": [
+      {
+        "question": "What factors does the IRS use to determine if a worker is classified as an employee or an independent contractor?",
+        "answer": "The IRS uses three primary factors to determine if a worker is classified as an employee or an independent contractor: (1) Behavioral Control (e.g., instructions on how to perform the job), (2) Financial Control (e.g., reimbursement of expenses, investment in facilities), and (3) Relationship of the Parties (e.g., written contracts, benefits). These factors are outlined in the IRS training manual and are detailed in the Classification Worksheet provided in the policy. (Source: [3] IRS Employee Classification Factors)",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer partially addresses the question but the specific factors mentioned (Behavioral Control, Financial Control, Relationship of the Parties) are not explicitly listed in the provided context, which only references the existence of IRS factors from a 1996 training manual without detailing them."
+      },
+      {
+        "question": "How long are exception requests for electronic information security exceptions retained according to the policy?",
+        "answer": "Exception requests and decisions must be documented, periodically reviewed based on risk and retained by the CISO as required by the UC Records Retention Schedule. (Source: UC-IT-19-0480_IS-3_Accessible.pdf)",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly quotes the context about retention requirements for exception requests, aligning with the question's focus on policy-mandated retention."
+      },
+      {
+        "question": "What are the requirements for a business to be certified as a Disabled Veteran Business Enterprise (DVBE) under UC policy?",
+        "answer": "A business must be certified by the California Department of General Services Office of Small Business and DVBE Services (OSDS) or other accepted certifying agency as listed on the Small Business First Program page. (Source: [1])",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer mentions certification by OSDS (supported by context [1]), but the context does not specify the detailed DVBE ownership/management requirements in the reference answer, making it partially faithful."
+      },
+      {
+        "question": "How does the University address maverick spend at Locations according to the procurement policy?",
+        "answer": "The University addresses maverick spend at Locations by determining methodologies to address it through leveraging Procurement/Supply Chain Directors, Procurement Departments, Strategic Sourcing Units, and Stakeholder Groups. Supplier support is utilized to assist in making contacts at Locations and converting customers to the Strategically Sourced Agreements. (Source: [5] BFB-BUS-43)",
+        "faithfulness": 0.0,
+        "relevancy": 1.0,
+        "reason": "The answer introduces the term 'maverick spend' not present in the context, contradicting the requirement to strictly adhere to the provided documents."
+      },
+      {
+        "question": "What are the requirements for maintaining records of inventorial equipment?",
+        "answer": "The requirements for maintaining records of inventorial equipment are outlined in Policy BFB-BUS-29: Management and Control of University Equipment. Key points include:  \n1. **Record Keeping**: The official records of inventorial equipment are maintained by Equipment Management. All property in the care and custody of the University that meets the definition of inventorial equipment is recorded in the same manner and under the same rules as University-owned inventorial equipment (Policy BFB-BUS-29, Section G.1).  \n2. **Government Property**: Government-furnished property or University-acquired property purchased by direct charge to a Government award is recorded with specific documentation (e.g., award number, quantity received, balance on hand, etc.) (Policy BFB-BUS-29, Section G.2).  \n3. **Physical Inventories**: At least every two years, Equipment Management distributes a physical inventory of all inventorial equipment, requiring custodial departments to verify existence, location, and utilization (Policy BFB-BUS-29, Section H.1).  \n4. **Departmental Responsibility**: The head of the custodial department and Principal Investigator must maintain up-to-date records reconciling with Equipment Management\u2019s records, including location details (building and room numbers), manufacturer/model/serial numbers, and ensure compliance with inventory deadlines (Policy BFB-BUS-29, Section G.1 and H.1).  \n5. **Retention**: Records for equipment acquired with federal funds must be retained for 3 years after final disposition (Policy BFB-BUS-29, Section H.1).  \n6. **Special Test Equipment**: Minimum information required includes award number, item description, and identification numbers (Policy BFB-BUS-29, Section G.2.e).  \n7. **Loan Agreements**: For personally-owned equipment, formal loan agreements are required, and records must be maintained with acquisition code 38 (Policy BFB-BUS-29, Section 4.c).  \n8. **Inventory Modifications**: Transfers of equipment between Principal Investigators or institutions require notifications and inventory modifications (Policy BFB-BUS-29, Section 4.3 and 4.4).  \n9. **Security and Disposal**: Custodial departments must ensure physical security, report unused equipment over $10,000, and restrict Government property use to award purposes (Policy BFB-BUS-29, Section H.1 and H.5).  \nThese",
+        "faithfulness": 0.0,
+        "relevancy": 0.6,
+        "reason": "The answer fabricates claims about Equipment Management maintaining records, which is not supported by the context, and omits critical details like serial numbers and reconciliation requirements specified in the reference answer."
+      },
+      {
+        "question": "Do I need a DEA registration to purchase DEA-exempt chemical preparations?",
+        "answer": "No, a researcher need not obtain a DEA registration to purchase and use DEA-exempt chemical preparations that meet the requirements of 21 C.F.R. \u00a71308.24 and as listed in the Exempt Chemical Preparations List published by DEA\u2019s Diversion Control Division. (Source: [1] BFB-BUS-50: Controlled Substances, Section III(D)(4))",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer directly addresses the question by stating that DEA registration is not required for DEA-exempt chemicals, supported by the policy's reference to substances excluded from DEA registration processes (context [1]), and aligns with the reference answer's structure and content."
+      },
+      {
+        "question": "Can we use foam packaging for our leased equipment?",
+        "answer": "No, the University prohibits the use of packaging foam (expanded polystyrene) for leased equipment. This is outlined in the UC Sustainable Practices Policy, which bans packaging foam for all contracted and non-contracted suppliers, including leased equipment, effective January 1st, 2020. The policy explicitly excludes packaging foam used for laboratory supply or medical packaging. (Source: UC Terms and Conditions-04-01-25.pdf, Article 15.5)",
+        "faithfulness": 0.4,
+        "relevancy": 1.0,
+        "reason": "The answer correctly states the prohibition on foam packaging for leased equipment but incorrectly cites UC Terms and Conditions-04-01-25.pdf as the source, whereas the policy details are actually in the UC Sustainable Practices Policy referenced in TC-Operating Lease-Equip Rental.docx."
+      },
+      {
+        "question": "What steps must the Processor take if a personal data breach occurs?",
+        "answer": "The Processor must notify the Controller immediately upon discovery of a personal data breach, both orally and in writing, but no later than two (2) calendar days after identifying the breach. The notification must include: (i) the nature of the breach, categories and approximate number of data subjects and records affected; (ii) likely consequences of the breach; and (iii) measures taken or proposed to address the breach. The Processor must also keep the Controller informed regularly until the breach is resolved. Additionally, the Processor must fully cooperate with the Controller\u2019s investigation, provide witnesses and documents, and may be subject to termination of the Agreement if the breach is not adequately addressed. (Source: [1], [2], [3])",
+        "faithfulness": 0.8,
+        "relevancy": 1.0,
+        "reason": "The answer covers key steps like immediate notification within 2 days and cooperation with investigations (context 1,6), but omits specific contact details (Name, Phone, Email, Address) required in context [2], reducing faithfulness."
+      },
+      {
+        "question": "Are inventors and authors of intellectual property exempt from the 12-month and two-year bans?",
+        "answer": "Yes, inventors and authors of intellectual property are exempt from the 12-month and two-year bans. This exemption is explicitly stated in the policy excerpt [1], which clarifies that neither the two-year nor the 12-month ban applies to inventors and authors of intellectual property. The policy further specifies that this exemption is intended to facilitate the practical application of a University invention for the general public benefit, as outlined in the guidelines for accepting equity when licensing University technology (G-44, February 15, 2002) and the University Policy on Accepting Equity When Licensing University Technology (June 18, 2008). These exemptions ensure that inventors and authors can engage in activities related to their intellectual property without being restricted by the bans, thereby promoting innovation transfer and equitable distribution of commercialization income. (Source: [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly states that inventors and authors of intellectual property are exempt from the bans, directly citing the relevant policy [1] and aligning with the question's focus."
+      },
+      {
+        "question": "Can unused Administrative Fund balances be carried over to the next fiscal year, and if so, what is the maximum percentage allowed?",
+        "answer": "Yes, up to 25% of a recipient's annual allocation can be carried forward for use in the next fiscal year; any unused portion beyond 25% must be returned to the accounting office at the end of the fiscal year. (Source: [3] [UC-FO-00-0190_a-253-27.pdf])",
+        "faithfulness": 0.5,
+        "relevancy": 0.5,
+        "reason": "scoring failed"
+      },
+      {
+        "question": "What is the current low-value purchase ceiling for individual transactions under the UC procurement policy?",
+        "answer": "The current low-value purchase ceiling for individual transactions under the UC procurement policy is $10,000 per transaction. This is specified in the policy under the section \"Low-Value Purchase Authorization,\" which states that purchases under this limit may be executed by Campus Personnel designated by each Department, with the amount not exceeding $10,000 per transaction. (Source: [3] BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf)",
+        "faithfulness": 0.2,
+        "relevancy": 1.0,
+        "reason": "The answer claims the $10,000 threshold is in [3], but the context does not support this citation. However, it directly answers the question about the low-value purchase ceiling."
+      },
+      {
+        "question": "I want to hire an independent contractor for $15,000. What do I need to do?",
+        "answer": "For purchases of $15,000 or more, you must complete the SOURCE SELECTION & PRICE REASONABLENESS JUSTIFICATION FORM. This includes selecting a supplier, justifying the price, and documenting the selection process. If hiring an independent contractor, ensure compliance with the UC Independent Contractor Guidelines for Federal Tax Purposes, including insurance requirements and classification criteria. (Policy: [5], [1])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly references the SOURCE SELECTION form for $15k+ purchases (context [5]) and mentions compliance with UC Independent Contractor Guidelines (context [1]), which aligns with the question about hiring an independent contractor."
+      },
+      {
+        "question": "Can state funds be used to purchase a retirement gift for a UC employee?",
+        "answer": "Yes, state funds may be used to purchase a retirement gift for a UC employee, as stated in section V.A.1 of Policy G-41. (Source: [4])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites Policy G-41 Section V.A.1, which explicitly allows state funds for employee recognition (including retirement gifts) as stated in the context."
+      },
+      {
+        "question": "When does a Business Associate Agreement need to be signed?",
+        "answer": "A Business Associate Agreement must be signed by UC and BA as part of the Underlying Agreement under which BA provides Services to UC. The Appendix BAA is binding on all other UC health care components (collectively, the Single Health Care Component or the SHCC) as stated in Recital D. (Source: Appendix BAA - Business Associate Agreement, Recital D)",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the need for a BAA when UC and a Business Associate enter an Underlying Agreement (supported by context [1]), but the claim about Recital D's binding nature is not explicitly stated in the provided context, introducing a minor hallucination."
+      },
+      {
+        "question": "What must be included in a Risk Assessment according to the policy?",
+        "answer": "A Risk Assessment must include the identification of threats and vulnerabilities that could adversely affect Unit or Location operations, Institutional Information or IT Resources. It must also identify further security controls that must be implemented in addition to the controls required by this policy. (Source: [3] UC-IT-19-0480_IS-3_Accessible.pdf)",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer correctly cites threats/vulnerabilities from the context but adds unsupported claims about 'security controls beyond policy requirements' not mentioned in the provided policies."
+      },
+      {
+        "question": "What must a Lessor confirm when submitting an invoice to UC according to the policy?",
+        "answer": "The Lessor must confirm compliance with applicable Business and Finance Bulletins governing service contracts and professional agreements, as stated in [4]. Additionally, the Lessor must confirm compliance with applicable local procedures, as outlined in [4]. The Lessor must also ensure that the submission of the invoice does not violate any of the terms outlined in the policy, including but not limited to the requirements for pricing, invoicing, and payment settlement methods specified in [2] and [3]. The Lessor must also ensure that the invoice is itemized and references the Agreement or PO number, as stated in [2]. The Lessor must also confirm that they are not debarred, suspended, or proposed for debarment by the U.S. government, as stated in [1]. The Lessor must also confirm that they have filed all compliance reports required by the Equal Opportunity clause, as stated in [1]. The Lessor must also confirm that their representations about U.S. Small Business Administration or state and local classifications are accurate and complete, as stated in [1]. The Lessor must also confirm that they will not use Federal appropriated funds to pay any person or organization for influencing or attempting to influence an officer or employee of any agency, a member of Congress, officer or employee of Congress, or an employee of a member of Congress in connection with obtaining any Federal contract, grant or any other award covered by 31 U.S.C. 1352, as stated in [1]. The Lessor must also confirm that they will not impose any fees, interest, or surcharges on UC, as stated in [2]. The Lessor must also confirm that they will not be responsible for any fees, interest, or surcharges imposed on UC, as stated in [2]. The Lessor must also confirm that they will not be responsible for any transportation costs, other related costs incurred, or payments to Lessor in accordance with the terms of the Agreement, as stated in [2]. The Lessor must also confirm that they will not be responsible for any latent defects, fraud, or such gross mistakes as amount to fraud, as stated in [2]. The Lessor must also confirm that they will not be responsible for any defects in design, materials, or workmanship during the term of the lease, as stated in [6]. The Lessor must also confirm that they will not be responsible for any defects in manufacturer's design, workmanship, and materials, as stated in [6]. The Lessor must",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question but includes some unsupported claims (e.g., 'applicable local procedures') not explicitly stated in the context, while correctly referencing compliance with Business and Finance Bulletins and invoice terms."
+      },
+      {
+        "question": "What factors determine the cybersecurity insurance requirements for procurement contracts under the UC data security policy?",
+        "answer": "The cybersecurity insurance requirements for procurement contracts under the UC data security policy are determined by the Protection Level Classification of Institutional Information identified in Exhibit 1 to Appendix - Data Security (DS). The insurance policy must have minimum limits based on the classification level: $500,000 each occurrence and $500,000 in the aggregate for P1, $1,000,000 each occurrence and $1,000,000 in the aggregate for P2, $5,000,000 each occurrence and $5,000,000 in the aggregate for P3 and P4 with less than 70,000 records, and $10,000,000 each occurrence and $10,000,000 in the aggregate for P3 and P4 with 70,000 or more records. (Source: UC Terms and Conditions-04-01-25.pdf)",
+        "faithfulness": 0.0,
+        "relevancy": 0.5,
+        "reason": "The answer invents specific insurance limit amounts not present in the context, contradicting the provided documents, but partially addresses the question by mentioning Protection Level Classification."
+      },
+      {
+        "question": "Can tax-free alcohol be used in our university lab for scientific research purposes?",
+        "answer": "Yes, tax-free alcohol can be used in university labs for scientific research purposes, as outlined in the policy. The policy permits the use of tax-free alcohol for research and clinical purposes, and it specifies that the University must obtain permits and adhere to strict conditions for its use. For example, the policy states that tax-free alcohol may be used in research settings, and the University is responsible for ensuring compliance with federal regulations, including proper storage, recordkeeping, and inventory management. Additionally, the policy allows for the use of tax-free alcohol in laboratories under the supervision of authorized personnel, provided that all withdrawals are documented and quantities are controlled to match the permit's authorization. (Source: BFB-BUS-2, Section II and III)",
+        "faithfulness": 0.6,
+        "relevancy": 1.0,
+        "reason": "The answer claims tax-free alcohol can be used for research, but the context only mentions clinical/medical uses (e.g., compounded medicines) and permit requirements, without explicitly stating research use. The reference answer's broader scope isn't fully reflected in the provided context."
+      },
+      {
+        "question": "What background checks are required for non-academic workforce members with access to institutional information or IT resources?",
+        "answer": "Location HR must conduct background checks for non-academic Workforce Members in Critical Positions, including those with access to Institutional Information classified at Protection Level 3 or higher, or IT Resources classified at Availability Level 3 or higher. These checks are outlined in Section 7.5 of the policy. (Source: [1])",
+        "faithfulness": 0.6,
+        "relevancy": 1.0,
+        "reason": "The answer references Section 7.5 but introduces specific classification levels (Protection Level 3, Availability Level 3) not explicitly stated in the provided context, while directly addressing the question about background checks for non-academic staff with access to institutional information/IT resources."
+      },
+      {
+        "question": "What are the post-employment conflict of interest restrictions for UC employees?",
+        "answer": "The post-employment conflict of interest restrictions for UC employees are outlined in the following four rules: (1) Before You Leave the University: Influencing Prospective Employment; (2) One-Year Ban on Representing Other Parties Before the University; (3) Permanent Ban on \"Switching Sides\" in Cases or Proceedings; and (4) Public Contract Code - Restrictions on Contracts to Provide Goods or Services. These rules are detailed in the Guidance document [2]. Additionally, the California Political Reform Act (PRA) and the California Public Contracting Code impose these restrictions. For further information, refer to the Office of the General Counsel and the Conflict of Interest Coordinators listed in the Appendix of the Compendium [1].",
+        "faithfulness": 0.7,
+        "relevancy": 1.0,
+        "reason": "The answer addresses the question but includes a rule (permanent ban on 'switching sides') not explicitly supported by the provided context, while other points align with [2] and [5]."
+      },
+      {
+        "question": "What are the prohibited actions when a conflict of interest exists?",
+        "answer": "When a conflict of interest exists, the prohibited actions are: (1) making the decision, (2) participating in making the decision, including attending meetings or making recommendations, (3) influencing the decision-making, and (4) lobbying or talking with UC staff about the decision. (Source: [2])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer accurately lists the prohibited actions from the context and correctly cites source [2], fully addressing the question without hallucinations or irrelevance."
+      },
+      {
+        "question": "How quickly must a Supplier respond to UC's cybersecurity-related questions?",
+        "answer": "The Supplier must respond to UC\u2019s reasonable questions related to cybersecurity controls, Security Incidents, or Major Changes, newly published vulnerabilities, and/or risk assessments within ten (10) business days. (Source: Article 5.B)",
+        "faithfulness": 0.0,
+        "relevancy": 1.0,
+        "reason": "The answer fabricates a reference to Article 5.B which is not present in the provided context, but directly addresses the question about response time."
+      },
+      {
+        "question": "If a clause in our lease agreement is found to be illegal or unenforceable, does that affect the rest of the agreement?",
+        "answer": "No, the illegality or unenforceability of one clause does not affect the rest of the agreement. [1]",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly references context [1] and directly addresses the question about whether an illegal clause affects the rest of the agreement."
+      },
+      {
+        "question": "Where can I find the University of California's conflict of interest and related policies?",
+        "answer": "The University of California's conflict of interest and related policies are detailed in the Compendium of Conflict of Interest and Related Policies (December 2024), formerly Business and Finance Bulletin G-39, which includes guidance documents such as the Conflict of Interest Code, Acceptance of Personal Gifts, and other appendices. (Source: [2])",
+        "faithfulness": 1.0,
+        "relevancy": 1.0,
+        "reason": "The answer correctly identifies the Compendium document as the source of UC's conflict of interest policies, citing the correct publication details and referencing supporting context entries."
+      },
+      {
+        "question": "What are the requirements for annual conflict of interest certification?",
+        "answer": "The requirements for annual conflict of interest certification are outlined in Regents Policy 1110: Policy on Conflicts of Interest in Accordance with the Political Reform Act. This policy mandates that Regents complete conflict of interest training and submit an annual certification. Additionally, they must alert the General Counsel of possible financial conflicts of interest. The certification process ensures ongoing compliance with conflict of interest standards. (Source: [2])",
+        "faithfulness": 0.5,
+        "relevancy": 1.0,
+        "reason": "The answer correctly addresses the question by listing required actions (training, certification, alerting General Counsel) but inaccurately cites Regents Policy 1110, which is not explicitly mentioned in the context (context [2] references 1111)."
+      }
+    ]
+  },
+  "timestamp": "20260604_072121"
+}
