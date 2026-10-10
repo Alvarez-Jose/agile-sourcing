@@ -1,0 +1,770 @@
+{
+  "schema_version": 1,
+  "description": "Source identities for the local corpus. Conservative internal/review defaults; activation and public visibility require an explicit review. Filenames are aliases, not version evidence.",
+  "documents": [
+    {
+      "id": "addendum-b-to-gdpr-appendix-standard-contractual-clauses",
+      "filenames": [
+        "Addendum B to Appendix GDPR - SCC_0.docx",
+        "Addendum_B_to_Appendix_GDPR_-_SCC_0.docx"
+      ],
+      "title": "Addendum B to GDPR Appendix: Standard Contractual Clauses",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Addendum B to Appendix GDPR"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "addendum-c-to-gdpr-appendix-uk-gdpr-template",
+      "filenames": [
+        "Addendum C (UK GDPR) template to SCC_0.docx",
+        "Addendum_C__UK_GDPR__template_to_SCC_0.docx"
+      ],
+      "title": "Addendum C to GDPR Appendix: UK GDPR Template",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Addendum C to Appendix GDPR"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating.",
+        "DRAFT marker present in source headers; verify intended template version."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-43",
+      "filenames": [
+        "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
+        "BUS43_ProcurementSupplyChainManagement_Main_Policy.pdf"
+      ],
+      "title": "BFB-BUS-43: Procurement & Supply Chain Management",
+      "policy_id": "BUS-43",
+      "category": "Procurement",
+      "kind": "policy",
+      "aliases": [
+        "BUS-43",
+        "BFB-BUS-43"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating.",
+        "Supplied copy effective 2021; compare with the published 2026 update."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-63-risk-matrix",
+      "filenames": [
+        "BUS-63 Risk Matrix 9-19-2025.pdf",
+        "BUS63_Risk_Matrix_9192025.pdf"
+      ],
+      "title": "BUS-63 Risk Matrix",
+      "policy_id": null,
+      "category": "Risk & Insurance",
+      "kind": "guidance",
+      "aliases": [
+        "BUS-63 Risk Matrix"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating.",
+        "Explicitly marked Confidential - Internal UC use only."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "conflict-of-interest-training-procurement-2024",
+      "filenames": [
+        "Conflict of Interest Training-Procurement-2024.pdf",
+        "Conflict_of_Interest_TrainingProcurement2024.pdf"
+      ],
+      "title": "Conflict of Interest Training: Procurement 2024",
+      "policy_id": null,
+      "category": "Conflict of Interest",
+      "kind": "training",
+      "aliases": [],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "federal-funds-checklist",
+      "filenames": [
+        "Federal Funds Checklist-121525 (2).docx",
+        "Federal_Funds_Checklist-121525__2_.docx"
+      ],
+      "title": "Federal Funds Checklist",
+      "policy_id": null,
+      "category": "Procurement",
+      "kind": "form",
+      "aliases": [
+        "Federal Funds Checklist",
+        "Federal Funding Checklist"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "uc-independent-contractor-guidelines",
+      "filenames": [
+        "GU-FA-20-0506_UCIndependentContractorGuidelines_Accessible.pdf",
+        "GUFA200506_UCIndependentContractorGuidelines_Accessible.pdf"
+      ],
+      "title": "UC Independent Contractor Guidelines",
+      "policy_id": null,
+      "category": "Contracting",
+      "kind": "guidance",
+      "aliases": [
+        "UC Independent Contractor Guidelines",
+        "Independent Contractor Guidelines"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "contracting-for-services-guide",
+      "filenames": [
+        "GU-HR-23-0643_ContractingforServices_Accessible.pdf",
+        "GUHR230643_ContractingforServices_Accessible.pdf"
+      ],
+      "title": "Contracting for Services Guide",
+      "policy_id": null,
+      "category": "Contracting",
+      "kind": "guidance",
+      "aliases": [
+        "Contracting for Services Guide"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "regents-policy-5402",
+      "filenames": [
+        "Regents Policy 5402_ Policy Generally Prohibiting Contracting for Services _ Board of Regents.pdf",
+        "Regents_Policy_5402__Policy_Generally_Prohibiting_Contracting_for_Services___Board_of_Regents.pdf"
+      ],
+      "title": "Regents Policy 5402: Policy Generally Prohibiting Contracting for Services",
+      "policy_id": "Regents Policy 5402",
+      "category": "Contracting",
+      "kind": "policy",
+      "aliases": [
+        "Regents Policy 5402",
+        "Regents 5402"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "sspr-form",
+      "filenames": [
+        "SOURCE SELECTION & PRICE REASONABLENESS JUSTIFICATION FORM (1).docx",
+        "SOURCE_SELECTION___PRICE_REASONABLENESS_JUSTIFICATION_FORM__1_.docx"
+      ],
+      "title": "Source Selection & Price Reasonableness Justification Form",
+      "policy_id": null,
+      "category": "Procurement",
+      "kind": "form",
+      "aliases": [
+        "SSPR Form",
+        "SSPR",
+        "Source Selection and Price Reasonableness Form"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "equipment-operating-lease",
+      "filenames": [
+        "TC-Operating Lease-Equip Rental.docx",
+        "TC-Operating_Lease-Equip_Rental.docx"
+      ],
+      "title": "Terms & Conditions: Operating Lease / Equipment Rental",
+      "policy_id": null,
+      "category": "Contracting",
+      "kind": "contract_template",
+      "aliases": [
+        "Terms and Conditions of Operating Lease",
+        "Terms and Conditions of Equipment Rental"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "uc-terms-and-conditions",
+      "filenames": [
+        "UC Terms and Conditions-04-01-25.pdf",
+        "UC_Terms_and_Conditions040125.pdf"
+      ],
+      "title": "UC Terms and Conditions of Purchase",
+      "policy_id": null,
+      "category": "Procurement",
+      "kind": "contract_template",
+      "aliases": [
+        "UC Terms and Conditions",
+        "UC Terms & Conditions",
+        "UC T&Cs"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "g-13",
+      "filenames": [
+        "UC-FA-18-0381_BFB-G-13_MovingRelocationPolicy_Accessible_4.12.2018.pdf",
+        "UCFA180381_BFBG13_MovingRelocationPolicy_Accessible_4_12_2018.pdf"
+      ],
+      "title": "BFB-G-13: Moving & Relocation Policy",
+      "policy_id": "G-13",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "G-13",
+        "BFB-G-13"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-29",
+      "filenames": [
+        "UC-FA-21-0555_BUS-29_ManagementControlUniversityEquipment_Accessible.pdf",
+        "UCFA210555_BUS29_ManagementControlUniversityEquipment_Accessible.pdf"
+      ],
+      "title": "BFB-BUS-29: Management & Control of University Equipment",
+      "policy_id": "BUS-29",
+      "category": "Property & Equipment",
+      "kind": "policy",
+      "aliases": [
+        "BUS-29",
+        "BFB-BUS-29"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-79",
+      "filenames": [
+        "UC-FA-22-0617_BUS-79 Bus Meetings Entertainment_updated-accessible_12.15.2022.pdf",
+        "UCFA220617_BUS79_Bus_Meetings_Entertainment_updatedaccessible_12_15_2022.pdf"
+      ],
+      "title": "BFB-BUS-79: Business Meetings & Entertainment",
+      "policy_id": "BUS-79",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "BUS-79",
+        "BFB-BUS-79"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "g-41",
+      "filenames": [
+        "UC-FA-23-672_BFB-G-41_EmployeeNon-CashAwardGifts_Accessible.pdf",
+        "UCFA23672_BFBG41_EmployeeNonCashAwardGifts_Accessible.pdf"
+      ],
+      "title": "BFB-G-41: Employee Non-Cash Awards & Gifts",
+      "policy_id": "G-41",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "G-41",
+        "BFB-G-41"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "a-000-7",
+      "filenames": [
+        "UC-FO-00-0180_a-000-7.pdf",
+        "UCFO000180_a0007.pdf"
+      ],
+      "title": "Accounting Manual A-000-7: Official Documentation Required in Support of University Financial Transactions",
+      "policy_id": "A-000-7",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "A-000-7"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "a-253-27",
+      "filenames": [
+        "UC-FO-00-0190_a-253-27.pdf",
+        "UCFO000190_a25327.pdf"
+      ],
+      "title": "Accounting Manual A-253-27: Administrative Fund Payments",
+      "policy_id": "A-253-27",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "A-253-27"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "is-3",
+      "filenames": [
+        "UC-IT-19-0480_IS-3_Accessible.pdf",
+        "UCIT190480_IS3_Accessible.pdf"
+      ],
+      "title": "BFB-IS-3: Electronic Information Security",
+      "policy_id": "IS-3",
+      "category": "Information Security",
+      "kind": "policy",
+      "aliases": [
+        "IS-3",
+        "BFB-IS-3"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-8",
+      "filenames": [
+        "UC-PS-12-0029_AcquisitionDispositionUniversityVehicles.pdf",
+        "UCPS120029_AcquisitionDispositionUniversityVehicles.pdf"
+      ],
+      "title": "BFB-BUS-8: Acquisition and Disposition of University Vehicles",
+      "policy_id": "BUS-8",
+      "category": "Property & Equipment",
+      "kind": "policy",
+      "aliases": [
+        "BUS-8",
+        "BFB-BUS-8"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-2",
+      "filenames": [
+        "UC-PS-12-0031_Tax-FreeAlcoholPermitsRecordsOperations (3).pdf",
+        "UCPS120031_TaxFreeAlcoholPermitsRecordsOperations_3.pdf"
+      ],
+      "title": "BFB-BUS-2: Tax-Free Alcohol Permits, Records, and Operations",
+      "policy_id": "BUS-2",
+      "category": "Finance",
+      "kind": "policy",
+      "aliases": [
+        "BUS-2",
+        "BFB-BUS-2"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-38",
+      "filenames": [
+        "UC-PS-12-0068_DispositionExcessPropertyTransferProperty.pdf",
+        "UCPS120068_DispositionExcessPropertyTransferProperty.pdf"
+      ],
+      "title": "BFB-BUS-38: Disposition of Excess Property and Transfer of University-Owned Property",
+      "policy_id": "BUS-38",
+      "category": "Property & Equipment",
+      "kind": "policy",
+      "aliases": [
+        "BUS-38",
+        "BFB-BUS-38"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-50",
+      "filenames": [
+        "UC-RK-25-761_ControlledSubstances_Accessible.pdf",
+        "UCRK25761_ControlledSubstances_Accessible.pdf"
+      ],
+      "title": "BFB-BUS-50: Controlled Substances",
+      "policy_id": "BUS-50",
+      "category": "Risk & Insurance",
+      "kind": "policy",
+      "aliases": [
+        "BUS-50",
+        "BFB-BUS-50"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "bus-63",
+      "filenames": [
+        "UC-RK-25-762_BFB-BUS-63_RiskTransferInsuranceRequirements_Accessible (1).pdf",
+        "UCRK25762_BFBBUS63_RiskTransferInsuranceRequirements_Accessible_1.pdf"
+      ],
+      "title": "BFB-BUS-63: Risk Transfer & Insurance Requirements",
+      "policy_id": "BUS-63",
+      "category": "Risk & Insurance",
+      "kind": "policy",
+      "aliases": [
+        "BUS-63",
+        "BFB-BUS-63"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "addendum-a-to-gdpr-appendix-scope-of-processing-data",
+      "filenames": [
+        "addendum-a-to-appendix-gdpr-scope-of-processing-data_0 (1).docx",
+        "addendum-a-to-appendix-gdpr-scope-of-processing-data_0__1_.docx"
+      ],
+      "title": "Addendum A to GDPR Appendix: Scope of Processing Data",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Addendum A to Appendix GDPR"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "appendix-business-associate-agreement-baa",
+      "filenames": [
+        "appendix-baa.pdf",
+        "appendixbaa.pdf"
+      ],
+      "title": "Appendix: Business Associate Agreement (BAA)",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Business Associate Agreement",
+        "BAA"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "appendix-data-security-requirements",
+      "filenames": [
+        "appendix-data-security.pdf",
+        "appendixdatasecurity.pdf"
+      ],
+      "title": "Appendix: Data Security Requirements",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Appendix Data Security",
+        "Data Security Appendix"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "appendix-gdpr-eea-uk-standard-contractual-clauses",
+      "filenames": [
+        "appendix-gdpr-eea-uk-4-27-21.pdf",
+        "appendixgdpreeauk42721.pdf"
+      ],
+      "title": "Appendix GDPR: EEA & UK (Standard Contractual Clauses)",
+      "policy_id": null,
+      "category": "GDPR & Privacy",
+      "kind": "contract_template",
+      "aliases": [
+        "Appendix GDPR",
+        "GDPR Appendix"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "article-5-contracting-out",
+      "filenames": [
+        "article-5-contracting-out-1-31-20.pdf",
+        "article5contractingout13120.pdf"
+      ],
+      "title": "Article 5: Contracting Out",
+      "policy_id": null,
+      "category": "Contracting",
+      "kind": "guidance",
+      "aliases": [
+        "Article 5 Contracting Out"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "g-39",
+      "filenames": [
+        "compendium-of-conflict-of-interest-and-related-policies-guidance-formerly-bfb-g-39.pdf",
+        "compendiumofconflictofinterestandrelatedpoliciesguidanceformerlybfbg39.pdf"
+      ],
+      "title": "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+      "policy_id": "G-39",
+      "category": "Conflict of Interest",
+      "kind": "policy",
+      "aliases": [
+        "Compendium of Conflict of Interest",
+        "BFB-G-39",
+        "G-39"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "post-employment-conflict-of-interest-rules",
+      "filenames": [
+        "mm-postemployment-coi-rules-10-2023.pdf",
+        "mmpostemploymentcoirules102023.pdf"
+      ],
+      "title": "Post-Employment Conflict of Interest Rules",
+      "policy_id": null,
+      "category": "Conflict of Interest",
+      "kind": "guidance",
+      "aliases": [
+        "Post-Employment Conflict of Interest Rules",
+        "Post-Employment and Revolving Door Guidance"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating."
+      ],
+      "reviewed_sha256": null
+    },
+    {
+      "id": "sspr-faq",
+      "filenames": [
+        "sspr-faq.pdf",
+        "ssprfaq.pdf"
+      ],
+      "title": "Source Selection and Price Reasonableness FAQ",
+      "policy_id": null,
+      "category": "Procurement",
+      "kind": "guidance",
+      "aliases": [
+        "SSPR FAQ",
+        "SSPR FAQs"
+      ],
+      "access_classification": "internal",
+      "review_status": "review",
+      "source_url": null,
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "review_notes": [
+        "Verify the issuing authority, current version, and access scope before activating.",
+        "FAQ dated April 2021 contains historical federal thresholds; do not treat those as current."
+      ],
+      "reviewed_sha256": null
+    }
+  ]
+}

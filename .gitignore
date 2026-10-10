@@ -28,6 +28,8 @@ data/raw/*.pdf
 data/raw/*.csv
 data/raw_policies/
 data/embeddings/chroma_store/
+data/parsed/policy_index.sqlite*
+data/graphs/policy_index/
 *.sqlite
 *.db
 

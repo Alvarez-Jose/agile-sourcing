@@ -60,6 +60,11 @@ ingestion, embedding models, and Ollama setup used by the existing pipeline.
 
 ### Run chat locally
 
+The new document/section index and policy graph have their own
+[preparation and review workflow](policy-index.md). `--prepare-only` builds them
+without loading models; `--preview-index` embeds local review sources without
+activating them. Normal `--ingest` publication requires reviewed public sources.
+
 The extension already calls `POST /api/ask`. A working login does not initialize
 the policy index or the language model service. To run the assistant locally:
 
@@ -69,9 +74,11 @@ the policy index or the language model service. To run the assistant locally:
    `ollama pull qwen3:8b` if it is missing.
 3. Obtain the team's policy PDFs/DOCX files and put them in `data/raw_policies/`.
    This is the directory used by the current ingestion script.
-4. From the repository root, run:
+4. Prepare the source/graph index, review the exact source versions in the manifest
+   as described in the policy index guide, and then publish eligible sources:
 
    ```sh
+   ./venv/bin/python -m scripts.ingest_policies --prepare-only
    ./venv/bin/python -m scripts.ingest_policies --ingest
    ```
 

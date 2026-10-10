@@ -218,8 +218,8 @@ mkdir -p secret
 # ingest policy docs
 mkdir -p data/raw_policies
 cp /path/to/pdfs/* data/raw_policies/
-python -m scripts.ingest_policies --ingest
-python scripts/build_policy_graph.py
+python -m scripts.ingest_policies --prepare-only
+python -m scripts.build_policy_graph build
 
 # run evaluation
 python scripts/run_evaluation.py

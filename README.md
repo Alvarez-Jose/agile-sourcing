@@ -65,6 +65,9 @@ agile-sourcing/
 For extension login, Firestore user profiles, and backend authentication, follow
 [the auth setup guide](docs/auth-setup.md).
 
+For the source-preserving section index, policy graph, and document review manifest,
+follow [the policy index guide](docs/policy-index.md).
+
 ```bash
 # Clone
 git clone <repo-url>
@@ -82,7 +85,8 @@ mkdir -p secret
 # Ingest policy docs
 mkdir -p data/raw_policies
 cp /path/to/policy-pdfs/* data/raw_policies/
-python -m scripts.ingest_policies --ingest
+python -m scripts.ingest_policies --prepare-only
+# Review the document manifest before publishing embeddings; see docs/policy-index.md.
 
 # Run backend
 uvicorn backend.main:app --reload --port 8000

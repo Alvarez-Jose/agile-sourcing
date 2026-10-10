@@ -124,10 +124,15 @@ FILE_FORMAT_MAP = {
  
  
 def tag_chunk(chunk: dict) -> dict:
+    from pathlib import Path
+    from rag_pipeline.documents.manifest import normalize_filename
+
     source = chunk.get("source", "")
-    chunk["policy_name"] = POLICY_MAP.get(source, source)
-    chunk["doc_type"] = DOC_TYPE_MAP.get(source, "General Policy")
-    chunk["file_format"] = FILE_FORMAT_MAP.get(source, "pdf")
+    canonical = next((name for name in POLICY_MAP
+                      if normalize_filename(name) == normalize_filename(source)), source)
+    chunk["policy_name"] = POLICY_MAP.get(canonical, source)
+    chunk["doc_type"] = DOC_TYPE_MAP.get(canonical, "General Policy")
+    chunk["file_format"] = Path(source).suffix.lower().lstrip(".")
     return chunk
 
 

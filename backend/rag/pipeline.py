@@ -18,9 +18,10 @@ from rag_pipeline.parser.metadata_tagger import tag_chunk
 from rag_pipeline.indexer.hybrid_index import HybridRetriever
 from rag_pipeline.retriever.intent_classifier import IntentClassifier
 from rag_pipeline.retriever.reranker import Reranker
+from rag_pipeline.indexer.source_chroma import CHROMA_DIR as SOURCE_CHROMA_DIR, active_collection
 from rules import RuleEngine, parse_query, should_use_rule_engine
 
-CHROMA_DIR      = "data/embeddings/chroma_store"
+CHROMA_DIR      = str(SOURCE_CHROMA_DIR)
 COLLECTION_NAME = "uc_policies"
 EMBED_MODEL     = "all-MiniLM-L6-v2"
 LLM_MODEL       = "qwen3:8b"
@@ -53,6 +54,7 @@ STRONG_RULE_TOPICS = {"covered", "sspr", "equipment", "split", "small_business",
 embedder = SentenceTransformer(EMBED_MODEL)
 chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
 _retriever = None
+_retriever_collection = None
 _reranker = None
 rule_engine = RuleEngine()
 classifier = IntentClassifier(embedder)
@@ -60,15 +62,16 @@ classifier = IntentClassifier(embedder)
 
 def get_collection():
     try:
-        return chroma_client.get_collection(COLLECTION_NAME)
+        return active_collection(chroma_client)
     except Exception:
         return None
 
 
 def _get_retriever(collection):
-    global _retriever
-    if _retriever is None:
+    global _retriever, _retriever_collection
+    if _retriever is None or _retriever_collection != collection.name:
         _retriever = HybridRetriever(collection, embedder)
+        _retriever_collection = collection.name
     return _retriever
 
 
