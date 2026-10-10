@@ -1,12 +1,13 @@
 import { defineConfig } from 'wxt';
 import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath } from 'node:url';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
     modules: ['@wxt-dev/module-react'],
     vite: () => ({
         plugins: [tailwindcss()],
-        envDir: '../', // Reads .env from root workspace folder
+        envDir: fileURLToPath(new URL('../secret/', import.meta.url)),
     }),
     manifest: {
         permissions: ['identity', 'storage'],

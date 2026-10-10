@@ -184,7 +184,7 @@ agile-sourcing/
 │   ├── metrics/               # retrieval accuracy, hallucination rate
 │   └── scenarios/             # real purchase test cases
 ├── frontend/                  # WXT browser extension (React + Tailwind)
-├── data/policies/             # the actual policy PDFs
+├── data/raw_policies/         # actual policy PDFs/DOCX for RAG ingestion
 ├── experiments/               # notebooks + configs
 ├── paper/                     # LaTeX writeup
 └── docs/                      # architecture diagrams, related work
@@ -212,12 +212,13 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env
-# add your API keys
+mkdir -p secret
+# Configure secret/.env and Admin credentials as described in docs/auth-setup.md.
 
 # ingest policy docs
-cp /path/to/pdfs/* data/policies/
-python scripts/ingest_policies.py
+mkdir -p data/raw_policies
+cp /path/to/pdfs/* data/raw_policies/
+python -m scripts.ingest_policies --ingest
 python scripts/build_policy_graph.py
 
 # run evaluation

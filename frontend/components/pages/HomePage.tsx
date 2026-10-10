@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Login from './Login';
 
 export function HomePage() {
-  const { userProfile, isAuthenticated, isApproved, toggleMockApproval } = useAuth();
+  const { userProfile, isAuthenticated, isApproved } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   return (
@@ -63,7 +63,7 @@ export function HomePage() {
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
                 <p className="font-medium">Why is my account pending?</p>
                 <p className="mt-0.5 text-amber-700 leading-relaxed">
-                  New users are granted access after administrative verification. In the meantime, you can review extension settings or test features in dev mode.
+                  New users are granted access after administrative verification. You can review your profile and approval status in extension settings.
                 </p>
               </div>
             )}
@@ -83,13 +83,6 @@ export function HomePage() {
                 </svg>
               </Link>
 
-              {/* Dev quick toggle */}
-              <button
-                onClick={() => toggleMockApproval()}
-                className="text-[11px] text-slate-500 hover:text-slate-800 underline cursor-pointer"
-              >
-                Toggle {isApproved ? 'Pending' : 'Approved'} (Dev Mode)
-              </button>
             </div>
           </div>
         ) : (
@@ -101,7 +94,7 @@ export function HomePage() {
               onClick={() => setLoginModalOpen(true)}
               className="px-5 py-2.5 bg-[#00539b] hover:bg-[#003d6f] text-white text-xs font-semibold rounded-lg shadow-xs transition-all cursor-pointer"
             >
-              Sign In with Google / CruzID
+              Sign in with Google
             </button>
             <Login isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
           </div>

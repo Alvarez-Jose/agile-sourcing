@@ -1,6 +1,6 @@
 import { GoogleAuthProvider, signInWithCredential, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "../firebase/firebaseConfig";
-import { UserProfile, StoredAuthData } from "../types/auth";
+import { UserProfile } from "../types/auth";
 import { browser } from "wxt/browser";
 
 export const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -12,9 +12,9 @@ export const API_BASE_URL =
  * Builds standard Google OAuth 2.0 URL for launchWebAuthFlow.
  * Uses response_type: "id_token" with nonce to exchange directly for Firebase credential.
  */
-function buildGoogleAuthUrl(emailHint?: string): string {
+function buildGoogleAuthUrl(): string {
   if (!CLIENT_ID) {
-    throw new Error("Missing VITE_GOOGLE_CLIENT_ID in your .env file");
+    throw new Error("Missing VITE_GOOGLE_CLIENT_ID in secret/.env");
   }
   const redirectUri = browser.identity.getRedirectURL();
   const params = new URLSearchParams({
@@ -25,10 +25,6 @@ function buildGoogleAuthUrl(emailHint?: string): string {
     nonce: crypto.randomUUID(), // Required when requesting id_token via implicit flow
   });
 
-  if (emailHint) {
-    params.append("login_hint", emailHint);
-  }
-
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
@@ -36,11 +32,11 @@ function buildGoogleAuthUrl(emailHint?: string): string {
  * Executes Chrome Web Auth Flow, parses Google id_token from redirect URL fragment,
  * signs in to Firebase with the credential, saves the token, and establishes a backend session.
  */
-async function executeGoogleAuthFlow(emailHint?: string): Promise<{
+async function executeGoogleAuthFlow(): Promise<{
   idToken: string;
   profile: UserProfile;
 }> {
-  const authUrl = buildGoogleAuthUrl(emailHint);
+  const authUrl = buildGoogleAuthUrl();
   const responseUrl = await browser.identity.launchWebAuthFlow({
     url: authUrl,
     interactive: true,
@@ -68,10 +64,7 @@ async function executeGoogleAuthFlow(emailHint?: string): Promise<{
   const result = await signInWithCredential(auth, credential);
   const idToken = await result.user.getIdToken(true);
 
-  // Store in browser.storage.local
-  await browser.storage.local.set({ idToken });
-
-  // Call session endpoint stub
+  // Only persist a session after the server verifies identity and loads its profile.
   const profile = await establishSession(idToken);
 
   return { idToken, profile };
@@ -88,74 +81,48 @@ export async function signInWithGoogle(): Promise<{
 }
 
 /**
- * Sign in with specific email hint via launchWebAuthFlow (pre-fills user / SSO).
- */
-export async function signInWithEmailHint(email: string): Promise<{
-  idToken: string;
-  profile: UserProfile;
-}> {
-  return executeGoogleAuthFlow(email);
-}
-
-/**
- * Exchange ID token with backend session endpoint.
- * Stubs a fallback mock profile if the backend endpoint is not yet live.
+ * Exchange a Firebase ID token for a server-owned Firestore profile.
  */
 export async function establishSession(idToken: string): Promise<UserProfile> {
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/auth/session`, {
+    res = await fetch(`${API_BASE_URL}/auth/session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${idToken}`,
       },
+      signal: AbortSignal.timeout(15000),
     });
-
-    if (!res.ok) {
-      throw new Error(`Session establishment failed with HTTP status ${res.status}`);
-    }
-
-    const profile: UserProfile = await res.json();
-    await browser.storage.local.set({ userProfile: profile });
-    return profile;
-  } catch (error) {
-    console.warn(
-      `[Auth Service] Backend /auth/session endpoint unreachable or returned error. Using fallback mock profile for development:`,
-      error
+  } catch {
+    throw new Error("Cannot reach the sign-in server. Check that FastAPI is running, then retry.");
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new SessionError(
+      typeof body?.detail === "string" ? body.detail : `Sign-in server returned HTTP ${res.status}.`,
+      res.status,
     );
+  }
+  const profile: UserProfile = await res.json();
+  if (profile.uid !== auth.currentUser?.uid || typeof profile.email !== "string" ||
+      typeof profile.is_approved !== "boolean") {
+    throw new Error("The sign-in server returned an invalid user profile.");
+  }
+  await browser.storage.local.set({ idToken, userProfile: profile });
+  return profile;
+}
 
-    // Mock fallback profile during local development
-    const currentUser = auth.currentUser;
-    const mockProfile: UserProfile = {
-      uid: currentUser?.uid || "mock-user-uid",
-      email: currentUser?.email || "cruzbuy-user@ucsc.edu",
-      name: currentUser?.displayName || "CruzBuy User",
-      photoURL: currentUser?.photoURL || undefined,
-      is_approved: false, // Default to pending approval to test approval states
-      role: "buyer",
-      created_at: new Date().toISOString(),
-    };
-
-    // Check if we already have a saved local approval state to preserve testing toggles
-    const existing = (await browser.storage.local.get("userProfile")) as { userProfile?: UserProfile };
-    const finalProfile: UserProfile = existing.userProfile
-      ? { ...mockProfile, is_approved: existing.userProfile.is_approved }
-      : mockProfile;
-
-    await browser.storage.local.set({ userProfile: finalProfile });
-    return finalProfile;
+export class SessionError extends Error {
+  constructor(message: string, public status: number) {
+    super(message);
   }
 }
 
-/**
- * Retrieve persisted auth data from browser.storage.local.
- */
-export async function getStoredAuth(): Promise<StoredAuthData> {
-  const data = (await browser.storage.local.get(["idToken", "userProfile"])) as StoredAuthData;
-  return {
-    idToken: data.idToken,
-    userProfile: data.userProfile,
-  };
+export async function getFreshIdToken(forceRefresh = false): Promise<string> {
+  await auth.authStateReady();
+  if (!auth.currentUser) throw new Error("Please sign in to continue.");
+  return auth.currentUser.getIdToken(forceRefresh);
 }
 
 /**
@@ -164,26 +131,7 @@ export async function getStoredAuth(): Promise<StoredAuthData> {
 export async function signOutUser(): Promise<void> {
   try {
     await firebaseSignOut(auth);
-  } catch (e) {
-    console.error("Firebase sign-out error:", e);
+  } finally {
+    await browser.storage.local.remove(["idToken", "userProfile"]);
   }
-  await browser.storage.local.remove(["idToken", "userProfile"]);
-}
-
-/**
- * Development Helper: Manually toggle is_approved status for UI state testing.
- */
-export async function setMockApproval(isApproved: boolean): Promise<UserProfile> {
-  const { userProfile } = await getStoredAuth();
-  const updated: UserProfile = userProfile
-    ? { ...userProfile, is_approved: isApproved }
-    : {
-        uid: "test-user-uid",
-        email: "test-user@ucsc.edu",
-        name: "Test User",
-        is_approved: isApproved,
-      };
-
-  await browser.storage.local.set({ userProfile: updated });
-  return updated;
 }

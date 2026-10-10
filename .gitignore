@@ -206,4 +206,5 @@ web-ext.config.ts
 
 # Keys
 *.pem
-
+/secret/
+*-firebase-adminsdk-*.json

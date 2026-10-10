@@ -1,32 +1,39 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Login from './Login';
+import { askQuestion, AskResponse } from '../../services/agent';
+import { SessionError } from '../../services/auth';
 
 export function ChatPage() {
-  const { userProfile, isAuthenticated, isApproved, isLoading, refreshSession, toggleMockApproval } = useAuth();
+  const { userProfile, isAuthenticated, isApproved, isLoading, refreshSession } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string; sources?: AskResponse['sources'] }>>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !isApproved) return;
+    if (!inputMessage.trim() || !isApproved || isSending || isLoading) return;
 
     const userText = inputMessage.trim();
     setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setInputMessage('');
 
-    // Simulated CruzBuy Assistant response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: `CruzBuy Assistant received: "${userText}". (RAG backend pipeline integration pending)`,
-        },
-      ]);
-    }, 600);
+    setChatError(null);
+    setIsSending(true);
+    try {
+      const result = await askQuestion(userText);
+      setMessages((prev) => [...prev, { sender: 'bot', text: result.answer, sources: result.sources }]);
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : 'Could not send your message.');
+      if (error instanceof SessionError && (error.status === 401 || error.status === 403)) {
+        await refreshSession();
+      }
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleRefresh = async () => {
@@ -62,16 +69,6 @@ export function ChatPage() {
           </p>
         </div>
 
-        {/* Development State Switcher */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => toggleMockApproval()}
-            className="text-[11px] px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300 transition-colors cursor-pointer"
-            title="Toggle between Approved and Pending Approval states for testing"
-          >
-            🧪 Dev Toggle: {isApproved ? 'Simulate Pending' : 'Simulate Approved'}
-          </button>
-        </div>
       </div>
 
       {/* State 1: Not Authenticated */}
@@ -196,7 +193,14 @@ export function ChatPage() {
                         : 'bg-gray-100 text-gray-800 rounded-bl-none'
                     }`}
                   >
-                    {m.text}
+                    <p className="whitespace-pre-wrap">{m.text}</p>
+                    {!!m.sources?.length && (
+                      <ul className="mt-2 border-t border-gray-200 pt-2 text-xs">
+                        {m.sources.map((source, index) => (
+                          <li key={index}>[{index + 1}] {source.policy}{source.page ? `, p. ${source.page}` : ''}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               ))
@@ -204,20 +208,22 @@ export function ChatPage() {
           </div>
 
           {/* Active Input Bar */}
+          {chatError && <p role="alert" className="mb-2 text-xs text-red-700">{chatError}</p>}
           <form onSubmit={handleSendMessage} className="mt-auto flex gap-2">
             <input
               type="text"
               value={inputMessage}
+              disabled={isSending || isLoading}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask CruzBuy Assistant about suppliers, contracts, orders..."
               className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#00539b] focus:border-transparent transition-all"
             />
             <button
               type="submit"
-              disabled={!inputMessage.trim()}
+              disabled={!inputMessage.trim() || isSending || isLoading}
               className="px-4 py-2 bg-[#00539b] hover:bg-[#003d6f] active:scale-95 text-white rounded-lg text-xs sm:text-sm font-medium transition-all disabled:opacity-50 cursor-pointer shadow-xs"
             >
-              Send
+              {isSending ? 'Thinking…' : 'Send'}
             </button>
           </form>
         </div>

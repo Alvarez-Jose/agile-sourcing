@@ -1,27 +1,26 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { onIdTokenChanged } from "firebase/auth";
+import { browser } from "wxt/browser";
 import { UserProfile } from "../types/auth";
+import { auth } from "../firebase/firebaseConfig";
 import {
-  getStoredAuth,
-  signInWithGoogle as authServiceSignInWithGoogle,
-  signInWithEmailHint as authServiceSignInWithEmailHint,
+  signInWithGoogle,
   signOutUser,
   establishSession,
-  setMockApproval,
+  getFreshIdToken,
+  SessionError,
 } from "../services/auth";
-import { auth } from "../firebase/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
 
 interface AuthContextType {
   userProfile: UserProfile | null;
   idToken: string | null;
   isLoading: boolean;
+  sessionError: string | null;
   isAuthenticated: boolean;
   isApproved: boolean;
   loginWithGoogle: () => Promise<void>;
-  loginWithEmail: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
-  toggleMockApproval: (approved?: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,137 +28,112 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const revision = useRef(0);
 
-  // Sync state with chrome.storage.local
-  const loadStoredAuth = async () => {
-    try {
-      const data = await getStoredAuth();
-      if (data.userProfile) {
-        setUserProfile(data.userProfile);
-      }
-      if (data.idToken) {
-        setIdToken(data.idToken);
-      }
-    } catch (err) {
-      console.error("Failed to load stored auth:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadStoredAuth();
-
-    // Listen for storage changes across different extension pages/views
-    const handleStorageChange = (
-      changes: { [key: string]: chrome.storage.StorageChange },
-      areaName: string
-    ) => {
-      if (areaName === "local") {
-        if (changes.userProfile) {
-          const newProfile = changes.userProfile.newValue as UserProfile | undefined;
-          setUserProfile(newProfile || null);
-        }
-        if (changes.idToken) {
-          const newToken = changes.idToken.newValue as string | undefined;
-          setIdToken(newToken || null);
-        }
-      }
-    };
-
-    chrome.storage.onChanged.addListener(handleStorageChange);
-
-    // Also observe Firebase auth state
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const token = await firebaseUser.getIdToken();
-          setIdToken(token);
-          await chrome.storage.local.set({ idToken: token });
-        } catch (e) {
-          console.warn("Could not get fresh ID token on auth change:", e);
-        }
-      }
-    });
-
-    return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-      unsubscribe();
-    };
+  const clearProfile = useCallback(async () => {
+    setUserProfile(null);
+    setIdToken(null);
+    await browser.storage.local.remove(["idToken", "userProfile"]);
   }, []);
 
-  const loginWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      const { idToken: token, profile } = await authServiceSignInWithGoogle();
-      setIdToken(token);
-      setUserProfile(profile);
-    } finally {
-      setIsLoading(false);
+  const handleError = useCallback(async (error: unknown) => {
+    setSessionError(error instanceof Error ? error.message : "Could not load your account.");
+    await clearProfile();
+    if (error instanceof SessionError && error.status === 401) {
+      await signOutUser();
     }
-  };
+  }, [clearProfile]);
 
-  const loginWithEmail = async (email: string) => {
+  useEffect(() => {
+    // Firebase restores identity; cached extension profiles do not establish a session.
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      const currentRevision = ++revision.current;
+      setIsLoading(true);
+      setUserProfile(null);
+      setIdToken(null);
+      try {
+        if (!user) {
+          await clearProfile();
+          return;
+        }
+        const token = await user.getIdToken();
+        const profile = await establishSession(token);
+        if (currentRevision !== revision.current) return;
+        setIdToken(token);
+        setUserProfile(profile);
+        setSessionError(null);
+      } catch (error) {
+        if (currentRevision === revision.current) await handleError(error);
+      } finally {
+        if (currentRevision === revision.current) setIsLoading(false);
+      }
+    });
+    return () => {
+      revision.current++;
+      unsubscribe();
+    };
+  }, [clearProfile, handleError]);
+
+  const login = async () => {
     setIsLoading(true);
+    setSessionError(null);
     try {
-      const { idToken: token, profile } = await authServiceSignInWithEmailHint(email);
-      setIdToken(token);
-      setUserProfile(profile);
+      const result = await signInWithGoogle();
+      revision.current++;
+      setIdToken(result.idToken);
+      setUserProfile(result.profile);
+    } catch (error) {
+      revision.current++;
+      await handleError(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
+    revision.current++;
     setIsLoading(true);
+    setSessionError(null);
+    await clearProfile();
     try {
       await signOutUser();
-      setUserProfile(null);
-      setIdToken(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   const refreshSession = async () => {
-    if (!idToken && !auth.currentUser) return;
     setIsLoading(true);
+    setSessionError(null);
     try {
-      const token = idToken || (await auth.currentUser?.getIdToken(true)) || "";
-      if (token) {
-        const profile = await establishSession(token);
-        setUserProfile(profile);
-      }
+      const token = await getFreshIdToken(true);
+      const profile = await establishSession(token);
+      revision.current++;
+      setIdToken(token);
+      setUserProfile(profile);
+    } catch (error) {
+      revision.current++;
+      await handleError(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleMockApproval = async (approved?: boolean) => {
-    const target = approved !== undefined ? approved : !userProfile?.is_approved;
-    const updated = await setMockApproval(target);
-    setUserProfile(updated);
-  };
-
-  const isAuthenticated = !!userProfile;
-  const isApproved = !!userProfile?.is_approved;
-
   return (
-    <AuthContext.Provider
-      value={{
-        userProfile,
-        idToken,
-        isLoading,
-        isAuthenticated,
-        isApproved,
-        loginWithGoogle,
-        loginWithEmail,
-        logout,
-        refreshSession,
-        toggleMockApproval,
-      }}
-    >
+    <AuthContext.Provider value={{
+      userProfile,
+      idToken,
+      isLoading,
+      sessionError,
+      isAuthenticated: !!userProfile,
+      isApproved: userProfile?.is_approved === true,
+      loginWithGoogle: login,
+      logout,
+      refreshSession,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -167,8 +141,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

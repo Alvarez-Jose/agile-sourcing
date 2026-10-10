@@ -7,15 +7,13 @@ type LoginProps = {
 };
 
 export default function Login({ isOpen, onClose }: LoginProps) {
-    const [email, setEmail] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { loginWithGoogle, loginWithEmail } = useAuth();
+    const { loginWithGoogle } = useAuth();
 
     if (!isOpen) return null;
 
-    // Generic Google sign-in (account chooser, no email pre-filled)
     const handleGoogle = async () => {
         if (submitting) return;
         setSubmitting(true);
@@ -26,24 +24,6 @@ export default function Login({ isOpen, onClose }: LoginProps) {
             onClose();
         } catch (err: any) {
             console.error("Google sign-in failed:", err);
-            setError(`Sign-in failed: ${err.message || err}`);
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    // Email-specific sign-in — routes straight to that account's SSO/2FA
-    const handleEmailSubmit = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        if (submitting || !email.trim()) return;
-        setSubmitting(true);
-        setError(null);
-
-        try {
-            await loginWithEmail(email.trim());
-            onClose();
-        } catch (err: any) {
-            console.error("Email sign-in failed:", err);
             setError(`Sign-in failed: ${err.message || err}`);
         } finally {
             setSubmitting(false);
@@ -71,46 +51,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 </button>
 
                 <h2 className="text-2xl sm:text-3xl font-serif text-[#2e1a3e] text-center">
-                    Log in or create an account
+                    Sign in to CruzBuy
                 </h2>
-
-                <form onSubmit={handleEmailSubmit} className="w-full flex flex-col gap-4">
-                    <div className="w-full">
-                        <label htmlFor="login-email" className="block font-serif text-base sm:text-lg mb-1.5 text-gray-800">
-                            Email Address:
-                        </label>
-                        <input
-                            id="login-email"
-                            type="email"
-                            placeholder="cruzid@ucsc.edu"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            disabled={submitting}
-                            className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-3 outline-none placeholder-white/60 focus:ring-2 focus:ring-[#00539b] focus:ring-offset-2 transition-all disabled:opacity-60"
-                        />
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={submitting || !email.trim()}
-                        className="w-full rounded-full bg-[#1f4e8c] text-white px-5 py-2.5 font-serif text-lg hover:bg-[#173d6b] disabled:opacity-50 transition-all cursor-pointer shadow-sm active:scale-[0.99] flex items-center justify-center gap-2"
-                    >
-                        {submitting ? (
-                            <>
-                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                <span>Signing in...</span>
-                            </>
-                        ) : (
-                            "Submit"
-                        )}
-                    </button>
-                </form>
-
-                <div className="w-full flex items-center gap-4">
-                    <div className="flex-1 border-t border-gray-400" />
-                    <span className="font-serif text-base text-gray-600">Or</span>
-                    <div className="flex-1 border-t border-gray-400" />
-                </div>
 
                 <button
                     onClick={handleGoogle}

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { API_BASE_URL } from '../../services/auth';
 import Login from './Login';
 
 export function SettingsPage() {
@@ -12,7 +11,6 @@ export function SettingsPage() {
     isLoading,
     refreshSession,
     logout,
-    toggleMockApproval,
   } = useAuth();
 
   const [loginOpen, setLoginOpen] = useState(false);
@@ -67,6 +65,18 @@ export function SettingsPage() {
           <div className="space-y-3 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div>
+                <span className="text-gray-500 block">Name:</span>
+                <span className="font-medium text-gray-800">{userProfile?.name || 'Not set'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Department:</span>
+                <span className="font-medium text-gray-800">{userProfile?.department || 'Not assigned'}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Clearance:</span>
+                <span className="font-medium text-gray-800">{userProfile?.clearance || 'none'}</span>
+              </div>
+              <div>
                 <span className="text-gray-500 block">Email:</span>
                 <span className="font-medium text-gray-800">{userProfile?.email}</span>
               </div>
@@ -108,7 +118,7 @@ export function SettingsPage() {
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={handleRefresh}
-                disabled={refreshing}
+                disabled={refreshing || isLoading}
                 className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
               >
                 {refreshing ? 'Syncing...' : 'Sync Session with Backend'}
@@ -135,34 +145,6 @@ export function SettingsPage() {
         )}
       </div>
 
-      {/* Development & Testing Controls */}
-      <div className="bg-white border border-dashed border-amber-300 rounded-xl p-4 shadow-xs space-y-3">
-        <h2 className="text-sm font-bold text-amber-900 flex items-center gap-1.5">
-          <span>🛠️ Developer & Testing Tools</span>
-        </h2>
-        <p className="text-xs text-amber-700">
-          Simulate different backend responses and permission flags locally without waiting for backend endpoints:
-        </p>
-
-        <div className="flex flex-wrap gap-2 pt-1">
-          <button
-            onClick={() => toggleMockApproval(true)}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium transition-colors cursor-pointer"
-          >
-            Set is_approved = true
-          </button>
-          <button
-            onClick={() => toggleMockApproval(false)}
-            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs font-medium transition-colors cursor-pointer"
-          >
-            Set is_approved = false
-          </button>
-        </div>
-
-        <div className="text-[11px] text-gray-500 pt-1">
-          Backend API Base URL configured: <span className="font-mono text-gray-700">{API_BASE_URL}</span>
-        </div>
-      </div>
     </div>
   );
 }

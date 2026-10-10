@@ -46,7 +46,7 @@ agile-sourcing/
 │   └── main.py           # FastAPI app entry point
 ├── frontend/             # WXT browser extension (React + Tailwind)
 ├── data/
-│   ├── policies/         # Policy PDFs for RAG ingestion
+│   ├── raw_policies/     # Policy PDFs/DOCX for the current RAG ingestion script
 │   ├── raw/              # Raw data exports
 │   └── embeddings/       # Cached embeddings
 ├── tests/
@@ -56,11 +56,14 @@ agile-sourcing/
 ├── scripts/              # Ingestion, seeding, eval scripts
 ├── docs/                 # Architecture docs, policy notes
 ├── requirements.txt
-├── .env.example
+├── secret/               # Ignored: .env, .env.example, Firebase Admin credentials
 └── README.md
 ```
 
 ## Setup
+
+For extension login, Firestore user profiles, and backend authentication, follow
+[the auth setup guide](docs/auth-setup.md).
 
 ```bash
 # Clone
@@ -73,19 +76,20 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Config
-cp .env.example .env
-# fill in API keys
+mkdir -p secret
+# Create secret/.env and add Admin credentials as described in docs/auth-setup.md.
 
 # Ingest policy docs
-cp /path/to/policy-pdfs/* data/policies/
-python scripts/ingest_policies.py
+mkdir -p data/raw_policies
+cp /path/to/policy-pdfs/* data/raw_policies/
+python -m scripts.ingest_policies --ingest
 
 # Run backend
 uvicorn backend.main:app --reload --port 8000
 
 # Frontend (separate terminal)
 cd frontend
-ng serve
+pnpm dev
 ```
 
 ## Key Rules the System Enforces
