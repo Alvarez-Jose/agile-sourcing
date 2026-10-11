@@ -68,6 +68,9 @@ For extension login, Firestore user profiles, and backend authentication, follow
 For the source-preserving section index, policy graph, and document review manifest,
 follow [the policy index guide](docs/policy-index.md).
 
+For reviewed starter sources, permission-filtered retrieval and cited chat answers,
+follow [the policy chat guide](docs/policy-chat.md).
+
 ```bash
 # Clone
 git clone <repo-url>

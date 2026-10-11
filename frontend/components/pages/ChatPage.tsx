@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Login from './Login';
-import { askQuestion, AskResponse } from '../../services/agent';
+import { askQuestion, AskResponse, citationUrl } from '../../services/agent';
 import { SessionError } from '../../services/auth';
 
 export function ChatPage() {
@@ -12,6 +12,18 @@ export function ChatPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+  const sessionKey = `${userProfile?.uid ?? ''}:${isAuthenticated}:${isApproved}:${userProfile?.clearance ?? 'none'}`;
+  const currentSession = useRef({ key: sessionKey, generation: 0 });
+  if (currentSession.current.key !== sessionKey) {
+    currentSession.current = { key: sessionKey, generation: currentSession.current.generation + 1 };
+  }
+
+  useEffect(() => {
+    setMessages([]);
+    setChatError(null);
+    setInputMessage('');
+    setIsSending(false);
+  }, [sessionKey]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,16 +35,19 @@ export function ChatPage() {
 
     setChatError(null);
     setIsSending(true);
+    const requestSession = currentSession.current.generation;
     try {
       const result = await askQuestion(userText);
+      if (currentSession.current.generation !== requestSession) return;
       setMessages((prev) => [...prev, { sender: 'bot', text: result.answer, sources: result.sources }]);
     } catch (error) {
+      if (currentSession.current.generation !== requestSession) return;
       setChatError(error instanceof Error ? error.message : 'Could not send your message.');
       if (error instanceof SessionError && (error.status === 401 || error.status === 403)) {
         await refreshSession();
       }
     } finally {
-      setIsSending(false);
+      if (currentSession.current.generation === requestSession) setIsSending(false);
     }
   };
 
@@ -142,7 +157,7 @@ export function ChatPage() {
               </svg>
               <p className="text-sm font-medium text-gray-500">Chat is locked</p>
               <p className="text-xs text-gray-400 max-w-xs mt-1">
-                Once approved, you will be able to search contracts, query quotes, and interact with the AI assistant.
+                Once approved, you will be able to ask about purchasing policies, required forms, and documentation.
               </p>
             </div>
 
@@ -177,7 +192,7 @@ export function ChatPage() {
                 </svg>
                 <p className="text-sm font-medium text-gray-600">How can I help you today?</p>
                 <p className="text-xs text-gray-400 mt-1 max-w-xs">
-                  Ask questions about purchasing guidelines, approved vendors, or item specifications.
+                  Ask questions about purchasing policies, required forms, and supporting documentation.
                 </p>
               </div>
             ) : (
@@ -196,9 +211,26 @@ export function ChatPage() {
                     <p className="whitespace-pre-wrap">{m.text}</p>
                     {!!m.sources?.length && (
                       <ul className="mt-2 border-t border-gray-200 pt-2 text-xs">
-                        {m.sources.map((source, index) => (
-                          <li key={index}>[{index + 1}] {source.policy}{source.page ? `, p. ${source.page}` : ''}</li>
-                        ))}
+                        {m.sources.map((source) => {
+                          const url = citationUrl(source);
+                          return (
+                            <li key={source.citation_id} className="mb-2">
+                              [{source.citation_id}] {url ? (
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#00539b] underline">{source.policy}</a>
+                              ) : source.policy}
+                              {source.section && <span> — {source.section}</span>}
+                              {source.page && <span>, p. {source.page}</span>}
+                              {!!source.evidence?.length && (
+                                <details className="mt-1">
+                                  <summary className="cursor-pointer text-slate-600">Supporting text</summary>
+                                  {source.evidence.map((evidence, index) => (
+                                    <blockquote key={index} className="mt-1 border-l-2 border-gray-300 pl-2 whitespace-pre-wrap">{evidence.quote}</blockquote>
+                                  ))}
+                                </details>
+                              )}
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </div>
@@ -215,7 +247,7 @@ export function ChatPage() {
               value={inputMessage}
               disabled={isSending || isLoading}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask CruzBuy Assistant about suppliers, contracts, orders..."
+              placeholder="Ask about purchasing policies or required forms..."
               className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#00539b] focus:border-transparent transition-all"
             />
             <button

@@ -85,6 +85,8 @@ def build_policy_graph(
         for alias in set(
             document.aliases + ([document.policy_id] if document.policy_id else [])
         ):
+            if document.review_status == "archived":
+                continue
             aliases.append(
                 (len(alias), _alias_pattern(alias), target, document.version_id)
             )

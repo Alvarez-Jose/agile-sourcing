@@ -5,9 +5,10 @@ revision/effective-date observations, source locations, and access/review metada
 in SQLite. Small child chunks point to their full parent sections. A separate
 evidence-backed graph connects documents, sections, forms, and explicit references.
 
-These components implement the document/section and graph foundation. Graph-expanded
-parent retrieval, conditional rule evaluation, and new chat behavior are subsequent
-work. The existing chat retrieval continues to operate on its active Chroma collection.
+Chat now uses scoped parent retrieval and one hop of explicit references from the
+authoritative SQLite snapshot; see [policy chat](policy-chat.md). Conditional override
+evaluation remains separate work. Legacy Chroma chunks are never a permission or
+source-review fallback for the chat endpoint.
 
 ## Build and inspect without an LLM
 
@@ -50,16 +51,19 @@ mode to enable from a browser query or LLM request.
 
 ## Document manifest
 
-`data/policies/document_manifest.json` registers the 32 source documents using stable
+`data/policies/document_manifest.json` registers source documents using stable
 IDs and filename aliases. Punctuation/case differences in downloaded filenames do
 not break document identity. Unknown files require registration instead of being
 silently indexed under a guessed identity. Source discovery includes nested folders.
 
 Each entry records title, policy ID, document kind, category, explicit reference
 aliases, access classification, review status, source URL, and review provenance.
-The supplied corpus starts with conservative `internal` / `review` defaults; this
-does not declare old or draft documents to be current policy. BUS-43/SSPR FAQ version
-concerns and the UK GDPR template's DRAFT marker are recorded for review.
+Unverified sources use conservative `internal` / `review` defaults. The official
+January 2026 BUS-43 interim PDF and December 2025 UCSC SSPR PDF are public/active;
+the old BUS-43, supplied SSPR DOCX and obsolete FAQ are archived. The checklist and
+other supplied sources remain under review. See [the source review](policy-source-review.md).
+`archived_sha256` excludes older/alternate bytes of an identity whose current verified
+version is active. Changed unrecognized active bytes still fail validation.
 
 After checking the exact source version and its issuing authority, a reviewer can set:
 
@@ -151,12 +155,12 @@ page range/section, access classification, review status and date observations.
 ./venv/bin/python -m scripts.ingest_policies --ingest
 ```
 
-Normal publication currently selects reviewed public sources only. Internal runtime
-retrieval needs the server authorization integration in the next phase. Local review
+Normal Chroma publication selects reviewed public sources only. Chat derives its scope
+from Firestore and ranks an authorized SQLite source snapshot directly. Local review
 collections are separate and never selected by the runtime pointer. Publication builds
 a fresh collection, verifies the count, and switches a small active-collection pointer
-only after success. Existing collections remain available for rollback. Runtime retrieval
-refreshes its cached hybrid index when the active collection changes.
+only after success. Existing collections remain available for rollback. Chroma exports
+are optional for scoped chat and do not override live source access classifications.
 
 Each published vector collection pins an immutable SQLite source snapshot in its
 generation directory. `active_source_index_path()` resolves the matching source

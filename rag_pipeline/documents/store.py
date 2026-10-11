@@ -337,9 +337,14 @@ class PolicyIndex:
             rows = db.execute(
                 f"""SELECT c.payload FROM chunk_search f
                 JOIN chunks c ON c.id = f.chunk_id JOIN documents d ON d.version_id = c.document_version_id
+                JOIN sections s ON s.id = c.parent_section_id
                 WHERE chunk_search MATCH ? AND d.access_classification IN ({placeholders(self.scope.classifications)})
                 AND d.review_status IN ({placeholders(statuses)})
-                ORDER BY bm25(chunk_search) LIMIT ?""",
+                ORDER BY
+                    CASE WHEN json_extract(s.payload, '$.kind') NOT IN ('body', 'table') THEN 1 ELSE 0 END,
+                    CASE WHEN length(trim(json_extract(c.payload, '$.text'))) < 120 THEN 1 ELSE 0 END,
+                    bm25(chunk_search, 0.0, 0.1, 1.0)
+                LIMIT ?""",
                 (
                     match,
                     *self.scope.classifications,
@@ -365,3 +370,62 @@ class PolicyIndex:
                 for row in db.execute("SELECT * FROM edges ORDER BY id")
                 if row["source_id"] in allowed and row["target_id"] in allowed
             ]
+
+    def retrieval_snapshot(self):
+        """One read transaction: filter before parsing, ranking, or model calls.
+
+        Opening one read-only connection pins the generation during atomic rebuilds.
+        No inaccessible payload is decoded or returned to the retriever.
+        """
+        statuses = ["active"]
+        if self.scope.include_review:
+            statuses.append("review")
+        if self.scope.include_archived:
+            statuses.append("archived")
+        empty = dict(documents=[], sections=[], chunks=[], nodes=[], edges=[])
+        if not self.scope.classifications:
+            return empty
+
+        def marks(values):
+            return ",".join("?" for _ in values)
+
+        allowed = f"access_classification IN ({marks(self.scope.classifications)}) AND review_status IN ({marks(statuses)})"
+        params = (*self.scope.classifications, *statuses)
+        with self.connection() as db:
+            db.execute("BEGIN")
+            documents = [
+                DocumentRecord.model_validate_json(row[0])
+                for row in db.execute(
+                    f"SELECT payload FROM documents WHERE {allowed} ORDER BY version_id",
+                    params,
+                )
+            ]
+            versions = {doc.version_id for doc in documents}
+            records = {}
+            for table, model in (("sections", SectionRecord), ("chunks", ChunkRecord)):
+                records[table] = [
+                    model.model_validate_json(row[0])
+                    for row in db.execute(
+                        f"SELECT payload FROM {table} WHERE document_version_id IN (SELECT version_id FROM documents WHERE {allowed}) ORDER BY id",
+                        params,
+                    )
+                ]
+            nodes = [
+                PolicyNode.model_validate_json(row[0])
+                for row in db.execute(
+                    f"SELECT payload FROM nodes WHERE {allowed} AND (document_version_id IS NULL OR document_version_id IN (SELECT version_id FROM documents WHERE {allowed})) ORDER BY id",
+                    (*params, *params),
+                )
+            ]
+            ids = {node.id for node in nodes}
+            edges = []
+            for row in db.execute(
+                "SELECT source_id, target_id, payload FROM edges ORDER BY id"
+            ):
+                if row[0] in ids and row[1] in ids:
+                    edge = PolicyEdge.model_validate_json(row[2])
+                    if all(
+                        item.document_version_id in versions for item in edge.evidence
+                    ):
+                        edges.append(edge)
+        return dict(documents=documents, nodes=nodes, edges=edges, **records)

@@ -7,18 +7,28 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from backend.auth.dependencies import require_approved_user
 from backend.auth.models import UserProfile
+from backend.auth.policy_access import policy_scope
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 class AskRequest(BaseModel):
-    question: str
+    model_config = ConfigDict(extra="forbid")
+    question: str = Field(min_length=1, max_length=4000)
     think: bool = False
+
+    @field_validator("question")
+    @classmethod
+    def nonempty_question(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("Question must not be blank")
+        return value
 
 
 class AskResponse(BaseModel):
@@ -40,7 +50,7 @@ def ask_endpoint(
     try:
         from backend.rag.pipeline import ask
 
-        result = ask(req.question, think=req.think)
+        result = ask(req.question, think=req.think, scope=policy_scope(user))
     except ModuleNotFoundError as error:
         logger.exception("Assistant dependency is missing: %s", error.name)
         raise HTTPException(

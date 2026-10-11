@@ -200,7 +200,9 @@ def test_approval_is_reloaded_on_each_protected_request(server):
         "/api/ask", headers=HEADERS, json={"question": "Hello"}
     )
     assert response.status_code == 403
-    server.pipeline.assert_called_once_with("Hello", think=False)
+    from rag_pipeline.documents.models import AccessScope
+
+    server.pipeline.assert_called_once_with("Hello", think=False, scope=AccessScope())
 
 
 def test_invalid_permission_data_fails_closed(server):
@@ -259,3 +261,41 @@ def test_pipeline_failures_return_an_actionable_response(
     assert response.status_code == 503
     assert response.json() == {"detail": expected_detail}
     assert "ollama" not in response.text.lower()
+
+
+@pytest.mark.parametrize(
+    "clearance,classes",
+    [
+        ("internal", ("public", "internal")),
+        ("restricted", ("public", "internal", "restricted")),
+        ("admin", ("public",)),
+    ],
+)
+def test_chat_uses_fresh_server_clearance_only(server, clearance, classes):
+    server.records[IDENTITY["uid"]] = {"is_approved": True, "clearance": clearance}
+    response = server.client.post(
+        "/api/ask", headers=HEADERS, json={"question": "Policy question"}
+    )
+    assert response.status_code == 200
+    assert server.pipeline.call_args.kwargs["scope"].classifications == classes
+    server.records[IDENTITY["uid"]]["clearance"] = "none"
+    server.client.post(
+        "/api/ask", headers=HEADERS, json={"question": "Policy question"}
+    )
+    assert server.pipeline.call_args.kwargs["scope"].classifications == ("public",)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"question": "Policy question", "clearance": "restricted"},
+        {"question": "Policy question", "scope": {"include_review": True}},
+        {"question": "   "},
+        {"question": "x" * 4001},
+    ],
+)
+def test_chat_rejects_client_permission_overrides_and_invalid_questions(server, body):
+    server.records[IDENTITY["uid"]] = {"is_approved": True}
+    response = server.client.post("/api/ask", headers=HEADERS, json=body)
+    assert response.status_code == 422
+    server.pipeline.assert_not_called()

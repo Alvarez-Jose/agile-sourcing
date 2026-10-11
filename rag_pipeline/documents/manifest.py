@@ -33,12 +33,19 @@ class ManifestEntry(BaseModel):
     reviewed_by: str | None = None
     reviewed_at: datetime | None = None
     reviewed_sha256: str | None = None
+    archived_sha256: list[str] = Field(default_factory=list)
     review_notes: list[str] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def require_active_review(self):
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", self.id):
             raise ValueError("Document IDs must be stable lowercase slugs")
+        if any(
+            not re.fullmatch(r"[a-f0-9]{64}", value) for value in self.archived_sha256
+        ):
+            raise ValueError("Archived source versions require full SHA-256 hashes")
+        if self.reviewed_sha256 in self.archived_sha256:
+            raise ValueError("The current reviewed source cannot also be archived")
         if self.review_status == "active" and not (
             self.reviewed_by
             and self.reviewed_at

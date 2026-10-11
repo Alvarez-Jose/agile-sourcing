@@ -55,8 +55,8 @@ uvicorn backend.main:app --reload --port 8000
 ```
 
 The auth routes initialize Firebase on demand. Login and `/api/health` do not load
-the RAG models or need Ollama. Approved chat requests still require the policy
-ingestion, embedding models, and Ollama setup used by the existing pipeline.
+the RAG models or need Ollama. Approved chat requests require the reviewed SQLite
+policy index, local retrieval models, and Ollama.
 
 ### Run chat locally
 
@@ -72,19 +72,26 @@ the policy index or the language model service. To run the assistant locally:
 2. Start `ollama serve` in a separate terminal (or start the Ollama application).
    Run `ollama list` to confirm `qwen3:8b` is available; download it with
    `ollama pull qwen3:8b` if it is missing.
-3. Obtain the team's policy PDFs/DOCX files and put them in `data/raw_policies/`.
-   This is the directory used by the current ingestion script.
-4. Prepare the source/graph index, review the exact source versions in the manifest
-   as described in the policy index guide, and then publish eligible sources:
+3. Restore the two verified public starter PDFs and build the source/graph index
+   from the repository root if it has not already been prepared:
 
    ```sh
-   ./venv/bin/python -m scripts.ingest_policies --prepare-only
-   ./venv/bin/python -m scripts.ingest_policies --ingest
+   ./venv/bin/python -m scripts.download_starter_policies
+   ./venv/bin/python -m scripts.build_policy_graph build
    ```
 
-   Alternatively, use the team's compatible prebuilt Chroma index at
-   `data/embeddings/chroma_store/`, containing the `uc_policies` collection.
-5. Restart FastAPI, sync the approved account in the extension, and send a question.
+   Current chat reads the reviewed SQLite index directly; publishing a Chroma
+   collection is optional. Additional sources require the review procedure in
+   [the policy index guide](policy-index.md).
+4. Start FastAPI from the repository root:
+
+   ```sh
+   ./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
+   ```
+
+5. In another terminal, run `cd frontend` and `pnpm dev`. Open the extension,
+   sign in, sync the approved account, and send a question. See
+   [the policy chat guide](policy-chat.md) for demo questions and tests.
 
 The embedding model (`all-MiniLM-L6-v2`) and reranker
 (`cross-encoder/ms-marco-MiniLM-L-6-v2`) download on first use if they are not cached.
@@ -138,10 +145,12 @@ values are preserved on subsequent logins. Clients cannot set permissions throug
 the session endpoints. Restrict client writes to this collection with Firestore
 Security Rules; the backend uses the Admin SDK and its IAM permissions.
 
-`clearance` is currently a descriptive string, defaulting to `"none"`; no clearance
-hierarchy or purchase thresholds are inferred from it. `is_approved` gates assistant
-chat for now, matching the existing UI. Define real clearance rules before connecting
-purchasing tools. New users can log in and see their profile while awaiting approval.
+`is_approved` gates assistant chat. Exact clearance `internal` permits public/internal
+documents; `restricted` permits all three classifications. `none`, `public`, missing
+and unknown values permit public documents only. Every document must also be active.
+Role and department do not implicitly grant clearance, and clearance does not establish
+purchasing authority. See [policy chat](policy-chat.md) for retrieval and access tests.
+New users can log in and see their profile while awaiting approval.
 
 To approve a test user, edit `users/{uid}` in Firestore, set `is_approved` to a
 **boolean** `true`, and assign the department/clearance as appropriate. Click

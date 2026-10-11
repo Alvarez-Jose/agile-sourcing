@@ -53,7 +53,8 @@
       "id": "bus-43",
       "filenames": [
         "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
-        "BUS43_ProcurementSupplyChainManagement_Main_Policy.pdf"
+        "BUS43_ProcurementSupplyChainManagement_Main_Policy.pdf",
+        "BUS-43_Interim_2026-01-26.pdf"
       ],
       "title": "BFB-BUS-43: Procurement & Supply Chain Management",
       "policy_id": "BUS-43",
@@ -63,16 +64,18 @@
         "BUS-43",
         "BFB-BUS-43"
       ],
-      "access_classification": "internal",
-      "review_status": "review",
-      "source_url": null,
-      "reviewed_by": null,
-      "reviewed_at": null,
+      "access_classification": "public",
+      "review_status": "active",
+      "source_url": "https://policy.ucop.edu/doc/3220485/BFB-BUS-43",
+      "reviewed_by": "Codex: official-source and byte verification",
+      "reviewed_at": "2026-10-10T20:09:17-07:00",
       "review_notes": [
-        "Verify the issuing authority, current version, and access scope before activating.",
-        "Supplied copy effective 2021; compare with the published 2026 update."
+        "Official publicly accessible source downloaded and inspected on 2026-10-10; review provenance in docs/policy-source-review.md. Prior supplied bytes retained as archived; current answers use the verified PDF only."
       ],
-      "reviewed_sha256": null
+      "reviewed_sha256": "2ef396ba53f531ce94b90b81b72b3d439dcc3f7fa81deebb9a2c0df8e1206229",
+      "archived_sha256": [
+        "3914c9f39cebb1a171bdc109dc5e05c211d491aaa24bd2aff1d0522868ac75b3"
+      ]
     },
     {
       "id": "bus-63-risk-matrix",
@@ -135,11 +138,11 @@
       ],
       "access_classification": "internal",
       "review_status": "review",
-      "source_url": null,
+      "source_url": "https://procurement.ucop.edu/resources/p-policies/staff-resources/federal-funding-resources",
       "reviewed_by": null,
       "reviewed_at": null,
       "review_notes": [
-        "Verify the issuing authority, current version, and access scope before activating."
+        "Supplied document footer says Rev. 11.2025. Official resources endpoint returned HTTP 403 during verification on 2026-10-10. Latest released bytes and distribution scope could not be independently confirmed; retain internal/review and exclude from runtime. See docs/policy-source-review.md."
       ],
       "reviewed_sha256": null
     },
@@ -218,7 +221,8 @@
       "id": "sspr-form",
       "filenames": [
         "SOURCE SELECTION & PRICE REASONABLENESS JUSTIFICATION FORM (1).docx",
-        "SOURCE_SELECTION___PRICE_REASONABLENESS_JUSTIFICATION_FORM__1_.docx"
+        "SOURCE_SELECTION___PRICE_REASONABLENESS_JUSTIFICATION_FORM__1_.docx",
+        "SSPR_Official_UCSC_2025-12.pdf"
       ],
       "title": "Source Selection & Price Reasonableness Justification Form",
       "policy_id": null,
@@ -229,15 +233,18 @@
         "SSPR",
         "Source Selection and Price Reasonableness Form"
       ],
-      "access_classification": "internal",
-      "review_status": "review",
-      "source_url": null,
-      "reviewed_by": null,
-      "reviewed_at": null,
+      "access_classification": "public",
+      "review_status": "active",
+      "source_url": "https://financial.ucsc.edu/Financial_Affairs_Forms/Source_Selection_Justification_Form.pdf",
+      "reviewed_by": "Codex: official-source and byte verification",
+      "reviewed_at": "2026-10-10T20:09:17-07:00",
       "review_notes": [
-        "Verify the issuing authority, current version, and access scope before activating."
+        "Official publicly accessible source downloaded and inspected on 2026-10-10; review provenance in docs/policy-source-review.md. Prior supplied bytes retained as archived; current answers use the verified PDF only."
       ],
-      "reviewed_sha256": null
+      "reviewed_sha256": "5c09cfef834e37941faf7efd843879b887dd44b807a00199c0e4b3d1f73aef25",
+      "archived_sha256": [
+        "3d8c3a95543bff584b483bd4a0c14bc4a41e1490126a3175f09c12c964622439"
+      ]
     },
     {
       "id": "equipment-operating-lease",
@@ -755,14 +762,13 @@
         "SSPR FAQ",
         "SSPR FAQs"
       ],
-      "access_classification": "internal",
-      "review_status": "review",
+      "access_classification": "public",
+      "review_status": "archived",
       "source_url": null,
       "reviewed_by": null,
       "reviewed_at": null,
       "review_notes": [
-        "Verify the issuing authority, current version, and access scope before activating.",
-        "FAQ dated April 2021 contains historical federal thresholds; do not treat those as current."
+        "April 2021 FAQ has obsolete $10,000/$250,000 federal thresholds; excluded from current answers. No current replacement verified. See docs/policy-source-review.md."
       ],
       "reviewed_sha256": null
     }

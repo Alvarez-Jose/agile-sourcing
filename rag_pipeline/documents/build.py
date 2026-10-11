@@ -136,7 +136,8 @@ def prepare_source_index(
     for path in files:
         entry = manifest.resolve(path.name)
         sha = hashlib.sha256(path.read_bytes()).hexdigest()
-        if entry.review_status == "active" and entry.reviewed_sha256 != sha:
+        status = "archived" if sha in entry.archived_sha256 else entry.review_status
+        if status == "active" and entry.reviewed_sha256 != sha:
             raise ValueError(
                 f"Source changed after review; review the new bytes before activating: {path.name}"
             )
@@ -198,7 +199,7 @@ def prepare_source_index(
             category=entry.category,
             kind=entry.kind,
             access_classification=classification,
-            review_status=entry.review_status,
+            review_status=status,
             source_url=entry.source_url,
             reviewed_by=entry.reviewed_by,
             reviewed_at=entry.reviewed_at,
