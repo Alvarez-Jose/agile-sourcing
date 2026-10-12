@@ -141,6 +141,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
             "sources": [{"policy": str, "page": str}, ...],
             "intent": str,
             "determination": str | None   (rule engine block, if it ran)
+            "rule_sources": [{document_id, document, version, page, section, quote, ...}]
         }
     """
     collection = get_collection()
@@ -198,4 +199,5 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         "sources": sources,
         "intent": intent["intent"],
         "determination": rule_result.to_prompt_context() if rule_result else None,
+        "rule_sources": [s.to_dict() for s in rule_result.sources] if rule_result else [],
     }

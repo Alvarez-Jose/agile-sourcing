@@ -20,6 +20,7 @@ from rules.form_router import route_forms
 from rules.funding_rules import (MIXED_FUNDING_FEDERAL_TRIGGERS, FundingDetermination, determine_funding,
                                  mixed_funding_trigger)
 from rules.models import Flag, PurchaseRequest
+from rules.provenance import TOPIC_SOURCES, sources_for
 from rules.query_parser import RULE_TOPICS, ParsedQuery, parse_query
 from rules.thresholds import ThresholdDetermination, detect_split_order, evaluate_thresholds
 
@@ -36,6 +37,7 @@ class EvaluationResult:
     forms: list = field(default_factory=list)
     flags: list = field(default_factory=list)
     reference: list = field(default_factory=list)
+    topics: set = field(default_factory=set)
 
     # shortcuts used by the tests / pipeline
     @property
@@ -74,6 +76,54 @@ class EvaluationResult:
             self.competitive_bid_required or self.sspr_required or self.forms or self.categories.equipment
             or any(f.severity in ("block", "require", "caution") for f in self.flags)
         )
+
+    # provenance: which threshold constants this determination relied on
+    def source_keys(self) -> list:
+        keys = []
+        if self.funding and self.funding.is_mixed:
+            keys.append("MIXED_FUNDING_FEDERAL_TRIGGERS")
+        t = self.thresholds
+        if t:
+            keys.append("COMPETITIVE_BID_THRESHOLD")
+            sspr_key = {T.SSPR_NON_FEDERAL: "SSPR_NON_FEDERAL", T.SSPR_FEDERAL_GRANT: "SSPR_FEDERAL_GRANT",
+                        T.SSPR_FEDERAL_CONTRACT: "SSPR_FEDERAL_CONTRACT"}.get(t.sspr_threshold)
+            if sspr_key:
+                keys.append(sspr_key)
+            if self.federal_rules_apply:
+                keys.append("SIMPLIFIED_ACQUISITION_THRESHOLD")
+            if t.small_business_quotes or self.has_flag("SB_LIMIT_EXCEEDED"):
+                keys += ["SMALL_BUSINESS_LIMIT", "SMALL_BUSINESS_TWO_QUOTES_ABOVE"]
+            if self.has_flag("SB_FEDERAL_OVER_100K"):
+                keys.append("SMALL_BUSINESS_FEDERAL_SSPR_LIMIT")
+            if t.certified_cost_pricing_required:
+                keys.append("CERTIFIED_COST_PRICING_THRESHOLD")
+            if any("micro-purchase" in note for note in t.explanations):
+                keys.append("CAMPUS_GRANT_MICRO_PURCHASE_MAX")
+        if self.has_flag("SPLIT_ORDER"):
+            keys.append("SPLIT_ORDER")
+        if any(f.name.startswith("Anti-Lobbying") for f in self.forms):
+            keys.append("ANTI_LOBBYING_THRESHOLD")
+        if self.categories.equipment:
+            keys.append("EQUIPMENT_TAG_THRESHOLD")
+            if any(e.item.acquired_before_july_2004 for e in self.categories.equipment):
+                keys.append("EQUIPMENT_TAG_THRESHOLD_PRE_JULY_2004")
+        cs = self.categories.covered_service
+        if cs:
+            keys += ["COVERED_SERVICES_PROHIBITION", "AFSCME_NOTICE_THRESHOLD"]
+            if cs.afscme_notice_required:
+                keys.append("WAGE_PARITY_MIN_DAYS")
+        if self.reference:
+            for topic in REFERENCE_FACTS:
+                if topic in self.topics:
+                    keys += TOPIC_SOURCES.get(topic, [])
+        return list(dict.fromkeys(keys))
+
+    @property
+    def sources(self) -> list:
+        return sources_for(self.source_keys())
+
+    def source_lines(self) -> list:
+        return [f'{s.cite()}: "{s.quote}"' for s in self.sources]
 
     # output formatting
     def summary_lines(self) -> list:
@@ -157,6 +207,7 @@ class EvaluationResult:
             "forms": self.form_names,
             "flags": [f.code for f in self.flags],
             "equipment": [(e.item.name, e.item.cost, e.must_tag) for e in self.categories.equipment],
+            "sources": [s.to_dict() for s in self.sources],
         }
 
 
@@ -247,7 +298,7 @@ class RuleEngine:
             route_forms(_no_funding(), _no_thresholds(), categories)
 
         reference = reference_facts(topics or set()) if req.amount == 0 and not req.items else []
-        return EvaluationResult(req, funding, thresholds, categories, forms, flags, reference)
+        return EvaluationResult(req, funding, thresholds, categories, forms, flags, reference, set(topics or ()))
 
     def evaluate_query(self, question: str) -> EvaluationResult:
         parsed = parse_query(question)
