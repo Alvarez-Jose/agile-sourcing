@@ -9,12 +9,23 @@ The frontend Send button should POST to:
     http://localhost:8000/api/ask
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes import router
+from backend.rag.pipeline import warm_up
 
-app = FastAPI(title="Agile Sourcing API")
+
+@asynccontextmanager
+async def lifespan(app):
+    # load the retriever, reranker and LLM once at startup instead of on the first question
+    warm_up()
+    yield
+
+
+app = FastAPI(title="Agile Sourcing API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -23,11 +23,24 @@ def client(monkeypatch):
         "answer": "Yes [1].", "sources": [SOURCE, UNCITED], "citations": [SOURCE],
         "rule_sources": [RULE_SOURCE], "determination": "=== RULE ENGINE ===", "intent": "threshold",
     }
+    stub.warm_ups = 0
+
+    def warm_up():
+        stub.warm_ups += 1
+    stub.warm_up = warm_up
     monkeypatch.setitem(sys.modules, "backend.rag.pipeline", stub)
     monkeypatch.delitem(sys.modules, "backend.api.routes", raising=False)
     monkeypatch.delitem(sys.modules, "backend.main", raising=False)
     from backend.main import app
-    return TestClient(app)
+    with TestClient(app) as c:          # context manager runs the startup lifespan
+        c.stub = stub
+        yield c
+
+
+def test_models_warm_up_once_at_startup(client):
+    client.post("/api/ask", json={"question": "a"})
+    client.post("/api/ask", json={"question": "b"})
+    assert client.stub.warm_ups == 1
 
 
 def test_ask_keeps_original_fields(client):

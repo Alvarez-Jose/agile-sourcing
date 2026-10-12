@@ -36,6 +36,35 @@ def source_line(result: EvaluationResult) -> str:
     return "; ".join(f'{s.cite()}: "{s.quote}"' for s in result.sources) or "See the policy excerpts cited below."
 
 
+# "what is the threshold" questions with no purchase in them: the engine's reference
+# facts are the whole answer, so no retrieval or LLM call is needed
+TEMPLATE_INTENTS = {"bidding_threshold", "sspr_form", "federal_funding", "equipment_tagging"}
+TEMPLATE_TOPICS = {"bid", "sspr", "federal", "micro", "sat", "small_business", "equipment", "mixed"}
+NOT_TEMPLATED_TOPICS = {"split", "sole_source", "covered"}   # need explanation, not a number
+
+
+def is_pure_threshold_question(result: EvaluationResult, intent: str) -> bool:
+    return bool(result.reference) and result.request.amount == 0 and not result.request.items \
+        and intent in TEMPLATE_INTENTS and bool(result.topics & TEMPLATE_TOPICS) \
+        and not result.topics & NOT_TEMPLATED_TOPICS
+
+
+def templated_answer(result: EvaluationResult) -> str:
+    return (f"Answer: {' '.join(result.reference)}\n"
+            f"Rule: {rule_line(result)}\n"
+            f"Source: {source_line(result)}\n"
+            "Conditions: These are the general thresholds. For a determination on a specific purchase, "
+            "ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).")
+
+
+def source_citations(result: EvaluationResult) -> list:
+    # provenance records in the same shape as retrieved-chunk citations
+    return [{"policy": s.document["title"], "page": str(s.page or ""), "ref": i, "section": s.section,
+             "file": (s.document["files"] or ("",))[0], "text": s.quote, "score": None, "cited": True,
+             "document_id": s.document_id, "version": s.document["version"]}
+            for i, s in enumerate(result.sources, 1)]
+
+
 def format_rule_answer(result: EvaluationResult, llm_text: str) -> str:
     answer, conditions = split_llm_sections(llm_text)
     return (f"Answer: {answer or rule_line(result)}\n"

@@ -19,7 +19,8 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 from rag_pipeline.retriever.intent_classifier import IntentClassifier
 from rag_pipeline.retriever.reranker import Reranker
 from rules import RuleEngine, parse_query, should_use_rule_engine
-from rules.answer_format import format_rule_answer
+from rules.answer_format import (format_rule_answer, is_pure_threshold_question, source_citations,
+                                 templated_answer)
 from rules.query_parser import RULE_TOPICS
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
@@ -103,6 +104,23 @@ def _get_reranker():
     return _reranker
 
 
+LLM_KEEP_ALIVE = "30m"   # keep qwen3 in memory between requests (Ollama's default unloads after 5m)
+
+
+def warm_up():
+    # embedder, chroma client and intent classifier load at import. this also builds the
+    # BM25 index + cross-encoder and loads qwen3, so the first real question isn't slow.
+    # called once from the FastAPI startup (backend/main.py)
+    collection = get_collection()
+    if collection is not None:
+        _get_retriever(collection)
+    _get_reranker().rerank("warm up", [{"document": "warm up", "metadata": {}}], top_k=1)
+    try:
+        ollama.generate(model=LLM_MODEL, prompt="", keep_alive=LLM_KEEP_ALIVE)
+    except Exception:
+        pass   # Ollama not running yet; the first question will load it
+
+
 def _rewrite_query(question: str, intent: dict) -> str:
     # intent has its own search terms for most categories
     if intent["search_terms"]:
@@ -117,7 +135,8 @@ def _rewrite_query(question: str, intent: dict) -> str:
     )
     response = ollama.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        keep_alive=LLM_KEEP_ALIVE,
     )
     raw = response["message"]["content"]
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -178,6 +197,15 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
 
     intent = classifier.classify(question)
     rule_result = _evaluate_rules(question, intent) if use_rules else None
+
+    # pure threshold question: answer straight from the engine, no retrieval or LLM
+    if rule_result and is_pure_threshold_question(rule_result, intent["intent"]):
+        citations = source_citations(rule_result)
+        return {"answer": templated_answer(rule_result), "sources": citations, "citations": citations,
+                "intent": intent["intent"], "determination": rule_result.to_prompt_context(),
+                "rule_sources": [s.to_dict() for s in rule_result.sources], "refused": False,
+                "llm_called": False}
+
     retrieval_query = _rewrite_query(question, intent)
 
     if use_reranker:
@@ -227,7 +255,8 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
 
     response = ollama.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        keep_alive=LLM_KEEP_ALIVE,
     )
     raw = response["message"]["content"]
     answer = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -249,6 +278,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         "determination": rule_result.to_prompt_context() if rule_result else None,
         "rule_sources": [s.to_dict() for s in rule_result.sources] if rule_result else [],
         "refused": False,
+        "llm_called": True,
     }
 
 
@@ -257,4 +287,5 @@ def _refusal(sources: list, intent: dict, reason: str) -> dict:
     for s in sources:
         s["cited"] = False
     return {"answer": NOT_FOUND_ANSWER, "sources": sources, "citations": [], "intent": intent["intent"],
-            "determination": None, "rule_sources": [], "refused": True, "refusal_reason": reason}
+            "determination": None, "rule_sources": [], "refused": True, "refusal_reason": reason,
+            "llm_called": reason != "low_retrieval_score"}
