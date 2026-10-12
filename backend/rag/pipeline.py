@@ -105,6 +105,12 @@ def _get_reranker():
 
 
 LLM_KEEP_ALIVE = "30m"   # keep qwen3 in memory between requests (Ollama's default unloads after 5m)
+# qwen3 sometimes loops (seen at 23k+ tokens on a warm-up question), and with no cap the
+# request never returns. answers on the benchmark top out around 600 tokens.
+ANSWER_MAX_TOKENS = 1024
+REWRITE_MAX_TOKENS = 48
+LLM_TIMEOUT_S = 90
+llm = ollama.Client(timeout=LLM_TIMEOUT_S)
 
 
 def warm_up():
@@ -116,7 +122,7 @@ def warm_up():
         _get_retriever(collection)
     _get_reranker().rerank("warm up", [{"document": "warm up", "metadata": {}}], top_k=1)
     try:
-        ollama.generate(model=LLM_MODEL, prompt="", keep_alive=LLM_KEEP_ALIVE)
+        llm.generate(model=LLM_MODEL, prompt="", keep_alive=LLM_KEEP_ALIVE)
     except Exception:
         pass   # Ollama not running yet; the first question will load it
 
@@ -133,13 +139,21 @@ def _rewrite_query(question: str, intent: dict) -> str:
         "Output keywords only, no question format, no punctuation, under 10 words.\n\n"
         "Question: " + question + "\n\nKeywords:"
     )
-    response = ollama.chat(
-        model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        keep_alive=LLM_KEEP_ALIVE,
-    )
-    raw = response["message"]["content"]
-    return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+    try:
+        response = llm.chat(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            keep_alive=LLM_KEEP_ALIVE,
+            options={"num_predict": REWRITE_MAX_TOKENS},
+        )
+    except Exception:
+        return question     # search with the question itself rather than fail
+    return _strip_think(response["message"]["content"]) or question
+
+
+def _strip_think(raw: str) -> str:
+    # drop <think> blocks, including one cut off by the token cap
+    return re.sub(r"<think>.*?(</think>|$)", "", raw, flags=re.DOTALL).strip()
 
 
 def _retrieve_reranked(search_query: str, question: str, collection):
@@ -253,13 +267,19 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
             "ANSWER:"
         )
 
-    response = ollama.chat(
-        model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        keep_alive=LLM_KEEP_ALIVE,
-    )
-    raw = response["message"]["content"]
-    answer = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+    try:
+        response = llm.chat(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            keep_alive=LLM_KEEP_ALIVE,
+            # /think spends tokens on reasoning first, so give it more room
+            options={"num_predict": ANSWER_MAX_TOKENS * (4 if think else 1)},
+        )
+        answer = _strip_think(response["message"]["content"])
+    except Exception:
+        if not rule_result:
+            raise
+        answer = ""     # the engine's determination still answers it (format_rule_answer)
 
     if not rule_result and VAGUE_ANSWER.search(answer):
         return _refusal(sources, intent, "llm_found_no_answer")
