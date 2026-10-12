@@ -19,6 +19,8 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 from rag_pipeline.retriever.intent_classifier import IntentClassifier
 from rag_pipeline.retriever.reranker import Reranker
 from rules import RuleEngine, parse_query, should_use_rule_engine
+from rules.answer_format import format_rule_answer
+from rules.query_parser import RULE_TOPICS
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
@@ -34,16 +36,6 @@ SYSTEM_PROMPT = (
     "Never output placeholder text like [Cite policy] or [Policy Text]. "
     "Always provide the actual answer. "
     "Cite source numbers like [1], [2] for every claim you make."
-)
-
-# only added to the prompt when the rule engine ran
-RULE_ENGINE_INSTRUCTIONS = (
-    "- A RULE ENGINE DETERMINATION block appears above the excerpts. It is computed "
-    "deterministically from UC policy and is final. Your answer must agree with it: use the "
-    "same YES/NO answers, dollar thresholds, required forms and prohibitions. If an excerpt "
-    "seems to conflict (excerpts often describe a different funding type or threshold), the "
-    "determination governs; do not call it incorrect and do not mention the rule engine. "
-    "Use the excerpts only to explain and cite.\n"
 )
 
 # explicit refusals instead of vague "the excerpts don't specify" answers.
@@ -66,6 +58,21 @@ VAGUE_ANSWER = re.compile(
 # topics specific enough that the reference facts help even if the intent says "rag".
 # "bid" isn't in here on purpose, COI questions say "bidding companies" all the time
 STRONG_RULE_TOPICS = {"covered", "sspr", "equipment", "split", "small_business", "micro", "sat", "mixed"}
+# topics where the engine actually decides something ("multi_year" alone just means "annual")
+DECISION_TOPICS = RULE_TOPICS - {"multi_year"}
+
+# when the rule engine fires, the LLM only explains its fixed determination. Rule and
+# Source lines are filled in from the determination/provenance, not by the LLM
+FIXED_FORMAT_INSTRUCTIONS = (
+    "The FIXED DETERMINATION and its SOURCES below are final. Do not change, recompute or contradict any "
+    "YES/NO, dollar amount, threshold, form or prohibition in them, and do not mention a rule engine. "
+    "Your only job is to explain them for this question.\n"
+    "Reply in exactly this format and nothing else:\n"
+    "Answer: <1-3 sentences that directly answer the user's actual question, consistent with the "
+    "determination. Start with Yes or No if it is a yes/no question.>\n"
+    "Conditions: <the conditions, exceptions or next steps that matter for this question, citing policy "
+    "excerpts as [1], [2]; or None>\n"
+)
 
 embedder = SentenceTransformer(EMBED_MODEL)
 chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
@@ -145,6 +152,10 @@ def _evaluate_rules(question: str, intent: dict):
     if intent["route_to"] == "rag" and not result.is_substantive \
             and not (result.reference and parsed.topics & STRONG_RULE_TOPICS):
         return None
+    # a stray dollar amount with nothing required and no procurement topic isn't a rule
+    # question ("a $50 classroom order" of tax-free alcohol, benchmark Q36)
+    if not result.is_substantive and not result.reference and not parsed.topics & DECISION_TOPICS:
+        return None
     return result
 
 
@@ -189,22 +200,30 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     if not rule_result and scores and scores[0] is not None and scores[0] < REFUSAL_MIN_RERANK:
         return _refusal(sources, intent, "low_retrieval_score")
 
-    rules_block = f"{rule_result.to_prompt_context()}\n\n" if rule_result else ""
     mode_tag = "/think" if think else "/no_think"
-    prompt = (
-        f"{mode_tag}\n\n"
-        f"{SYSTEM_PROMPT}\n\n"
-        "RULES:\n"
-        "- Read every excerpt carefully before answering.\n"
-        "- If ANY excerpt contains the answer, use it.\n"
-        "- Cite source numbers [1], [2] etc. for every claim.\n"
-        "- Be direct and specific.\n"
-        f"{RULE_ENGINE_INSTRUCTIONS if rule_result else ''}\n"
-        f"{rules_block}"
-        f"POLICY EXCERPTS:\n{context}\n"
-        f"QUESTION: {question}\n\n"
-        "ANSWER:"
-    )
+    if rule_result:
+        prompt = (
+            f"{mode_tag}\n\n"
+            f"{SYSTEM_PROMPT}\n\n"
+            f"{FIXED_FORMAT_INSTRUCTIONS}\n"
+            f"FIXED DETERMINATION:\n{rule_result.to_answer_header()}\n{rule_result.to_prompt_context()}\n\n"
+            "SOURCES FOR THE DETERMINATION:\n" + "\n".join(f"- {line}" for line in rule_result.source_lines()) + "\n\n"
+            f"POLICY EXCERPTS:\n{context}\n"
+            f"QUESTION: {question}\n"
+        )
+    else:
+        prompt = (
+            f"{mode_tag}\n\n"
+            f"{SYSTEM_PROMPT}\n\n"
+            "RULES:\n"
+            "- Read every excerpt carefully before answering.\n"
+            "- If ANY excerpt contains the answer, use it.\n"
+            "- Cite source numbers [1], [2] etc. for every claim.\n"
+            "- Be direct and specific.\n\n"
+            f"POLICY EXCERPTS:\n{context}\n"
+            f"QUESTION: {question}\n\n"
+            "ANSWER:"
+        )
 
     response = ollama.chat(
         model=LLM_MODEL,
@@ -216,10 +235,8 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     if not rule_result and VAGUE_ANSWER.search(answer):
         return _refusal(sources, intent, "llm_found_no_answer")
 
-    # put the rule engine's answer at the top word for word, the LLM just explains it
-    header = rule_result.to_answer_header() if rule_result else ""
-    if header:
-        answer = f"{header}\n\n{answer}"
+    if rule_result:
+        answer = format_rule_answer(rule_result, answer)
 
     for s in sources:
         s["cited"] = f"[{s['ref']}]" in answer

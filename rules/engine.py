@@ -162,6 +162,11 @@ class EvaluationResult:
         # arguing with the determination in its explanation, so this makes sure the
         # real answer is always there word for word
         parts = []
+        # prohibitions first: "Competitive bid required: NO" ahead of "splitting is prohibited"
+        # read as permission (benchmark Q11/Q12)
+        for f in self.flags:
+            if f.severity in ("block", "require") and f.code in ("SPLIT_ORDER", "SOLE_SOURCE_INVALID", "SB_LIMIT_EXCEEDED"):
+                parts.append(f.message)
         if self.funding:
             if self.funding.is_mixed:
                 trigger = mixed_funding_trigger(self.funding.award_type)
@@ -179,9 +184,6 @@ class EvaluationResult:
         for e in self.categories.equipment:
             parts.append(f"{e.item.name} (${e.item.cost:,.0f}): {'must be tagged' if e.must_tag else 'no tagging required'} "
                          f"(BUS-29 threshold ${e.threshold:,}).")
-        for f in self.flags:
-            if f.severity in ("block", "require") and f.code in ("SPLIT_ORDER", "SOLE_SOURCE_INVALID", "SB_LIMIT_EXCEEDED"):
-                parts.append(f.message)
         cs = self.categories.covered_service
         if cs:
             parts.append(f"Covered service ({', '.join(cs.services)}) under Regents Policy 5402: "
