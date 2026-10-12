@@ -1,0 +1,50 @@
+{
+  "status": "PROPOSED - not applied. evaluation/results/benchmark_questions_multi.json is unchanged until approved.",
+  "how_to_apply": "replace questions[q-1].answer with proposed_answer for each approved entry",
+  "corrections": [
+    {
+      "q": 7,
+      "current_answer": "An SSPR (Sole Source Procurement Request) form is required for federal purchases that exceed $50,000. Any federally funded procurement over this threshold must have a completed SSPR form as part of the compliance documentation.",
+      "proposed_answer": "The SSPR (Source Selection & Price Reasonableness Justification) form is required for federal contract purchases of $15,000 or more and federal grant/cooperative agreement purchases of $50,000 or more (including tax and shipping). Non-federal purchases need it at $100,000 or more.",
+      "why": "The current answer misnames the form and gives one $50,000 threshold for all federal purchases; the current form splits federal contracts (>= $15,000) from grants/cooperative agreements (>= $50,000), and uses >=, not 'exceed'.",
+      "source": {"document": "SSPR form", "version": "Revised 12-2025", "page": 1, "section": "header"},
+      "quote": "This document must be completed by the requesting Department for federally funded contract purchases ≥$15,000 (including tax and shipping), federally funded grant/cooperative agreement purchases ≥$50,000* (including tax and shipping), and non-federally funded purchases ≥$100,000 (excluding tax but including shipping)."
+    },
+    {
+      "q": 25,
+      "current_answer": "The ban on UC contracts for former employees is one year.",
+      "proposed_answer": "Two years if the former employee took part in the negotiations, planning or decision-making for the contract while at UC; 12 months for contracts with the department they left if they held a policymaking position there in the same subject area. Retirees are generally exempt. (The separate one-year rule bars representing other parties before the University; it is not the contracting ban.)",
+      "why": "The one-year ban in the guide is about representing others before UC. The contracting restrictions are two years (decision-making) and 12 months (policymaking, same department). BUS-43 p.28 also uses 'less than two years'.",
+      "source": {"document": "Post-Employment Conflict of Interest Rules (mm-postemployment-coi-rules-10-2023.pdf)", "page": 3, "section": "3(a) and 3(b) Public Contract Code - Restrictions on Providing Goods or Services to the University"},
+      "quote": "You are barred for two years from entering into a contract with the University to provide goods or services, if you engaged in any negotiations, planning, arrangements, or any part of the decision-making process related to the contract while still employed by the University.",
+      "quote_2": "You are barred for 12 months after leaving the University from entering into a contract with the University department you formerly worked for, if you were employed by that department in a policymaking position in the same general subject area as the proposed contract.",
+      "note": "The same guide says retirees are generally exempt from both bans.",
+      "supporting_quote": {"document": "BFB-BUS-43 Interim (Jan 26, 2026)", "page": 28, "section": "b. Former Employee", "quote": "The former employee left UC less than two years ago"}
+    },
+    {
+      "q": 55,
+      "current_answer": "Only newly hired employees are eligible for reimbursement.",
+      "proposed_answer": "New appointees and current employees who transfer to a new University location, in MSP or PSS positions, can be reimbursed for eligible moving expenses, subject to the policy's conditions (e.g. the I.R.C. 217 time and distance tests) and departmental approval.",
+      "why": "G-13 explicitly covers current employees who transfer, not only new hires.",
+      "source": {"document": "BFB-G-13 Moving & Relocation (UC-FA-18-0381, 4.12.2018)", "page": 2, "section": "Definitions: Moving Expenses"},
+      "quote": "the reasonable costs (or expenses) incurred by a new appointee, or by a current employee who transfers to a new University location, of moving household goods and personal effects to a new residence",
+      "supporting_quote": {"page": 3, "quote": "The eligibility requirements for the payment of moving expenses for a new appointee or a current employee, in an MSP or PSS position"}
+    },
+    {
+      "q": 56,
+      "current_answer": "No, because the policy states that relocation expenses are reimbursable only for newly hired employees, not for current employees transferring between locations.",
+      "proposed_answer": "Yes, they may request it. G-13 covers a current employee who transfers to a new University location (MSP/PSS positions), subject to the time and distance tests and the hiring department's approval.",
+      "why": "Same G-13 text as Q55: transfers between UC locations are explicitly covered.",
+      "source": {"document": "BFB-G-13 Moving & Relocation (UC-FA-18-0381, 4.12.2018)", "page": 2, "section": "Definitions: Moving Expenses"},
+      "quote": "incurred by a new appointee, or by a current employee who transfers to a new University location"
+    }
+  ],
+  "needs_decision_not_requested": [
+    {
+      "q": [13, 14, 15],
+      "issue": "These expected answers use the 2021 SSPR FAQ's '> $10,000 federal portion' mixed-funding rule. The rule engine now follows the 12-2025 SSPR form (federal side when the federal portion meets $15,000 contract / $50,000 grant). Q14 ($12K NIH grant of $25K) flips from federal to non-federal under the form. Whether the form's Section I rule is the right general trigger, or only decides which side of the SSPR to check, should be confirmed with Procurement before rewriting these.",
+      "quote": "For mixed funding where the federal portion exceeds the above thresholds, check Federal side only.",
+      "source": {"document": "SSPR form", "version": "Revised 12-2025", "page": 1, "section": "I. Source Selection"}
+    }
+  ]
+}
