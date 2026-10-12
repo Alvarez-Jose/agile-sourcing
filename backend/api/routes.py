@@ -17,8 +17,14 @@ class AskRequest(BaseModel):
 
 
 class AskResponse(BaseModel):
+    # answer + sources are what the frontend already reads; sources entries keep
+    # policy/page and now also carry ref/section/file/text/score/cited
     answer: str
     sources: list[dict]
+    citations: list[dict] = []          # the retrieved chunks the answer actually cites ([n])
+    rule_sources: list[dict] = []       # provenance for the rule-engine determination
+    determination: str | None = None
+    intent: str | None = None
 
 
 @router.get("/health")
@@ -29,4 +35,8 @@ def health():
 @router.post("/ask", response_model=AskResponse)
 def ask_endpoint(req: AskRequest):
     result = ask(req.question, think=req.think)
-    return AskResponse(answer=result["answer"], sources=result["sources"])
+    return AskResponse(
+        answer=result["answer"], sources=result["sources"],
+        citations=result.get("citations", []), rule_sources=result.get("rule_sources", []),
+        determination=result.get("determination"), intent=result.get("intent"),
+    )

@@ -123,11 +123,26 @@ FILE_FORMAT_MAP = {
 # Everything not in FILE_FORMAT_MAP is assumed to be pdf
  
  
+# official 2026 interim BUS-43 (same identity, new bytes)
+POLICY_MAP["BUS-43_Interim_2026-01-26.pdf"] = "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+DOC_TYPE_MAP["BUS-43_Interim_2026-01-26.pdf"] = "Procurement"
+
+
+def _key(filename: str) -> str:
+    # downloaded names differ only in punctuation/spacing ("BUS-43_..._Main Policy.pdf"
+    # vs "BUS43_..._Main_Policy.pdf", "(2)" vs "__2_"), so match on letters and digits
+    return "".join(ch for ch in filename.lower() if ch.isalnum())
+
+
+_POLICY = {_key(k): v for k, v in POLICY_MAP.items()}
+_DOC_TYPE = {_key(k): v for k, v in DOC_TYPE_MAP.items()}
+
+
 def tag_chunk(chunk: dict) -> dict:
     source = chunk.get("source", "")
-    chunk["policy_name"] = POLICY_MAP.get(source, source)
-    chunk["doc_type"] = DOC_TYPE_MAP.get(source, "General Policy")
-    chunk["file_format"] = FILE_FORMAT_MAP.get(source, "pdf")
+    chunk["policy_name"] = _POLICY.get(_key(source), source)
+    chunk["doc_type"] = _DOC_TYPE.get(_key(source), "General Policy")
+    chunk["file_format"] = "docx" if source.lower().endswith(".docx") else "pdf"
     return chunk
 
 

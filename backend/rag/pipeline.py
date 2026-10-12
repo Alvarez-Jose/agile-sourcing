@@ -112,7 +112,7 @@ def _retrieve_reranked(search_query: str, question: str, collection):
                 seen.add(doc)
                 candidates.append({"document": doc, "metadata": meta})
     ranked = _get_reranker().rerank(question, candidates, top_k=RERANK_TOP_K)
-    return [c["document"] for c in ranked], [c["metadata"] for c in ranked]
+    return [c["document"] for c in ranked], [c["metadata"] for c in ranked], [c["rerank_score"] for c in ranked]
 
 
 def _evaluate_rules(question: str, intent: dict):
@@ -153,17 +153,21 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     retrieval_query = _rewrite_query(question, intent)
 
     if use_reranker:
-        chunks, metas = _retrieve_reranked(retrieval_query, question, collection)
+        chunks, metas, scores = _retrieve_reranked(retrieval_query, question, collection)
     else:
         chunks, metas = _get_retriever(collection).retrieve(retrieval_query, top_k=TOP_K)
+        scores = [None] * len(chunks)
 
     context = ""
     sources = []
-    for i, (chunk, meta) in enumerate(zip(chunks, metas)):
+    for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
         context += f"\n[{i+1}] {policy}, p.{page}\n{chunk}\n"
-        sources.append({"policy": policy, "page": page})
+        # policy/page are the original fields the frontend reads; the rest is the citation
+        sources.append({"policy": policy, "page": page, "ref": i + 1, "section": meta.get("section", ""),
+                        "file": meta.get("source", ""), "text": chunk,
+                        "score": round(score, 3) if score is not None else None})
 
     rules_block = f"{rule_result.to_prompt_context()}\n\n" if rule_result else ""
     mode_tag = "/think" if think else "/no_think"
@@ -194,9 +198,13 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     if header:
         answer = f"{header}\n\n{answer}"
 
+    for s in sources:
+        s["cited"] = f"[{s['ref']}]" in answer
+
     return {
         "answer": answer,
         "sources": sources,
+        "citations": [s for s in sources if s["cited"]],
         "intent": intent["intent"],
         "determination": rule_result.to_prompt_context() if rule_result else None,
         "rule_sources": [s.to_dict() for s in rule_result.sources] if rule_result else [],
