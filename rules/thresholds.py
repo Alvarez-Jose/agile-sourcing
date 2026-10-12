@@ -6,6 +6,8 @@
 #   CA Public Contract Code 10507 / 10508.5
 #   SSPR form rev 12-2025 + the SSPR FAQ (V 4.2021)
 #   FAR 15.403-4 for certified cost/pricing data
+#   FAR 2.101 micro-purchase / simplified acquisition thresholds (inflation adjustment
+#   effective Oct 1, 2025, 90 FR 41872)
 
 from dataclasses import dataclass, field
 from typing import Optional
@@ -14,13 +16,20 @@ from rules.funding_rules import FundingDetermination
 from rules.models import Flag, PurchaseRequest
 
 # competitive bidding
-COMPETITIVE_BID_THRESHOLD        = 100_000   # BUS-43 + CA PCC. federal is $100K too since CA PCC is stricter than the $250K SAT
-SIMPLIFIED_ACQUISITION_THRESHOLD = 250_000   # federal SAT
-FEDERAL_MICRO_PURCHASE           = 10_000
+COMPETITIVE_BID_THRESHOLD        = 100_000   # BUS-43 + CA PCC. federal is $100K too since CA PCC is stricter than the $350K SAT
+SIMPLIFIED_ACQUISITION_THRESHOLD = 350_000   # federal SAT, FAR 2.101 (was $250K before Oct 1, 2025)
+FEDERAL_MICRO_PURCHASE           = 15_000    # FAR 2.101 (was $10K before Oct 1, 2025); matches the SSPR form's federal contract trigger
 CAMPUS_GRANT_MICRO_PURCHASE_MAX  = 50_000    # OMB lets campuses go up to this for grants/coops
-SMALL_BUSINESS_LIMIT             = 250_000   # SB/DVBE, no formal bid, any funding (SSPR FAQ)
+# SB/DVBE ceiling. the two sources disagree at exactly $250,000:
+#   BUS-43 p.9 C.1.a / p.25 C: "valued up to $250,000"  (inclusive)
+#   SSPR form p.1 Section I:   "Only <$250k"            (exclusive)
+# we keep the form's stricter "< $250,000" and say so in the output
+SMALL_BUSINESS_LIMIT             = 250_000
 SMALL_BUSINESS_FEDERAL_SSPR_LIMIT = 100_000  # but the SSPR form's federal SB box says "Only <$100K"
-SMALL_BUSINESS_TWO_QUOTES_AT     = 100_000   # BUS-43: 1 quote under $100K, 2 quotes for $100K-$250K
+# BUS-43 p.25 C.1(a)/(b): 1 quote for $10K-$100K, 2 quotes only when "greater than $100,000"
+SMALL_BUSINESS_TWO_QUOTES_ABOVE  = 100_000
+SB_CEILING_CONFLICT_NOTE = ("BUS-43 allows small business/DVBE awards \"up to $250,000\" but the SSPR form "
+                            "says \"Only <$250k\"; at exactly $250,000 confirm with Procurement.")
 
 # SSPR form
 SSPR_FEDERAL_CONTRACT = 15_000
@@ -165,7 +174,7 @@ def evaluate_thresholds(req: PurchaseRequest, funding: FundingDetermination,
     elif selection == "small_business":
         if value < SMALL_BUSINESS_LIMIT:
             exemption = "certified small business / DVBE (under $250,000)"
-            sb_quotes = 2 if value >= SMALL_BUSINESS_TWO_QUOTES_AT else 1
+            sb_quotes = 2 if value > SMALL_BUSINESS_TWO_QUOTES_ABOVE else 1
             if federal and value >= SMALL_BUSINESS_FEDERAL_SSPR_LIMIT:
                 flags.append(Flag("SB_FEDERAL_OVER_100K", "caution",
                                   "The SSPR FAQ allows SB/DVBE awards up to $250,000 with any funding source, "
@@ -174,9 +183,12 @@ def evaluate_thresholds(req: PurchaseRequest, funding: FundingDetermination,
                                   "SSPR FAQ; SSPR Form Section I"))
         else:
             flags.append(Flag("SB_LIMIT_EXCEEDED", "require",
-                              f"At ${value:,.0f} this exceeds the $250,000 small business/DVBE limit, so the "
+                              f"At ${value:,.0f} this is not under the $250,000 small business/DVBE limit, so the "
                               "small business exception does not apply and a competitive bid is required.",
                               "BUS-43; CA PCC 10508.5"))
+            if value == SMALL_BUSINESS_LIMIT:
+                flags.append(Flag("SB_CEILING_CONFLICT", "caution", SB_CEILING_CONFLICT_NOTE,
+                                  "BUS-43 p.9/p.25; SSPR Form Section I"))
             selection = None
     elif selection in NON_FEDERAL_ONLY_SELECTIONS:
         exemption = {"professional_services": "professional/personal services (non-federal only)",
@@ -210,7 +222,8 @@ def evaluate_thresholds(req: PurchaseRequest, funding: FundingDetermination,
                      "still encouraged.")
     if sb_quotes:
         notes.append(f"Small business/DVBE: obtain {sb_quotes} quote{'s' if sb_quotes > 1 else ''} from certified "
-                     "small businesses/DVBEs (BUS-43: 1 quote for $10K-$100K, 2 quotes for $100K-$250K).")
+                     "small businesses/DVBEs (BUS-43: 1 quote for $10K-$100K, 2 quotes above $100K up to the "
+                     "$250K ceiling).")
 
     # SSPR
     sspr_thr = sspr_threshold_for(funding)

@@ -17,7 +17,8 @@ from rules import thresholds as T
 from rules.category_flags import (AFSCME_NOTICE_THRESHOLD, CONTRACTING_OUT_EXCEPTIONS, COVERED_SERVICES,
                                   EQUIPMENT_TAG_THRESHOLD, CategoryResult, evaluate_categories)
 from rules.form_router import route_forms
-from rules.funding_rules import MIXED_FUNDING_FEDERAL_TRIGGER, FundingDetermination, determine_funding
+from rules.funding_rules import (MIXED_FUNDING_FEDERAL_TRIGGERS, FundingDetermination, determine_funding,
+                                 mixed_funding_trigger)
 from rules.models import Flag, PurchaseRequest
 from rules.query_parser import RULE_TOPICS, ParsedQuery, parse_query
 from rules.thresholds import ThresholdDetermination, detect_split_order, evaluate_thresholds
@@ -113,9 +114,11 @@ class EvaluationResult:
         parts = []
         if self.funding:
             if self.funding.is_mixed:
+                trigger = mixed_funding_trigger(self.funding.award_type)
                 parts.append(f"Federal rules {'apply to the entire transaction' if self.federal_rules_apply else 'do NOT apply; UC/State rules only'} "
                              f"(federal portion ${self.funding.federal_amount:,.0f} "
-                             f"{'exceeds' if self.federal_rules_apply else 'does not exceed'} $10,000).")
+                             f"{'meets' if self.federal_rules_apply else 'is below'} the ${trigger:,} "
+                             f"federal {self.funding.award_type} threshold).")
         if self.thresholds:
             t = self.thresholds
             parts.append(f"Competitive bid required: {'YES' if t.competitive_bid_required else 'NO'} "
@@ -177,15 +180,17 @@ REFERENCE_FACTS = {
                 "Federally funded orders require the Federal Funds Checklist, Debarment & Suspension verification, "
                 f"Anti-Lobbying (Byrd) verification at ${T.ANTI_LOBBYING_THRESHOLD:,}+, and flow-down articles "
                 "(grants: UC T&C Articles 1, 8.1(c)(i-v), 11.8, 11.9, 11.10; contracts: 8.1(a) or 8.1(b), 1, 11.10)."],
-    "mixed": [f"Mixed funding: if the federal portion exceeds ${MIXED_FUNDING_FEDERAL_TRIGGER:,}, federal "
-              "requirements apply to the ENTIRE transaction; if it is $10,000 or less, only UC/State rules apply "
-              "(SSPR FAQ)."],
+    "mixed": [f"Mixed funding: if the federal portion meets the SSPR federal threshold (federal contract "
+              f">= ${MIXED_FUNDING_FEDERAL_TRIGGERS['contract']:,}; federal grant/cooperative agreement >= "
+              f"${MIXED_FUNDING_FEDERAL_TRIGGERS['grant']:,}), federal requirements apply to the ENTIRE "
+              "transaction (check Federal side only); below that, only UC/State rules apply (SSPR form "
+              "Rev. 12-2025, Section I)."],
     "multi_year": ["Multi-year agreements: with federal funds, use the total anticipated contract value (e.g. "
                    "$25K/year x 5 years = $125K must be bid and use the SSPR). BUS-43 alone looks at annual "
                    "expenditures of more than $100,000."],
     "small_business": [f"Certified small business/DVBE: may award up to ${T.SMALL_BUSINESS_LIMIT:,} without formal "
                        "bid, any funding source. BUS-43: 1 SB/DVBE quote for $10K-$100K; 2 quotes from certified "
-                       "SB/DVBEs for $100K-$250K. (SSPR form federal SB option: under $100K.)"],
+                       "SB/DVBEs above $100K. (SSPR form federal SB option: under $100K.) " + T.SB_CEILING_CONFLICT_NOTE],
     "sole_source": ["Allowable sole source justifications - federal: one-of-a-kind, emergency, awarding agency "
                     "approval, no competition (grants/coops only); non-federal: one-of-a-kind/unique, match "
                     "existing (UC PO#). NOT allowable: pre-work with the supplier that excludes competition, price, "
@@ -231,8 +236,10 @@ class RuleEngine:
             flags += split_flags + thresholds.flags
             if funding.is_mixed and not funding.federal_rules_apply:
                 flags.append(Flag("FEDERAL_PORTION_BELOW_TRIGGER", "info",
-                                  "Federal dollars are present but at or below $10,000, so only UC/State "
-                                  "procurement rules govern this transaction.", "SSPR FAQ"))
+                                  f"Federal dollars are present but below the "
+                                  f"${mixed_funding_trigger(funding.award_type):,} SSPR federal "
+                                  f"{funding.award_type} threshold, so only UC/State procurement rules govern "
+                                  "this transaction.", "SSPR Form Rev. 12-2025 Section I"))
 
         categories = evaluate_categories(req)
         flags += categories.flags
