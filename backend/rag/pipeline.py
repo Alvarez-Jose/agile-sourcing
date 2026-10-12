@@ -46,6 +46,23 @@ RULE_ENGINE_INSTRUCTIONS = (
     "Use the excerpts only to explain and cite.\n"
 )
 
+# explicit refusals instead of vague "the excerpts don't specify" answers.
+#
+# REFUSAL_MIN_RERANK: if the best cross-encoder score is below this and the rule engine
+# has nothing, refuse without calling the LLM. picked from the 60-question benchmark
+# (full corpus): correct answers go as low as -7.70 (Q45) and -6.51 (Q43), so any floor
+# above that loses correct answers (-6: 2 lost, -4: 4 lost, -2: 8 lost). -8.0 loses 0
+# and still refuses clearly off-topic questions (weather -9.8, pizza -10.4, sports -8.7).
+# ms-marco scores aren't calibrated for policy text, so this is a floor, not a filter.
+REFUSAL_MIN_RERANK = -8.0
+NOT_FOUND_ANSWER = ("Not found in policy: I couldn't find UC policy text in the indexed documents that answers "
+                    "this question. Please check with Procurement, or rephrase with the policy or form name.")
+# the LLM's own way of saying it has no answer; replaced with the explicit refusal above
+VAGUE_ANSWER = re.compile(
+    r"(excerpts?|provided (text|context|documents?)|sources?) (do(es)? not|don't) "
+    r"(contain|provide|specify|mention|address|include)|not (specified|mentioned|addressed|covered) in the"
+    r"|insufficient (information|evidence)|cannot (be )?(determine|answer)d?", re.I)
+
 # topics specific enough that the reference facts help even if the intent says "rag".
 # "bid" isn't in here on purpose, COI questions say "bidding companies" all the time
 STRONG_RULE_TOPICS = {"covered", "sspr", "equipment", "split", "small_business", "micro", "sat", "mixed"}
@@ -169,6 +186,9 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
                         "file": meta.get("source", ""), "text": chunk,
                         "score": round(score, 3) if score is not None else None})
 
+    if not rule_result and scores and scores[0] is not None and scores[0] < REFUSAL_MIN_RERANK:
+        return _refusal(sources, intent, "low_retrieval_score")
+
     rules_block = f"{rule_result.to_prompt_context()}\n\n" if rule_result else ""
     mode_tag = "/think" if think else "/no_think"
     prompt = (
@@ -193,6 +213,9 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     raw = response["message"]["content"]
     answer = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
 
+    if not rule_result and VAGUE_ANSWER.search(answer):
+        return _refusal(sources, intent, "llm_found_no_answer")
+
     # put the rule engine's answer at the top word for word, the LLM just explains it
     header = rule_result.to_answer_header() if rule_result else ""
     if header:
@@ -208,4 +231,13 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         "intent": intent["intent"],
         "determination": rule_result.to_prompt_context() if rule_result else None,
         "rule_sources": [s.to_dict() for s in rule_result.sources] if rule_result else [],
+        "refused": False,
     }
+
+
+def _refusal(sources: list, intent: dict, reason: str) -> dict:
+    # closest sections still come back in "sources" so a user can check them
+    for s in sources:
+        s["cited"] = False
+    return {"answer": NOT_FOUND_ANSWER, "sources": sources, "citations": [], "intent": intent["intent"],
+            "determination": None, "rule_sources": [], "refused": True, "refusal_reason": reason}

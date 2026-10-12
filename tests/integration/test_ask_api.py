@@ -41,3 +41,4 @@ def test_ask_returns_citations_with_supporting_text(client):
     assert body["citations"] == [SOURCE]
     assert body["citations"][0]["text"] and body["citations"][0]["section"]
     assert body["rule_sources"][0]["quote"] == "$100,000 or more"
+    assert body["refused"] is False and body["refusal_reason"] is None
