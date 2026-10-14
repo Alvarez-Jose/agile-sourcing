@@ -11,6 +11,7 @@ import chromadb
 import ollama
 from sentence_transformers import SentenceTransformer
 
+from backend.rag.citations import citation_line
 from rag_pipeline.parser.pdf_extractor import extract_pdf
 from rag_pipeline.parser.docx_extractor import extract_docx
 from rag_pipeline.parser.section_parser import chunk_by_section
@@ -233,7 +234,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
-        context += f"\n[{i+1}] {policy}, p.{page}\n{chunk}\n"
+        context += f"\n[{i+1}] {citation_line(policy, page, meta.get("section", ""))}\n{chunk}\n"
         # policy/page are the original fields the frontend reads; the rest is the citation
         sources.append({"policy": policy, "page": page, "ref": i + 1, "section": meta.get("section", ""),
                         "file": meta.get("source", ""), "text": chunk,
