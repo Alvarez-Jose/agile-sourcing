@@ -218,11 +218,6 @@ cp .env.example .env
 # ingest policy docs
 cp /path/to/pdfs/* data/policies/
 python scripts/ingest_policies.py
-python scripts/build_policy_graph.py
-
-# run evaluation
-python scripts/run_evaluation.py
-python scripts/compare_baselines.py
 
 # run app
 uvicorn backend.main:app --reload --port 8000
