@@ -1,0 +1,54 @@
+[
+  {
+    "question": "What is the competitive bidding threshold?",
+    "answer": "Competitive bidding is required for purchases of $100,000 or more. [1]",
+    "sources": [
+      {
+        "ref": 1,
+        "policy": "Example Procurement Policy",
+        "page": "9",
+        "text": "Purchases of $100,000 or more require competitive bidding."
+      }
+    ],
+    "rule_sources": []
+  },
+  {
+    "question": "What is the competitive bidding threshold?",
+    "answer": "Competitive bidding is required for purchases of $250,000 or more. [1]",
+    "sources": [
+      {
+        "ref": 1,
+        "policy": "Example Procurement Policy",
+        "page": "9",
+        "text": "Purchases of $100,000 or more require competitive bidding."
+      }
+    ],
+    "rule_sources": []
+  },
+  {
+    "question": "Is competitive bidding required?",
+    "answer": "Competitive bidding is required for purchases of $100,000 or more. [5]",
+    "sources": [
+      {
+        "ref": 1,
+        "policy": "Example Procurement Policy",
+        "page": "9",
+        "text": "Purchases of $100,000 or more require competitive bidding."
+      }
+    ],
+    "rule_sources": []
+  },
+  {
+    "question": "Does a $150,000 purchase require competitive bidding?",
+    "answer": "The competitive bidding threshold is $150,000. [1]",
+    "sources": [
+      {
+        "ref": 1,
+        "policy": "Example Procurement Policy",
+        "page": "9",
+        "text": "Purchases of $100,000 or more require competitive bidding."
+      }
+    ],
+    "rule_sources": []
+  }
+]
