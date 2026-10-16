@@ -16,14 +16,49 @@
     },
     "corrected_from": "benchmark_questions_multi.json",
     "corrected_questions": [
+      4,
       7,
+      9,
+      11,
       13,
       14,
       25,
+      27,
+      34,
+      35,
+      36,
       55,
       56
     ],
-    "note": "Expected answers for these questions updated to current policy text; each carries a 'correction' record with the previous answer and the supporting quote."
+    "note": "Expected answers for these questions updated to current policy text; each carries a 'correction' record with the previous answer and the supporting quote.",
+    "corrections_2026_10_16": {
+      "applied": [
+        4,
+        9,
+        11,
+        27,
+        34,
+        35,
+        36
+      ],
+      "note": "Q34-36: the 'DEA registration / annual inventory' source fact is not in the policy (TTB permit, semiannual inventory). Q4: both the statutory two-quote rule and BUS-43's tiered rule are accepted. Q9/Q11: BUS-43 anti-splitting rule applied; Q11's question asserts a $50,000 bid threshold that does not exist. See each question's 'correction' record for quotes."
+    },
+    "disputed_questions": {
+      "questions": [
+        13,
+        14,
+        15
+      ],
+      "note": "Expected answers use the 2021 SSPR FAQ's '> $10,000 federal portion' mixed-funding rule; the rule engine follows the 12-2025 SSPR form ($15,000 contract / $50,000 grant). Left unchanged pending a decision from Procurement (see evaluation/benchmarks/proposed_corrections.json). Report scores with and without these three."
+    },
+    "not_in_corpus": {
+      "questions": [
+        46,
+        47,
+        48
+      ],
+      "note": "Source fact 'UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements' does not appear in any indexed document (one lease T&C chunk lists FAR 52.222 clauses; nothing mentions FAR Part 12 or commercial items). The system cannot answer these from policy text; a 'not found in policy' refusal is the honest behavior. Excluded from the headline score alongside the disputed questions."
+    }
   },
   "questions": [
     {
@@ -49,10 +84,26 @@
     },
     {
       "question": "What is the small business set-aside exception and how many price quotes do I need?",
-      "answer": "The UC small business set-aside exception allows procurement from small businesses for purchases up to $250,000 without going through the full competitive bidding process. You are required to obtain a minimum of two price quotes from small business suppliers to use this exception.",
+      "answer": "Under California Public Contract Code 10508.5, UC may award a purchase agreement to a certified small business (or DVBE) valued up to $250,000 without competitive bidding, so long as it obtains price quotations from two or more certified small businesses. UC's own Small Business First policy in BUS-43 tiers the quote requirement: one quote from a certified SB/DVBE for purchases of $10,000-$100,000 annually, and at least two quotes for $100,000-$250,000 annually.",
       "difficulty": "simple",
       "source_fact": "Small business set-aside exception up to $250,000 with two price quotes",
-      "generator": "claude-opus-4"
+      "generator": "claude-opus-4",
+      "correction": {
+        "previous_answer": "The UC small business set-aside exception allows procurement from small businesses for purchases up to $250,000 without going through the full competitive bidding process. You are required to obtain a minimum of two price quotes from small business suppliers to use this exception.",
+        "why": "The original answer ('a minimum of two price quotes') is the statutory language and is in BUS-43, but BUS-43's Small Business First section only requires one quote below $100,000. An answer giving either the statutory two-quote rule or the tiered rule is consistent with the policy.",
+        "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management",
+        "file": "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
+        "page": 15,
+        "section": "III, C. Expenditures of $100,000 or More Annually, 1.a (PCC 10508.5)",
+        "quotes": [
+          "allows the UC to award a Purchase Agreement to a certified small business up to $250,000 without being competitively bid, so long as the UC obtains price quotations from two or more certified small businesses",
+          "To purchase goods and/or services valued between $10,000-$100,000 annually, the University must only obtain one (1) quote from either a certified Small Businesses or Disabled Veteran Business Enterprise. To purchase goods and/or services valued between $100,000-$250,000 annually, the University must obtain at least two (2) quotes"
+        ],
+        "quote_pages": [
+          15,
+          33
+        ]
+      }
     },
     {
       "question": "I'm a lab manager and need to purchase $185,000 worth of specialized lab furniture from a certified small business vendor. Can I use the small business set-aside exception, and if so, what steps do I need to take?",
@@ -95,10 +146,26 @@
     },
     {
       "question": "I have a federal grant and need to buy two separate pieces of equipment from the same vendor — one for $30,000 and another for $28,000. They are for related experiments in the same project. Since each individual purchase is under $50,000, do I still need to submit an SSPR form?",
-      "answer": "Based strictly on the stated policy, the SSPR form is required for federal purchases over $50,000. Each individual purchase in your scenario is below the $50,000 threshold, so on a per-transaction basis, neither would independently trigger the SSPR requirement. However, you should exercise caution: if these purchases could be reasonably viewed as a single procurement that was split to avoid the $50,000 threshold (known as order splitting), this could raise compliance concerns. The policy as stated sets the trigger at federal purchases over $50,000, so if there is any possibility the two orders could be considered a combined $58,000 procurement, you should consult your procurement office to determine whether an SSPR form is required and to ensure you are not inadvertently violating federal split-purchase prohibitions.",
+      "answer": "Yes. The two purchases are related (same vendor, same project) and must be evaluated at their combined value: BUS-43 prohibits artificially dividing requirements into separate transactions, so $30,000 + $28,000 = $58,000 is treated as one procurement. That meets the $50,000 SSPR threshold for federal grant/cooperative agreement purchases, so an SSPR form is required (and the purchase should be handled as a single order).",
       "difficulty": "edge_case",
       "source_fact": "SSPR form required for federal purchases over $50,000",
-      "generator": "claude-opus-4"
+      "generator": "claude-opus-4",
+      "correction": {
+        "previous_answer": "Based strictly on the stated policy, the SSPR form is required for federal purchases over $50,000. Each individual purchase in your scenario is below the $50,000 threshold, so on a per-transaction basis, neither would independently trigger the SSPR requirement. However, you should exercise caution: if these purchases could be reasonably viewed as a single procurement that was split to avoid the $50,000 threshold (known as order splitting), this could raise compliance concerns. The policy as stated sets the trigger at federal purchases over $50,000, so if there is any possibility the two orders could be considered a combined $58,000 procurement, you should consult your procurement office to determine whether an SSPR form is required and to ensure you are not inadvertently violating federal split-purchase prohibitions.",
+        "why": "The original answer hedged ('neither would independently trigger... consult procurement'). BUS-43's anti-splitting rule is explicit and the SSPR form's grant threshold is $50,000, so the combined $58,000 requires the SSPR.",
+        "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management",
+        "file": "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
+        "page": 11,
+        "section": "Solicitation, a. Competition",
+        "quotes": [
+          "UC must not artificially divide requirements into separate transactions in order to avoid competition",
+          "Federal Grant/Cooperative Agreement purchases ≥$50,000"
+        ],
+        "quote_sources": [
+          "BUS-43 p.11",
+          "SSPR form Rev. 12-2025 p.1 header"
+        ]
+      }
     },
     {
       "question": "Can I break up a large purchase into smaller orders to avoid having to go through the competitive bidding process?",
@@ -109,10 +176,26 @@
     },
     {
       "question": "I need to buy $60,000 worth of lab equipment from the same vendor. The competitive bid threshold is $50,000. My colleague suggested I place two separate purchase orders — one for $35,000 and another for $25,000 — so we can process them faster without going through the formal bid process. Is this allowed?",
-      "answer": "No, this is not allowed. Splitting the $60,000 equipment purchase into two separate orders of $35,000 and $25,000 to stay under the $50,000 competitive bidding threshold is a textbook example of split-order purchasing, which is explicitly prohibited by UC policy. You must process the full $60,000 as a single procurement and follow the required competitive bidding procedures for purchases at or above the applicable threshold.",
+      "answer": "No, this is not allowed. Splitting the $60,000 purchase into $35,000 and $25,000 orders to avoid the bid process is split-order purchasing, which BUS-43 explicitly prohibits; related orders are evaluated at their combined value. Note that UC's competitive bid threshold is actually $100,000 annually (not $50,000), so a single $60,000 order would not require a formal competitive bid in any case, but it must still be processed as one $60,000 procurement, not two.",
       "difficulty": "scenario",
       "source_fact": "Split-order purchasing to avoid bidding thresholds is explicitly prohibited",
-      "generator": "claude-opus-4"
+      "generator": "claude-opus-4",
+      "correction": {
+        "previous_answer": "No, this is not allowed. Splitting the $60,000 equipment purchase into two separate orders of $35,000 and $25,000 to stay under the $50,000 competitive bidding threshold is a textbook example of split-order purchasing, which is explicitly prohibited by UC policy. You must process the full $60,000 as a single procurement and follow the required competitive bidding procedures for purchases at or above the applicable threshold.",
+        "why": "The question asserts a $50,000 bid threshold that does not exist in policy; the system correctly cites $100,000 and was graded wrong for contradicting the expected answer's $50,000. The conclusion (No, splitting is prohibited) is unchanged.",
+        "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management",
+        "file": "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
+        "page": 9,
+        "section": "III, C. Expenditures of $100,000 or More Annually, 1. General Requirements",
+        "quotes": [
+          "requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies",
+          "UC must not artificially divide requirements into separate transactions in order to avoid competition"
+        ],
+        "quote_pages": [
+          9,
+          11
+        ]
+      }
     },
     {
       "question": "Our department needs to purchase similar office furniture for three different building renovations happening at different times over the next four months, totaling $75,000. Each renovation's furniture order is about $25,000 and each has a separate project budget code. Since these are technically different projects with different funding sources and different delivery dates, can we process them as three independent purchases without triggering the competitive bid threshold?",
@@ -258,10 +341,22 @@
     },
     {
       "question": "A former UC employee was subject to a one-year contract ban. If a UC department wants to hire him temporarily as an independent contractor for a specialized project that receives no direct UC funding, does the ban still apply?",
-      "answer": "Yes, the one-year ban on UC contracts applies regardless of the source of funding for the project.",
+      "answer": "The project's funding source is irrelevant: hiring him as an independent contractor is a contract with the University, so the post-employment contracting rules apply. Those rules are not a flat one-year ban: he is barred for two years from any UC contract he took part in negotiating, planning or deciding while employed, and for 12 months from contracting with his former department if he held a policymaking position there in the same subject area. (The separate one-year rule bars him from representing others before UC in matters he worked on.) If neither contracting restriction is triggered, the department may hire him; if one is, it may not, regardless of who funds the project.",
       "difficulty": "edge_case",
       "source_fact": "Post-employment COI restriction: one year ban on UC contracts for former employees",
-      "generator": "gpt-4o"
+      "generator": "gpt-4o",
+      "correction": {
+        "previous_answer": "Yes, the one-year ban on UC contracts applies regardless of the source of funding for the project.",
+        "why": "The question's premise ('a one-year contract ban') conflates two rules. The one-year rule in the post-employment guide bars a former employee from representing others before the University in proceedings they worked on; the contracting restrictions are two years (if they took part in the decision-making for the contract) and 12 months (former department, policymaking position). The funding point in the original answer is right: a UC department hiring him is a UC contract whatever pays for the project.",
+        "document": "Post-Employment Conflict of Interest Rules (mm-postemployment-coi-rules-10-2023.pdf)",
+        "page": 3,
+        "section": "3(a) and 3(b) Public Contract Code - Restrictions on Providing Goods or Services to the University",
+        "quotes": [
+          "You are barred for two years from entering into a contract with the University to provide goods or services, if you engaged in any negotiations, planning, arrangements, or any part of the decision-making process related to the contract while still employed by the University.",
+          "You are barred for 12 months after leaving the University from entering into a contract with the University department you formerly worked for, if you were employed by that department in a policymaking position in the same general subject area as the proposed contract."
+        ],
+        "see_also": "Q25 correction (same source)"
+      }
     },
     {
       "question": "What must be included when making an exception to the competitive bidding process in UC procurement?",
@@ -307,24 +402,81 @@
     },
     {
       "question": "What are the two key requirements for obtaining a tax-free alcohol permit at UC?",
-      "answer": "The permit requires DEA registration and annual inventory reconciliation.",
+      "answer": "Tax-free alcohol permits are issued by the Alcohol and Tobacco Tax and Trade Bureau (TTB), not the DEA. The two key requirements are: (1) the application for an industrial use permit must be filed with the TTB in the name of 'The Regents of the University of California'; and (2) TTB must approve it and issue the official numbered 'Permit to Use Alcohol Free of Tax' (TTB Form 5150.22) before the campus designee may sign any tax-free alcohol documents. Ongoing obligations include a physical inventory every six months and complete records of all alcohol received and issued.",
       "difficulty": "simple",
       "source_fact": "Tax-free alcohol permits require DEA registration and annual inventory reconciliation",
-      "generator": "deepseek-chat"
+      "generator": "deepseek-chat",
+      "correction": {
+        "previous_answer": "The permit requires DEA registration and annual inventory reconciliation.",
+        "why": "The original answer ('DEA registration and annual inventory reconciliation') does not appear in the policy: the word DEA occurs nowhere in it, permits come from the TTB, and inventories are semiannual, not annual.",
+        "document": "BFB-BUS-2 / UCPS-120031: Tax-Free Alcohol Permits, Records, and Operations",
+        "version": "Issued 6/30/2012",
+        "file": "UC-PS-12-0031_Tax-FreeAlcoholPermitsRecordsOperations (3).pdf",
+        "page": 2,
+        "section": "III. A. Securing Industrial Use Permits; B. Approval by TTB",
+        "quotes": [
+          "Applications for industrial use permits for tax-free alcohol are filed with the Alcohol and Tobacco Tax and Trade Bureau of the U.S. Department of the Treasury. All tax-free alcohol use applications are to be made in the name of \"The Regents of the University of California.\"",
+          "TTB will issue an official numbered “Permit to Use Alcohol Free of Tax” (TTB Form 5150.22)",
+          "a physical inventory of tax-free alcohol shall be taken semiannually or at other inventory periods approximately six months apart"
+        ],
+        "quote_pages": [
+          2,
+          2,
+          6
+        ]
+      }
     },
     {
       "question": "Our lab needs to purchase 500 mL of 200-proof ethanol for research, tax-free, at a cost of $1,200. I have a DEA registration but haven't done an inventory count since last year. Can I proceed with the purchase?",
-      "answer": "No, you cannot proceed because the tax-free alcohol permit requires both DEA registration AND annual inventory reconciliation. Even with a valid DEA registration, the purchase is not allowed until the annual inventory is completed and reconciled.",
+      "answer": "Not on the basis of a DEA registration. Tax-free alcohol is bought under the University's TTB permit (held in the name of The Regents), and the vendor may not ship until it has a signed copy of a valid permit on file, so the order must go through the campus permit holder. Separately, the policy requires a physical inventory every six months; an inventory not taken 'since last year' is overdue and must be brought current to stay in compliance. The $1,200 amount does not change any of this.",
       "difficulty": "scenario",
       "source_fact": "Tax-free alcohol permits require DEA registration and annual inventory reconciliation",
-      "generator": "deepseek-chat"
+      "generator": "deepseek-chat",
+      "correction": {
+        "previous_answer": "No, you cannot proceed because the tax-free alcohol permit requires both DEA registration AND annual inventory reconciliation. Even with a valid DEA registration, the purchase is not allowed until the annual inventory is completed and reconciled.",
+        "why": "Same fabrication as Q34: the policy has no DEA requirement and no annual reconciliation; it requires a TTB permit on file with the vendor and semiannual inventories.",
+        "document": "BFB-BUS-2 / UCPS-120031: Tax-Free Alcohol Permits, Records, and Operations",
+        "version": "Issued 6/30/2012",
+        "file": "UC-PS-12-0031_Tax-FreeAlcoholPermitsRecordsOperations (3).pdf",
+        "page": 3,
+        "section": "C. Obligations of University Permit Holders, 1. Purchasing Requirements",
+        "quotes": [
+          "Shipments may not be made until the vendor has a signed copy of a valid permit on file",
+          "a physical inventory of tax-free alcohol shall be taken semiannually or at other inventory periods approximately six months apart"
+        ],
+        "quote_pages": [
+          3,
+          6
+        ]
+      }
     },
     {
       "question": "Our department uses tax-free alcohol for both research and occasional classroom demonstrations. The DEA registration is under a principal investigator who is retiring next month. We have the annual inventory scheduled for next week. Can we still use the tax-free permit for a small classroom order of $50 worth of alcohol this week, before the inventory is done?",
-      "answer": "No, the tax-free alcohol permit requires an annual inventory reconciliation to be current. Using the permit without having completed that year's reconciliation violates the policy, regardless of the low dollar amount or purpose. Additionally, the pending retirement of the DEA-registered PI may affect the permit's validity for future use.",
+      "answer": "Yes, provided the order is placed under the University's valid TTB permit. The permit is held in the name of The Regents and is continuous, so it does not belong to the retiring PI and is not affected by their departure (a DEA registration is not what the policy requires). Inventories are semiannual, so an inventory scheduled for next week does not block a withdrawal this week as long as the last inventory was within about six months. The $50 classroom order must still follow the permit conditions: withdrawals within the stated monthly requirement, use only on University premises, and a signed receipt and records for the delivery.",
       "difficulty": "edge_case",
       "source_fact": "Tax-free alcohol permits require DEA registration and annual inventory reconciliation",
-      "generator": "deepseek-chat"
+      "generator": "deepseek-chat",
+      "correction": {
+        "previous_answer": "No, the tax-free alcohol permit requires an annual inventory reconciliation to be current. Using the permit without having completed that year's reconciliation violates the policy, regardless of the low dollar amount or purpose. Additionally, the pending retirement of the DEA-registered PI may affect the permit's validity for future use.",
+        "why": "The original answer ('No... annual inventory reconciliation... DEA-registered PI') rests on requirements that are not in the policy. Permits are institutional and continuous; inventories are semiannual.",
+        "document": "BFB-BUS-2 / UCPS-120031: Tax-Free Alcohol Permits, Records, and Operations",
+        "version": "Issued 6/30/2012",
+        "file": "UC-PS-12-0031_Tax-FreeAlcoholPermitsRecordsOperations (3).pdf",
+        "page": 2,
+        "section": "III. A-B. Permits; 2. Conditions of Use; 5. Inventories",
+        "quotes": [
+          "All tax-free alcohol use applications are to be made in the name of \"The Regents of the University of California.\"",
+          "Permits are continuous unless automatically terminated by the terms of the permit.",
+          "Persons authorized to withdraw quantities of alcohol shall sign a receipt for each delivery and shall maintain complete, accurate, and up-to-date records of all tax-free alcohol received and issued.",
+          "a physical inventory of tax-free alcohol shall be taken semiannually"
+        ],
+        "quote_pages": [
+          2,
+          2,
+          5,
+          6
+        ]
+      }
     },
     {
       "question": "What is the minimum general liability insurance a vendor must carry per occurrence?",
