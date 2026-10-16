@@ -44,7 +44,14 @@ chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
 hybrid_retriever = None
 
 
-def ingest():
+def chunk_header(chunk: dict) -> str:
+    # policy name + section in front of the text so the embedder, BM25 and the reranker
+    # all see which document a chunk is from (the metadata alone never reaches them)
+    section = (chunk.get("section") or "").strip()
+    return f"[{chunk.get('policy_name', '')}" + (f" | {section}" if section else "") + "]\n"
+
+
+def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
     if not DATA_DIR.exists():
         print(f"ERROR: {DATA_DIR} not found.")
         return None
@@ -69,6 +76,9 @@ def ingest():
 
             chunks = chunk_by_section(pages)
             chunks = [tag_chunk(c) for c in chunks]
+            if prefix_headers:
+                for c in chunks:
+                    c["text"] = chunk_header(c) + c["text"]
             all_chunks.extend(chunks)
             print(f"    -> {len(chunks)} chunks")
 
@@ -87,12 +97,12 @@ def ingest():
     vectors = embedder.encode(texts, show_progress_bar=True)
 
     try:
-        chroma_client.delete_collection(COLLECTION_NAME)
+        chroma_client.delete_collection(collection_name)
     except Exception:
         pass
 
     collection = chroma_client.get_or_create_collection(
-        name=COLLECTION_NAME,
+        name=collection_name,
         metadata={"hnsw:space": "cosine"}
     )
 
@@ -117,7 +127,7 @@ def ingest():
             ids=[f"chunk_{i + j}" for j in range(len(batch))],
         )
 
-    print(f"Stored {len(all_chunks)} chunks in ChromaDB at '{CHROMA_DIR}'")
+    print(f"Stored {len(all_chunks)} chunks in ChromaDB collection '{collection_name}' at '{CHROMA_DIR}'")
     return collection
 
 
@@ -195,6 +205,12 @@ def main():
     parser.add_argument("--ingest", action="store_true")
     parser.add_argument("--query",  type=str)
     parser.add_argument("--think",  action="store_true")
+    parser.add_argument("--collection", default=COLLECTION_NAME,
+                        help="chroma collection to (re)build; use a different name to compare indexes")
+    # on by default: lifted recall@1 on the 60-question benchmark from 40 to 46 with the same
+    # reranker (evaluation/metrics/retrieval_recall.py)
+    parser.add_argument("--prefix-headers", action=argparse.BooleanOptionalAction, default=True,
+                        help="put '[policy name | section]' in front of every chunk's text")
     args = parser.parse_args()
 
     if not args.ingest and not args.query:
@@ -205,7 +221,7 @@ def main():
 
     if args.ingest:
         print("\n--- Ingestion ---")
-        collection = ingest()
+        collection = ingest(args.collection, args.prefix_headers)
 
     if args.query:
         print("\n--- Query ---")
