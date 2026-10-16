@@ -2,27 +2,30 @@
 
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
-## Current Status (October 12, 2026)
+## Current Status (October 16, 2026)
 
 Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC policy documents:
 
-| Metric | Result |
-|--------|--------|
-| Correct (LLM judge, corrected answer key) | 48 / 60 (80.0%) |
-| Numeric accuracy (thresholds and amounts) | 95.0% |
-| Answers citing a policy source | 55 / 60 |
-| Explicit "not found in policy" refusals | 1 |
-| Mean / median latency | 6.9 s / 6.0 s (threshold questions ~0 s via rule engine) |
+| Metric | Default (`think` off) | With `--think` |
+|--------|------|------|
+| Correct / partial / wrong (LLM judge, corrected answer key) | **50 / 9 / 1** (83.3%) | **52 / 8 / 0** (86.7%) |
+| Same, on the 54 questions the corpus can answer (see below) | 47 / 7 / 0 (87%) | 49 / 5 / 0 (91%) |
+| Answers citing a policy source | 60 / 60 | 59 / 60 |
+| Empty answers / explicit "not found in policy" refusals | 0 / 0 | 0 / 1 |
+| Retrieval: expected document at rank 1 / in top 5 (no LLM) | 49 / 60 and 60 / 60 | same |
+| Mean / median latency per question | 1.8 s / 1.8 s | 8.0 s / 7.1 s |
 
 - Thresholds follow the **interim BUS-43 (Jan 2026)**, the **SSPR form (Rev. 12-2025)**, and the **Oct 2025 FAR update**. Every rule carries its document, page, and quote, and a test fails if a quote disappears from the current documents.
-- Single run per configuration; expect about ±3 questions of run-to-run variation.
-- Benchmark is AI-generated; real buyer questions are pending from the procurement team.
+- Six questions are reported separately: **Q13–15** use a mixed-funding rule that conflicts with the 12-2025 SSPR form (pending a Procurement decision), and **Q46–48** ask about FAR Part 12, which no indexed document covers. The one wrong answer above is Q46.
+- The answer key is AI-generated and has been corrected where it contradicted the policy text (13 questions so far, each with the quote and page in `evaluation/results/benchmark_questions_corrected.json`); real buyer questions are pending from the procurement team.
+- Single run per configuration; expect about ±3 questions of run-to-run variation. The judge is qwen3:8b grading itself; set `JUDGE_MODEL` to grade with a different model.
 
 Reproduce:
 
 ```bash
-python evaluation/benchmarks/run_benchmark.py
+python evaluation/benchmarks/run_benchmark.py                 # add --think for the slower, more accurate mode
 python evaluation/metrics/score.py <results.json> --judge
+python evaluation/metrics/retrieval_recall.py                 # retrieval only, ~10 s, no LLM
 ```
 
 ## Architecture
@@ -53,7 +56,7 @@ User (plain language request)
              └───────────┘ └───────────┘ └───────────┘
 ```
 
-**How a policy question is answered:** intent classifier → query parser (amount, funding type) → threshold questions go straight to the rule engine with a cited source; everything else uses query rewriting, hybrid BM25 + semantic retrieval, cross-encoder reranking, and a fixed Answer / Rule / Source / Conditions response. Low-confidence retrieval returns "not found in policy." All LLM calls have token caps, 90 s timeouts, and fallbacks.
+**How a policy question is answered:** intent classifier → query parser (amount, funding type) → threshold questions go straight to the rule engine with a cited source; everything else uses query rewriting, hybrid BM25 + semantic retrieval, cross-encoder reranking (8 chunks to the LLM), and a fixed Answer / Rule / Source / Conditions response when the engine decided something. Questions the engine can only annotate (what counts as a sole source reason, that split orders are prohibited) get those facts as background and a free-form answer. Low-confidence retrieval returns "not found in policy." Every chunk is indexed with its policy name and section in the text, so the embedder, BM25 and the reranker all see which document it is from. All LLM calls have token caps, 90 s timeouts, fallbacks, and thinking disabled at the API level (qwen3 ignores the `/no_think` tag often enough to return empty answers otherwise).
 
 ## Project Structure
 
@@ -71,7 +74,8 @@ agile-sourcing/
 ├── training/             # Fine-tuning data and scripts
 ├── frontend/             # WXT browser extension (React + Tailwind)
 ├── data/
-│   └── policies/         # Policy documents for ingestion
+│   ├── raw_policies/     # Policy documents for ingestion
+│   └── embeddings/       # Chroma index (built by scripts/ingest_policies.py)
 ├── tests/                # Unit and integration tests
 ├── scripts/              # Ingestion and evaluation scripts
 ├── docs/                 # Architecture docs, policy notes
@@ -98,9 +102,9 @@ ollama pull qwen3:8b
 # Config
 cp .env.example .env
 
-# Ingest policy docs
-cp /path/to/policy-docs/* data/policies/
-python scripts/ingest_policies.py
+# Ingest policy docs (the 32 UC/UCSC documents)
+cp /path/to/policy-docs/* data/raw_policies/
+python scripts/ingest_policies.py --ingest
 
 # Run backend
 uvicorn backend.main:app --reload --port 8000
