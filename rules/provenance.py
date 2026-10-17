@@ -42,6 +42,26 @@ DOCUMENTS = {
         version="1-31-20",
         files=("article-5-contracting-out-1-31-20.pdf",),
         url=None),
+    "post-employment-coi": dict(
+        title="Summary of the Post-Employment Rules (UC Office of the General Counsel)",
+        version="October 2023",
+        files=("mm-postemployment-coi-rules-10-2023.pdf",),
+        url=None),
+    "bus-79": dict(
+        title="BFB-BUS-79: Expenditures for Business Meetings, Entertainment, and Other Occasions",
+        version="UC-FA-22-0617 (updated 12.15.2022, accessible)",
+        files=("UC-FA-22-0617_BUS-79 Bus Meetings Entertainment_updated-accessible_12.15.2022.pdf",),
+        url=None),
+    "bus-2-alcohol": dict(
+        title="BFB-BUS-2 / UCPS 120031: Tax-Free Alcohol Permits, Records, and Operations",
+        version="Issued 6/30/2012",
+        files=("UC-PS-12-0031_Tax-FreeAlcoholPermitsRecordsOperations (3).pdf",),
+        url=None),
+    "bus-63-risk-matrix": dict(
+        title="UC BUS-63 Risk Matrix",
+        version="Revised 9.19.2025",
+        files=("BUS-63 Risk Matrix 9-19-2025.pdf",),
+        url=None),
     # not in the corpus: checked by hand, not by the quote test
     "far-2.101": dict(
         title="FAR 2.101 Definitions (inflation adjustment, 90 FR 41872)",
@@ -149,6 +169,81 @@ SOURCES = {
         S("regents-policy-5402", 3, "C. Employment Standards, 1. Wage and Benefits Parity",
           "Contracts for covered services exceeding $100,000 and ninety (90) days' duration shall include "
           "provisions requiring the contractor"),),
+
+    # policy ladders (rules/policy_ladders.py) - no dollar constants, but every line is quoted
+    "POST_EMPLOYMENT_TWO_YEAR": (
+        S("post-employment-coi", 3, "3(a) Public Contract Code - Restrictions on Providing Goods or Services",
+          "You are barred for two years from entering into a contract with the University to provide goods or "
+          "services, if you engaged in any negotiations, planning, arrangements, or any part of the decision-making "
+          "process related to the contract while still employed by the University."),),
+    "POST_EMPLOYMENT_12_MONTH": (
+        S("post-employment-coi", 3, "3(b) Public Contract Code - Restrictions on Providing Goods or Services",
+          "You are barred for 12 months after leaving the University from entering into a contract with the "
+          "University department you formerly worked for, if you were employed by that department in a policymaking "
+          "position in the same general subject area as the proposed contract."),),
+    "POST_EMPLOYMENT_RETIREE": (
+        S("post-employment-coi", 3, "3(a)/3(b) note",
+          "retirees are generally exempt from this ban and may nonetheless be hired back by the University"),),
+    "POST_EMPLOYMENT_ONE_YEAR_REPRESENTING": (
+        S("post-employment-coi", 3, "2. One Year Ban on Representing Other Parties Before the University",
+          "You are barred for one year after leaving the University from appearing before or communicating with "
+          "your campus while representing another person, in an attempt to influence certain University "
+          "proceedings if you are being paid to do so."),),
+    "BUS79_DOCUMENTATION": (
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "The completed request must include the following information:"),
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request", "Type of expense (lunch, dinner, etc.);"),
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request", "Type of event;"),),
+    "BUS79_GUEST_LIST": (
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "Number of participants (attach a guest list containing the name and title of participants, and their "
+          "occupation or group affiliation, in order to establish the business-related relationship to the "
+          "University)"),),
+    "BUS79_PURPOSE": (
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "Date and location of the event;"),
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "Business-related nature of the occasion or purpose of the event; and"),
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "The signature, printed name, and department of the department head or approving authority."),),
+    "BUS79_RECEIPTS": (
+        S("bus-79", 17, "IV.B.1 Reimbursement or Payment Request",
+          "Expenses of $75 or more per occasion must be supported by original itemized receipts"),),
+    "ALCOHOL_TTB_APPLICATION": (
+        S("bus-2-alcohol", 2, "III.A Securing Industrial Use Permits",
+          "Applications for industrial use permits for tax-free alcohol are filed with the Alcohol and Tobacco Tax "
+          "and Trade Bureau of the U.S. Department of the Treasury"),),
+    "ALCOHOL_REGENTS_NAME": (
+        S("bus-2-alcohol", 2, "III.A Securing Industrial Use Permits",
+          'All tax-free alcohol use applications are to be made in the name of "The Regents of the University of '
+          'California."'),),
+    "ALCOHOL_TTB_PERMIT": (
+        S("bus-2-alcohol", 2, "III.B Approval by TTB", "TTB will issue an official numbered"),),
+    "ALCOHOL_PERMIT_CONTINUOUS": (
+        S("bus-2-alcohol", 2, "III.B Approval by TTB",
+          "Permits are continuous unless automatically terminated by the terms of the permit."),),
+    "ALCOHOL_VENDOR_PERMIT_ON_FILE": (
+        S("bus-2-alcohol", 3, "III.C.1 Purchasing Requirements",
+          "Shipments may not be made until the vendor has a signed copy of a valid permit on file"),),
+    "ALCOHOL_SEMIANNUAL_INVENTORY": (
+        S("bus-2-alcohol", 6, "5. Inventories",
+          "a physical inventory of tax-free alcohol shall be taken semiannually or at other inventory periods "
+          "approximately six months apart"),),
+    "ALCOHOL_RECORDS": (
+        S("bus-2-alcohol", 5, "2. Conditions of Use of Tax-Free Alcohol",
+          "shall sign a receipt for each delivery and shall maintain complete, accurate, and up-to-date records of "
+          "all tax-free alcohol received and issued"),),
+    "ALCOHOL_PREMISES_ONLY": (
+        S("bus-2-alcohol", 3, "III.C.2 Conditions of Use", "shall be used only on the premises of the University"),),
+    "RISK_MATRIX_HIGH_COI": (
+        S("bus-63-risk-matrix", 1, "How to Use",
+          "If the contract involves any one of the Risk Exposures C-K, the entire contract is classified as "
+          "presenting High risk and a COI must be collected."),
+        S("bus-63-risk-matrix", 2, "High Risk", "Collection of a Certificate of Insurance (COI) is required."),),
+    "RISK_MATRIX_LOW_MODERATE_COI": (
+        S("bus-63-risk-matrix", 2, "Low Risk / Moderate Risk",
+          "A Certificate of Insurance (COI) does not need to be collected; the agreement or PO should require the "
+          "Contractor/External Party to provide a COI to UC upon UC"),),
 }
 del S
 

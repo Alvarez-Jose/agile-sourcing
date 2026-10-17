@@ -91,18 +91,33 @@
       "correction": {
         "previous_answer": "The UC small business set-aside exception allows procurement from small businesses for purchases up to $250,000 without going through the full competitive bidding process. You are required to obtain a minimum of two price quotes from small business suppliers to use this exception.",
         "why": "The original answer ('a minimum of two price quotes') is the statutory language and is in BUS-43, but BUS-43's Small Business First section only requires one quote below $100,000. An answer giving either the statutory two-quote rule or the tiered rule is consistent with the policy.",
-        "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management",
-        "file": "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
-        "page": 15,
-        "section": "III, C. Expenditures of $100,000 or More Annually, 1.a (PCC 10508.5)",
+        "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued January 26, 2026)",
+        "file": "BUS-43_Interim_2026-01-26.pdf",
+        "page": 25,
+        "section": "III, Part 3, C. Small Business First, 1. General Requirements (a)-(b)",
         "quotes": [
-          "allows the UC to award a Purchase Agreement to a certified small business up to $250,000 without being competitively bid, so long as the UC obtains price quotations from two or more certified small businesses",
-          "To purchase goods and/or services valued between $10,000-$100,000 annually, the University must only obtain one (1) quote from either a certified Small Businesses or Disabled Veteran Business Enterprise. To purchase goods and/or services valued between $100,000-$250,000 annually, the University must obtain at least two (2) quotes"
+          "California Public Contract Code Section 10508.5 allows UC to limit competition and award purchase agreements valued up to $250,000 to a certified Small Business (SB) or Disabled Veteran Business Enterprise (DVBE) without being competitively bid, so long as the UC obtains price quotations from two or more certified SBs, or two or more certified DVBEs.",
+          "(a) If the goods and/or services are valued between $10,000 and $100,000 annually, UC may award purchase agreement upon obtaining at least one (1) quote from either a certified SB, SBE or DVBE. (b) If the goods and/or services are valued greater than $100,000 but less than $250,000 annually, UC must obtain at least two (2) quotes from a certified SB, SBE or from at least two (2) certified DVBEs."
         ],
         "quote_pages": [
-          15,
-          33
-        ]
+          25,
+          25
+        ],
+        "supersedes_citation": {
+          "document": "BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management",
+          "file": "BUS-43_ProcurementSupplyChainManagement_Main Policy.pdf",
+          "page": 15,
+          "section": "III, C. Expenditures of $100,000 or More Annually, 1.a (PCC 10508.5)",
+          "quotes": [
+            "allows the UC to award a Purchase Agreement to a certified small business up to $250,000 without being competitively bid, so long as the UC obtains price quotations from two or more certified small businesses",
+            "To purchase goods and/or services valued between $10,000-$100,000 annually, the University must only obtain one (1) quote from either a certified Small Businesses or Disabled Veteran Business Enterprise. To purchase goods and/or services valued between $100,000-$250,000 annually, the University must obtain at least two (2) quotes"
+          ],
+          "quote_pages": [
+            15,
+            33
+          ]
+        },
+        "note_2026_10_17": "Re-cited from the interim BUS-43 after the superseded main policy was archived; the statutory two-or-more rule and the SB First one/two-quote tiers both appear on p.25."
       }
     },
     {

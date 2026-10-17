@@ -2,20 +2,21 @@
 
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
-## Current Status (October 16, 2026)
+## Current Status (October 17, 2026)
 
 Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC policy documents:
 
 | Metric | Default (`think` off) | With `--think` |
 |--------|------|------|
-| Correct / partial / wrong (LLM judge, corrected answer key) | **50 / 9 / 1** (83.3%) | **52 / 8 / 0** (86.7%) |
-| Same, on the 54 questions the corpus can answer (see below) | 47 / 7 / 0 (87%) | 49 / 5 / 0 (91%) |
+| Correct / partial / wrong (LLM judge, corrected answer key) | **55 / 5 / 0** (91.7%) | 52 / 8 / 0 (86.7%, measured before the ladders) |
+| Same, on the 54 questions the corpus can answer (see below) | 51 / 3 / 0 (94%) | 49 / 5 / 0 (91%, before the ladders) |
 | Answers citing a policy source | 60 / 60 | 59 / 60 |
 | Empty answers / explicit "not found in policy" refusals | 0 / 0 | 0 / 1 |
-| Retrieval: expected document at rank 1 / in top 5 (no LLM) | 49 / 60 and 60 / 60 | same |
+| Retrieval: expected document at rank 1 / in top 5 (no LLM) | 50 / 60 and 60 / 60 | same |
 | Mean / median latency per question | 1.8 s / 1.8 s | 8.0 s / 7.1 s |
 
 - Thresholds follow the **interim BUS-43 (Jan 2026)**, the **SSPR form (Rev. 12-2025)**, and the **Oct 2025 FAR update**. Every rule carries its document, page, and quote, and a test fails if a quote disappears from the current documents.
+- The October 17 jump (50 → 55) comes from four policy ladders in the rule engine and from indexing the interim BUS-43 and the official SSPR PDF; seven questions that no model had answered correctly the day before (Q27, 34, 36, 42, 47 among them) are now decided deterministically with a cited quote.
 - Six questions are reported separately: **Q13–15** use a mixed-funding rule that conflicts with the 12-2025 SSPR form (pending a Procurement decision), and **Q46–48** ask about FAR Part 12, which no indexed document covers. The one wrong answer above is Q46.
 - The answer key is AI-generated and has been corrected where it contradicted the policy text (13 questions so far, each with the quote and page in `evaluation/results/benchmark_questions_corrected.json`); real buyer questions are pending from the procurement team.
 - Single run per configuration; expect about ±3 questions of run-to-run variation (a repeat of the same qwen3:32b configuration scored 47 and 44).
@@ -72,7 +73,7 @@ User (plain language request)
              └───────────┘ └───────────┘ └───────────┘
 ```
 
-**How a policy question is answered:** intent classifier → query parser (amount, funding type) → threshold questions go straight to the rule engine with a cited source; everything else uses query rewriting, hybrid BM25 + semantic retrieval, cross-encoder reranking (8 chunks to the LLM), and a fixed Answer / Rule / Source / Conditions response when the engine decided something. Questions the engine can only annotate (what counts as a sole source reason, that split orders are prohibited) get those facts as background and a free-form answer. Low-confidence retrieval returns "not found in policy." Every chunk is indexed with its policy name and section in the text, so the embedder, BM25 and the reranker all see which document it is from. All LLM calls have token caps, 90 s timeouts, fallbacks, and thinking disabled at the API level (qwen3 ignores the `/no_think` tag often enough to return empty answers otherwise).
+**How a policy question is answered:** intent classifier → query parser (amount, funding type) → threshold questions go straight to the rule engine with a cited source; four policy ladders (post-employment contracting bans, business-meal documentation, tax-free alcohol permits, BUS-63 risk matrix / certificate of insurance) decide their questions the same way, with a page-cited quote and a test per quote (`rules/policy_ladders.py`); everything else uses query rewriting, hybrid BM25 + semantic retrieval, cross-encoder reranking (8 chunks to the LLM), and a fixed Answer / Rule / Source / Conditions response when the engine decided something. Questions the engine can only annotate (what counts as a sole source reason, that split orders are prohibited) get those facts as background and a free-form answer. Low-confidence retrieval returns "not found in policy." Every chunk is indexed with its policy name and section in the text, so the embedder, BM25 and the reranker all see which document it is from. All LLM calls have token caps, 90 s timeouts, fallbacks, and thinking disabled at the API level (qwen3 ignores the `/no_think` tag often enough to return empty answers otherwise).
 
 ## Project Structure
 
@@ -118,7 +119,10 @@ ollama pull qwen3:8b
 # Config
 cp .env.example .env
 
-# Ingest policy docs (the 32 UC/UCSC documents)
+# Ingest policy docs: the 31 UC/UCSC documents plus the interim BUS-43 (Jan 2026,
+# https://policy.ucop.edu/doc/3220485/BFB-BUS-43) and the UCSC SSPR PDF (Rev. 12-2025,
+# https://financial.ucsc.edu/Financial_Affairs_Forms/Source_Selection_Justification_Form.pdf);
+# the superseded BUS-43 main policy lives in data/raw/archive and is not indexed
 cp /path/to/policy-docs/* data/raw_policies/
 python scripts/ingest_policies.py --ingest
 
@@ -136,6 +140,10 @@ pnpm dev
 | Rule | Threshold | Source |
 |------|-----------|--------|
 | Competitive bidding required | $100,000 or more | BUS-43 (interim 2026), §C.1 |
+| Former employee contracting bans | 2 years (took part in the contract's decision-making); 12 months (policymaking role, same department); retirees exempt | OGC Post-Employment Rules (Oct 2023), p.3 |
+| Certificate of insurance | Required for any High-risk exposure C–K; on request only for Low/Moderate (digital-only) risk | BUS-63 Risk Matrix (9.19.2025), pp.1–2 |
+| Tax-free alcohol | TTB permit in the Regents' name; vendor holds a signed copy; semiannual inventory | BFB-BUS-2 / UCPS 120031, pp.2–6 |
+| Business meal documentation | Type of expense and event, guest list with names/titles, date/location, business purpose, approver signature; itemized receipts at $75+ | BUS-79 IV.B.1, p.17 |
 | SSPR form: federal contracts | ≥ $15,000 | SSPR form Rev. 12-2025, p.1 |
 | SSPR form: federal grants / cooperative agreements | ≥ $50,000 | SSPR form Rev. 12-2025, p.1 |
 | SSPR form: non-federal | ≥ $100,000 | SSPR form Rev. 12-2025, p.1 |

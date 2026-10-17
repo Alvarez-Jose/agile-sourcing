@@ -425,9 +425,10 @@ def test_nl_reference_question_q7():
     ("What is the competitive bidding threshold?", True),
     ("Do I need to tag a $6,000 spectrometer?", True),
     ("Can we contract out custodial services?", True),
-    ("What is the duration of the ban on UC contracts for former employees?", False),
+    # post-employment and business meals are decided by rules/policy_ladders.py now
+    ("What is the duration of the ban on UC contracts for former employees?", True),
     ("Which terms and conditions govern all UC purchase orders?", False),
-    ("What two pieces of information must be documented for a business meal expense?", False),
+    ("What two pieces of information must be documented for a business meal expense?", True),
 ])
 def test_should_use_rule_engine(text, expected):
     assert should_use_rule_engine(text) is expected

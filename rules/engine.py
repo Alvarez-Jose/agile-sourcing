@@ -20,6 +20,7 @@ from rules.form_router import route_forms
 from rules.funding_rules import (MIXED_FUNDING_FEDERAL_TRIGGERS, FundingDetermination, determine_funding,
                                  mixed_funding_trigger)
 from rules.models import Flag, PurchaseRequest
+from rules.policy_ladders import evaluate_ladders
 from rules.provenance import TOPIC_SOURCES, sources_for
 from rules.query_parser import RULE_TOPICS, ParsedQuery, parse_query
 from rules.thresholds import ThresholdDetermination, detect_split_order, evaluate_thresholds
@@ -38,6 +39,7 @@ class EvaluationResult:
     flags: list = field(default_factory=list)
     reference: list = field(default_factory=list)
     topics: set = field(default_factory=set)
+    ladders: list = field(default_factory=list)     # rules/policy_ladders.py determinations
 
     # shortcuts used by the tests / pipeline
     @property
@@ -65,7 +67,7 @@ class EvaluationResult:
 
     @property
     def is_empty(self) -> bool:
-        return not (self.thresholds or self.categories.equipment or self.flags or self.reference)
+        return not (self.thresholds or self.categories.equipment or self.flags or self.reference or self.ladders)
 
     @property
     def is_substantive(self) -> bool:
@@ -75,6 +77,7 @@ class EvaluationResult:
         return bool(
             self.competitive_bid_required or self.sspr_required or self.forms or self.categories.equipment
             or any(f.severity in ("block", "require", "caution") for f in self.flags)
+            or any(l.severity in ("block", "require") for l in self.ladders)
         )
 
     # provenance: which threshold constants this determination relied on
@@ -116,6 +119,8 @@ class EvaluationResult:
             for topic in REFERENCE_FACTS:
                 if topic in self.topics:
                     keys += TOPIC_SOURCES.get(topic, [])
+        for ladder in self.ladders:
+            keys += ladder.source_keys
         return list(dict.fromkeys(keys))
 
     @property
@@ -155,6 +160,9 @@ class EvaluationResult:
         if self.reference:
             lines.append("POLICY THRESHOLDS (reference):")
             lines += [f"  - {r}" for r in self.reference]
+        for ladder in self.ladders:
+            lines.append(f"{ladder.code}: {ladder.headline}")
+            lines += [f"  - {line}" for line in ladder.lines + ladder.conditions]
         return lines
 
     def to_answer_header(self) -> str:
@@ -193,6 +201,7 @@ class EvaluationResult:
         forms = [f.name for f in self.forms if f.name != "SSPR Form"]
         if forms:
             parts.append("Also required: " + "; ".join(forms) + ".")
+        parts += [ladder.headline for ladder in self.ladders]
         if not parts and self.reference:
             parts = self.reference[:1]
         return "Determination (rule engine): " + " ".join(parts) if parts else ""
@@ -244,10 +253,12 @@ REFERENCE_FACTS = {
     "small_business": [f"Certified small business/DVBE: may award up to ${T.SMALL_BUSINESS_LIMIT:,} without formal "
                        "bid, any funding source. BUS-43: 1 SB/DVBE quote for $10K-$100K; 2 quotes from certified "
                        "SB/DVBEs above $100K. (SSPR form federal SB option: under $100K.) " + T.SB_CEILING_CONFLICT_NOTE],
-    "sole_source": ["Allowable sole source justifications - federal: one-of-a-kind, emergency, awarding agency "
-                    "approval, no competition (grants/coops only); non-federal: one-of-a-kind/unique, match "
-                    "existing (UC PO#). NOT allowable: pre-work with the supplier that excludes competition, price, "
-                    "brand name, and (federal) geographic preference. Document in SSPR Section IV.",
+    "sole_source": ["A sole source justification is required whenever a purchase is awarded without competition "
+                    "because only one supplier can meet the requirement. Allowable reasons - federal: one-of-a-kind, "
+                    "emergency, awarding agency approval, no competition (grants/coops only); non-federal: "
+                    "one-of-a-kind/unique, match existing (UC PO#). NOT allowable: pre-work with the supplier that "
+                    "excludes competition, price, brand name, familiarity, and (federal) geographic preference. "
+                    "Document in SSPR Section IV.",
                     f"Sole-sourced federal non-commercial contract orders >= ${T.CERTIFIED_COST_PRICING_THRESHOLD:,} "
                     "require certified cost or pricing data (FAR 15.403-4)."],
     "split": ["Split orders: requirements must not be artificially divided into separate transactions to avoid "
@@ -300,7 +311,9 @@ class RuleEngine:
             route_forms(_no_funding(), _no_thresholds(), categories)
 
         reference = reference_facts(topics or set()) if req.amount == 0 and not req.items else []
-        return EvaluationResult(req, funding, thresholds, categories, forms, flags, reference, set(topics or ()))
+        ladders = evaluate_ladders(req.description, topics)
+        return EvaluationResult(req, funding, thresholds, categories, forms, flags, reference, set(topics or ()),
+                                ladders)
 
     def evaluate_query(self, question: str) -> EvaluationResult:
         parsed = parse_query(question)
