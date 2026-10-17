@@ -38,8 +38,9 @@ except Exception as e:
     sys.exit(f'Ollama is not reachable ({e}). Start it with `ollama serve` and rerun.')
 
 questions = json.load(open('evaluation/results/benchmark_questions_multi.json', encoding='utf-8'))['questions']
-print(f'Running {len(questions)} questions (rules={not args.no_rules}, rerank={not args.no_rerank}, '
-      f'think={args.think}, top_k={args.top_k or "default"})...')
+import backend.rag.pipeline as _p
+print(f'Running {len(questions)} questions (model={_p.LLM_MODEL}, host={os.environ.get("OLLAMA_HOST", "local")}, '
+      f'rules={not args.no_rules}, rerank={not args.no_rerank}, think={args.think}, top_k={args.top_k or "default"})...')
 
 answers = []
 start = time.time()

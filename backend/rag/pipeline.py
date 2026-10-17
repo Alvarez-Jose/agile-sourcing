@@ -4,6 +4,7 @@ RAG pipeline entry point for the FastAPI backend.
 Call ask() from your API routes to get answers from the UC policy corpus.
 """
 
+import os
 import re
 from pathlib import Path
 
@@ -26,7 +27,9 @@ from rules.query_parser import RULE_TOPICS
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
 EMBED_MODEL     = "all-MiniLM-L6-v2"
-LLM_MODEL       = "qwen3:8b"
+# the Ollama client also honors OLLAMA_HOST, so a rented GPU box running Ollama is a
+# drop-in: OLLAMA_HOST=http://<box>:11434 LLM_MODEL=qwen3:32b python evaluation/benchmarks/run_benchmark.py
+LLM_MODEL       = os.environ.get("LLM_MODEL", "qwen3:8b")
 TOP_K           = 8     # chunks to the LLM when the reranker is off
 # 8 instead of 5: the right document was always in the reranker's top 5 but the specific
 # detail often wasn't (benchmark: 47 -> 50 correct on the corrected key, no latency cost)
