@@ -18,7 +18,23 @@ Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC pol
 - Thresholds follow the **interim BUS-43 (Jan 2026)**, the **SSPR form (Rev. 12-2025)**, and the **Oct 2025 FAR update**. Every rule carries its document, page, and quote, and a test fails if a quote disappears from the current documents.
 - Six questions are reported separately: **Q13–15** use a mixed-funding rule that conflicts with the 12-2025 SSPR form (pending a Procurement decision), and **Q46–48** ask about FAR Part 12, which no indexed document covers. The one wrong answer above is Q46.
 - The answer key is AI-generated and has been corrected where it contradicted the policy text (13 questions so far, each with the quote and page in `evaluation/results/benchmark_questions_corrected.json`); real buyer questions are pending from the procurement team.
-- Single run per configuration; expect about ±3 questions of run-to-run variation. The judge is qwen3:8b grading itself; set `JUDGE_MODEL` to grade with a different model.
+- Single run per configuration; expect about ±3 questions of run-to-run variation (a repeat of the same qwen3:32b configuration scored 47 and 44).
+- **The judge matters.** The table above is graded by qwen3:8b. Re-graded by qwen3:32b (`JUDGE_MODEL=qwen3:32b`), the same answers score **41 / 15 / 4** (default) and **46 / 13 / 1** (`--think`): the 8b judge passes about 9 answers the 32b judge calls partial. Use the 32b-judged numbers when comparing models.
+
+### Model comparison (October 16, 2026; rented A100, judge = qwen3:32b, default mode unless noted)
+
+| Model | Correct / partial / wrong | Per-question latency |
+|---|---|---|
+| llama3.3:70b | 47 / 12 / 1 | 10.0 s |
+| qwen3:32b `--think` | 47 / 11 / 2 | 21.6 s |
+| qwen3:30b-a3b | 46 / 10 / 4 | 11.8 s |
+| **qwen3:8b `--think` (local)** | **46 / 13 / 1** | 8.0 s |
+| qwen3:32b | 44 / 14 / 2 (repeat: 47) | 7.8 s |
+| qwen3.5:35b | 44 / 15 / 1 | 6.7 s |
+| qwen3:8b (local, default) | 41 / 15 / 4 | 1.8 s |
+| gemma3:27b | 40 / 19 / 1 | 6.6 s |
+
+Nine questions are answered correctly by none of the six default-mode models: four are the flagged disputed/not-in-corpus ones (Q13, 15, 46, 47); the other five (Q27, 34, 42, 49, 58) are benchmark or retrieval problems, not model problems. Remote results are in `evaluation/results/remote/`.
 
 Reproduce:
 
