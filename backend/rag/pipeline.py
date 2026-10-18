@@ -5,19 +5,26 @@ Call ask() from your API routes to get answers from the UC policy corpus.
 """
 
 import re
-from functools import lru_cache
+from pathlib import Path
 
-from backend.rag.access import ScopedCollection, ScopedCorpus
-from rag_pipeline.documents.models import AccessScope
-from rag_pipeline.documents.store import DEFAULT_INDEX, PolicyIndex
-from rag_pipeline.indexer.source_chroma import CHROMA_DIR, POINTER_NAME, active_collection
-from rag_pipeline.retriever.section_retriever import requested_source_ids, requested_sources_available
+import chromadb
+import ollama
+from sentence_transformers import SentenceTransformer
+
 from backend.rag.citations import citation_line
+from rag_pipeline.parser.pdf_extractor import extract_pdf
+from rag_pipeline.parser.docx_extractor import extract_docx
+from rag_pipeline.parser.section_parser import chunk_by_section
+from rag_pipeline.parser.metadata_tagger import tag_chunk
+from rag_pipeline.indexer.hybrid_index import HybridRetriever
+from rag_pipeline.retriever.intent_classifier import IntentClassifier
+from rag_pipeline.retriever.reranker import Reranker
 from rules import RuleEngine, parse_query, should_use_rule_engine
 from rules.answer_format import (format_rule_answer, is_pure_threshold_question, source_citations,
                                  templated_answer)
 from rules.query_parser import RULE_TOPICS
 
+CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
 EMBED_MODEL     = "all-MiniLM-L6-v2"
 LLM_MODEL       = "qwen3:8b"
@@ -69,38 +76,33 @@ FIXED_FORMAT_INSTRUCTIONS = (
     "excerpts as [1], [2]; or None>\n"
 )
 
+embedder = SentenceTransformer(EMBED_MODEL)
+chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
+_retriever = None
+_reranker = None
 rule_engine = RuleEngine()
-
-
-@lru_cache(maxsize=1)
-def _get_embedder():
-    from sentence_transformers import SentenceTransformer
-    return SentenceTransformer(EMBED_MODEL)
-
-
-@lru_cache(maxsize=1)
-def _get_classifier():
-    from rag_pipeline.retriever.intent_classifier import IntentClassifier
-    return IntentClassifier(_get_embedder())
+classifier = IntentClassifier(embedder)
 
 
 def get_collection():
-    import chromadb
-    # Legacy/preview collections have no reviewed generation pointer.
-    if not (CHROMA_DIR / POINTER_NAME).exists():
-        raise ValueError("Reviewed policy vectors not published; run python -m scripts.ingest_policies --ingest")
-    return active_collection(chromadb.PersistentClient(path=str(CHROMA_DIR)))
+    try:
+        return chroma_client.get_collection(COLLECTION_NAME)
+    except Exception:
+        return None
 
 
 def _get_retriever(collection):
-    from rag_pipeline.indexer.hybrid_index import HybridRetriever
-    return HybridRetriever(collection, _get_embedder())
+    global _retriever
+    if _retriever is None:
+        _retriever = HybridRetriever(collection, embedder)
+    return _retriever
 
 
-@lru_cache(maxsize=1)
 def _get_reranker():
-    from rag_pipeline.retriever.reranker import Reranker
-    return Reranker()
+    global _reranker
+    if _reranker is None:
+        _reranker = Reranker()
+    return _reranker
 
 
 LLM_KEEP_ALIVE = "30m"   # keep qwen3 in memory between requests (Ollama's default unloads after 5m)
@@ -109,18 +111,19 @@ LLM_KEEP_ALIVE = "30m"   # keep qwen3 in memory between requests (Ollama's defau
 ANSWER_MAX_TOKENS = 1024
 REWRITE_MAX_TOKENS = 48
 LLM_TIMEOUT_S = 90
-@lru_cache(maxsize=1)
-def _get_llm():
-    import ollama
-    return ollama.Client(host="http://127.0.0.1:11434", timeout=LLM_TIMEOUT_S)
+llm = ollama.Client(timeout=LLM_TIMEOUT_S)
 
 
 def warm_up():
-    # Optional startup warm-up loads models, never an unscoped policy corpus.
-    _get_classifier()
+    # embedder, chroma client and intent classifier load at import. this also builds the
+    # BM25 index + cross-encoder and loads qwen3, so the first real question isn't slow.
+    # called once from the FastAPI startup (backend/main.py)
+    collection = get_collection()
+    if collection is not None:
+        _get_retriever(collection)
     _get_reranker().rerank("warm up", [{"document": "warm up", "metadata": {}}], top_k=1)
     try:
-        _get_llm().generate(model=LLM_MODEL, prompt="", keep_alive=LLM_KEEP_ALIVE)
+        llm.generate(model=LLM_MODEL, prompt="", keep_alive=LLM_KEEP_ALIVE)
     except Exception:
         pass   # Ollama not running yet; the first question will load it
 
@@ -138,7 +141,7 @@ def _rewrite_query(question: str, intent: dict) -> str:
         "Question: " + question + "\n\nKeywords:"
     )
     try:
-        response = _get_llm().chat(
+        response = llm.chat(
             model=LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             keep_alive=LLM_KEEP_ALIVE,
@@ -190,8 +193,7 @@ def _evaluate_rules(question: str, intent: dict):
     return result
 
 
-def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker: bool = True,
-        *, scope=None, index_path=DEFAULT_INDEX) -> dict:
+def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker: bool = True) -> dict:
     """
     Main entry point for the API.
 
@@ -204,33 +206,21 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
             "rule_sources": [{document_id, document, version, page, section, quote, ...}]
         }
     """
-    scope = scope if scope is not None else AccessScope()
-    if scope.include_review or scope.include_archived:
-        raise ValueError("Chat cannot use local-review or archived-source access")
-    corpus = ScopedCorpus(PolicyIndex(index_path, scope))
-    if not requested_sources_available(question, list(corpus.documents.values())):
-        return _refusal([], {"intent": "unavailable_source"}, "unavailable_source")
-    if not corpus.records:
-        return _refusal([], {"intent": "empty_corpus"}, "no_authorized_sources")
+    collection = get_collection()
+    if collection is None:
+        return {"answer": "Policy database not loaded. Run ingestion first.", "sources": []}
 
-    intent = _get_classifier().classify(question)
+    intent = classifier.classify(question)
     rule_result = _evaluate_rules(question, intent) if use_rules else None
-    rule_citations = corpus.rule_citations(rule_result) if rule_result else None
-    if rule_result and not rule_citations:
-        rule_result = None   # rule constants never bypass source review or clearance
 
     # pure threshold question: answer straight from the engine, no retrieval or LLM
     if rule_result and is_pure_threshold_question(rule_result, intent["intent"]):
-        citations = rule_citations
+        citations = source_citations(rule_result)
         return {"answer": templated_answer(rule_result), "sources": citations, "citations": citations,
                 "intent": intent["intent"], "determination": rule_result.to_prompt_context(),
                 "rule_sources": [s.to_dict() for s in rule_result.sources], "refused": False,
                 "llm_called": False}
 
-    requested = requested_source_ids(question)
-    collection = ScopedCollection(get_collection(), corpus, requested or None)
-    if not collection.count():
-        return _refusal([], intent, "no_authorized_sources")
     retrieval_query = _rewrite_query(question, intent)
 
     if use_reranker:
@@ -244,14 +234,11 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
-        context += f"\n[{i+1}] {citation_line(policy, page, meta.get('section', ''))}\n{chunk}\n"
+        context += f"\n[{i+1}] {citation_line(policy, page, meta.get("section", ""))}\n{chunk}\n"
         # policy/page are the original fields the frontend reads; the rest is the citation
-        citation = corpus.citation(meta, i + 1)
-        citation["score"] = round(score, 3) if score is not None else None
-        sources.append(citation)
-
-    if not sources:
-        return _refusal([], intent, "no_retrieval_results")
+        sources.append({"policy": policy, "page": page, "ref": i + 1, "section": meta.get("section", ""),
+                        "file": meta.get("source", ""), "text": chunk,
+                        "score": round(score, 3) if score is not None else None})
 
     if not rule_result and scores and scores[0] is not None and scores[0] < REFUSAL_MIN_RERANK:
         return _refusal(sources, intent, "low_retrieval_score")
@@ -282,7 +269,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         )
 
     try:
-        response = _get_llm().chat(
+        response = llm.chat(
             model=LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
             keep_alive=LLM_KEEP_ALIVE,
@@ -300,10 +287,6 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
 
     if rule_result:
         answer = format_rule_answer(rule_result, answer)
-
-    valid_refs = {str(s["ref"]) for s in sources}
-    if set(re.findall(r"\[(\d+)\]", answer)) - valid_refs:
-        return _refusal([], intent, "invalid_citation")
 
     for s in sources:
         s["cited"] = f"[{s['ref']}]" in answer
@@ -326,4 +309,4 @@ def _refusal(sources: list, intent: dict, reason: str) -> dict:
         s["cited"] = False
     return {"answer": NOT_FOUND_ANSWER, "sources": sources, "citations": [], "intent": intent["intent"],
             "determination": None, "rule_sources": [], "refused": True, "refusal_reason": reason,
-            "llm_called": reason in {"llm_found_no_answer", "invalid_citation"}}
+            "llm_called": reason != "low_retrieval_score"}

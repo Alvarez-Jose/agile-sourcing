@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop, auth]
   pull_request:
 
 jobs:
@@ -15,5 +15,18 @@ jobs:
           python-version: "3.13"
       # rules/ is pure Python; tests/integration stubs the pipeline, so heavy
       # deps (torch, chromadb, ollama) are never imported
-      - run: pip install pytest fastapi httpx
-      - run: python -m pytest rules tests/integration -q
+      - run: pip install pytest fastapi==0.136.3 pydantic==2.13.4 httpx firebase-admin==6.5.0 python-dotenv==1.0.1 python-docx==1.2.0 pdfplumber==0.11.9 pypdf==6.12.2 reportlab==4.5.1
+      - run: python -m pytest rules tests -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - run: pnpm test && pnpm compile && pnpm build
+        working-directory: frontend

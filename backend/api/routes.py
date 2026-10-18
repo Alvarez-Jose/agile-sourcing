@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from backend.auth.dependencies import require_approved_user
 from backend.auth.models import UserProfile
-from backend.auth.policy_access import policy_scope
+from backend.api.citations import frontend_sources
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ def ask_endpoint(
     try:
         from backend.rag.pipeline import ask
 
-        result = ask(req.question, think=req.think, scope=policy_scope(user))
+        result = ask(req.question, think=req.think)
     except ModuleNotFoundError as error:
         logger.exception("Assistant dependency is missing: %s", error.name)
         raise HTTPException(
@@ -70,4 +70,6 @@ def ask_endpoint(
         raise HTTPException(
             503, "The assistant is temporarily unavailable. Please try again later."
         ) from None
-    return AskResponse.model_validate(result)
+    return AskResponse.model_validate(
+        {**result, "sources": frontend_sources(result["sources"])}
+    )

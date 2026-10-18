@@ -10,43 +10,81 @@ import types
 import pytest
 from fastapi.testclient import TestClient
 
-SOURCE = {"policy": "BFB-BUS-43", "page": "9", "ref": 1, "section": "C. Expenditures", "file": "bus43.pdf",
-          "text": "UC competitively bid all purchases ... $100,000 or more", "score": 4.2, "cited": True}
+SOURCE = {
+    "policy": "BFB-BUS-43",
+    "page": "9",
+    "ref": 1,
+    "section": "C. Expenditures",
+    "file": "bus43.pdf",
+    "text": "UC competitively bid all purchases ... $100,000 or more",
+    "score": 4.2,
+    "cited": True,
+}
 UNCITED = {**SOURCE, "ref": 2, "cited": False}
-RULE_SOURCE = {"document_id": "bus-43", "page": 9, "quote": "$100,000 or more", "version": "Interim"}
+RULE_SOURCE = {
+    "document_id": "bus-43",
+    "page": 9,
+    "quote": "$100,000 or more",
+    "version": "Interim",
+}
 
 
 @pytest.fixture
 def client(monkeypatch):
+    monkeypatch.delenv("RAG_WARM_UP", raising=False)
     stub = types.ModuleType("backend.rag.pipeline")
-    stub.ask = lambda question, think=False: {
-        "answer": "Yes [1].", "sources": [SOURCE, UNCITED], "citations": [SOURCE],
-        "rule_sources": [RULE_SOURCE], "determination": "=== RULE ENGINE ===", "intent": "threshold",
+    stub.ask = lambda question, think=False, scope=None: {
+        "answer": "Yes [1].",
+        "sources": [SOURCE, UNCITED],
+        "citations": [SOURCE],
+        "rule_sources": [RULE_SOURCE],
+        "determination": "=== RULE ENGINE ===",
+        "intent": "threshold",
     }
     stub.warm_ups = 0
 
     def warm_up():
         stub.warm_ups += 1
+
     stub.warm_up = warm_up
     monkeypatch.setitem(sys.modules, "backend.rag.pipeline", stub)
-    monkeypatch.delitem(sys.modules, "backend.api.routes", raising=False)
-    monkeypatch.delitem(sys.modules, "backend.main", raising=False)
     from backend.main import app
-    with TestClient(app) as c:          # context manager runs the startup lifespan
-        c.stub = stub
-        yield c
+    from backend.auth.dependencies import require_approved_user
+    from backend.auth.models import UserProfile
+
+    app.dependency_overrides[require_approved_user] = lambda: UserProfile(
+        uid="fixture", email="fixture@ucsc.edu", is_approved=True
+    )
+    try:
+        with TestClient(app) as c:
+            c.stub = stub
+            yield c
+    finally:
+        app.dependency_overrides.pop(require_approved_user, None)
 
 
-def test_models_warm_up_once_at_startup(client):
+def test_auth_startup_does_not_require_local_models(client):
     client.post("/api/ask", json={"question": "a"})
     client.post("/api/ask", json={"question": "b"})
+    assert client.stub.warm_ups == 0
+
+
+def test_explicit_warm_up_runs_once(client, monkeypatch):
+    from backend.main import app
+
+    monkeypatch.setenv("RAG_WARM_UP", "1")
+    with TestClient(app) as warmed:
+        assert warmed.get("/api/health").status_code == 200
     assert client.stub.warm_ups == 1
 
 
 def test_ask_keeps_original_fields(client):
     body = client.post("/api/ask", json={"question": "bid threshold?"}).json()
     assert body["answer"] == "Yes [1]."
-    assert [(s["policy"], s["page"]) for s in body["sources"]] == [("BFB-BUS-43", "9"), ("BFB-BUS-43", "9")]
+    assert [(s["policy"], s["page"]) for s in body["sources"]] == [
+        ("BFB-BUS-43", "9"),
+        ("BFB-BUS-43", "9"),
+    ]
 
 
 def test_ask_returns_citations_with_supporting_text(client):

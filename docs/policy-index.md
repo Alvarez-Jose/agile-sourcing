@@ -5,10 +5,10 @@ revision/effective-date observations, source locations, and access/review metada
 in SQLite. Small child chunks point to their full parent sections. A separate
 evidence-backed graph connects documents, sections, forms, and explicit references.
 
-Chat now uses scoped parent retrieval and one hop of explicit references from the
-authoritative SQLite snapshot; see [policy chat](policy-chat.md). Conditional override
-evaluation remains separate work. Legacy Chroma chunks are never a permission or
-source-review fallback for the chat endpoint.
+The source index and graph remain available for offline review. Current chat uses
+the team's unchanged main RAG and `uc_policies` collection. Per-user document
+filtering is deferred; offline index controls do not apply to the current chat
+endpoint. See [policy chat](policy-chat.md).
 
 ## Build and inspect without an LLM
 
@@ -31,10 +31,10 @@ The original PDF/DOCX files are preserved. Errors abort the build; incomplete re
 do not replace a working SQLite index. Replaced source-byte versions are retained in
 SQLite as archived records, excluded from default reads.
 
-Equivalent preparation through the ingestion entry point:
+Source-only preparation uses the graph builder, separately from team RAG ingestion:
 
 ```sh
-./venv/bin/python -m scripts.ingest_policies --prepare-only
+./venv/bin/python -m scripts.build_policy_graph build
 ```
 
 Inspect the supplied, unreviewed internal corpus explicitly:
@@ -147,24 +147,14 @@ The Chroma view stores child text/embeddings and primitive metadata linking back
 SQLite: document ID/version, `parent_section_id`, chunk ID, offsets, source hash,
 page range/section, access classification, review status and date observations.
 
-```sh
-# Optional local embedding preview. It does not activate the assistant collection.
-./venv/bin/python -m scripts.ingest_policies --preview-index
+The `rag_pipeline.indexer.source_chroma` library supports this offline publisher.
+It selects reviewed public sources and writes versioned collections. Preview
+collections are separate. Each generation pins an immutable SQLite snapshot, and
+the runtime pointer changes only after a successful build.
 
-# Publish only after exact source versions have been reviewed and made public/active.
-./venv/bin/python -m scripts.ingest_policies --ingest
-```
-
-Normal Chroma publication selects reviewed public sources only. Chat derives its scope
-from Firestore and ranks an authorized SQLite source snapshot directly. Local review
-collections are separate and never selected by the runtime pointer. Publication builds
-a fresh collection, verifies the count, and switches a small active-collection pointer
-only after success. Existing collections remain available for rollback. Chroma exports
-are optional for scoped chat and do not override live source access classifications.
-
-Each published vector collection pins an immutable SQLite source snapshot in its
-generation directory. `active_source_index_path()` resolves the matching source
-index so later preparation builds cannot invalidate active parent-section IDs.
+This workflow is separate from the team's restored ingestion CLI. Their unchanged
+RAG reads `uc_policies`, populated by `scripts.ingest_policies --ingest`, and does not
+read this publisher's pointer or enforce its source-review/access metadata.
 
 Neither preparation nor graph building downloads models or calls an LLM. Embedding
 preview/publication loads the local embedding model; model downloads may occur if its

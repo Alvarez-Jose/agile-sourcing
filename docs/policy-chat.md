@@ -1,118 +1,61 @@
-# Grounded policy chat
+# Authenticated chat on develop
 
-`POST /api/ask` now uses the reviewed SQLite source index, full parent sections and
-one hop of explicit policy references. It never uses legacy Chroma chunks to bypass
-review or permissions. The Chroma publishing bridge remains available for vector
-exports; chat ranks an authorized source snapshot directly, so source/access changes
-apply without rebuilding a separate vector collection.
+`develop` integrates the team's main-branch RAG, the five open PR branches, and
+Firebase/FastAPI authentication. The user requested that RAG and evaluation code
+remain exactly as the teammate left it. The pipeline includes PR #7's DOCX citation
+fix; the diagnostic scripts from PRs #8 and #9 are included without modifications.
 
-## Request flow
+## API boundary
 
-1. Verify the Firebase token and load the fresh Firestore profile.
-2. Reject pending accounts. Derive an exact clearance grant on the server.
-3. Open one read-only SQLite snapshot; filter documents, sections, chunks and graph
-   endpoints before decoding their payloads or passing their text to model hooks.
-4. Combine BM25 and local semantic ranking, then cross-encoder rerank the candidates.
-   Retain short policy instructions; suppress heading-only/header/footer records and
-   revision-history sections as answer candidates.
-   Explicitly named sources must be available in the user's reviewed corpus;
-   otherwise abstain before model calls. Named sources supply the primary results.
-5. Expand useful matches into full sections. Large sections use explicitly marked,
-   source-aligned partial excerpts. Context is bounded to six passages / 24,000
-   source characters, with at most two reference additions. Traverse only explicit
-   `references` to available documents/sections/forms. No URL fetches or overrides.
-6. Ask local `qwen3:8b` for structured claims and numbered supporting source spans
-   using Ollama JSON mode. The server partitions full context at original block and
-   paragraph boundaries, preserving all non-whitespace content, footnotes and page
-   transitions. It supplies the original quote and offsets for each selected span.
-   Validate the schema, source/span IDs and numerical facts. One repair is allowed;
-   invalid/insufficient evidence produces an abstention. Literal supporting quotes
-   also require exact source matches, with equivalent typography permitted.
-7. Return cited document/section/version, evidence offsets and PDF physical pages.
-   The UI links official sources and displays the supporting quotes. DOCX pages
-   remain unknown. Chat history and late responses clear on session/clearance changes.
+1. Verify the Firebase ID token and retrieve the fresh server-owned Firestore profile.
+2. Reject unapproved accounts before importing or invoking the RAG pipeline.
+3. Call the team's unchanged `ask(question, think=...)` entry point.
+4. Return its answer, sources, citations, rule sources, intent, determination, and
+   refusal fields. A transport-only adapter exposes source `ref` as the extension's
+   `citation_id` and source `text` as expandable supporting text. It does not modify
+   rankings, answer wording, or refusal decisions, or invent section offsets/URLs.
 
-The old deterministic threshold engine is excluded from chat until its rules have
-current source/version provenance. Its existing standalone tests still run. Local
-models are loaded lazily; Firebase/login/health do not require loading ML models.
-Ollama calls are pinned to `http://127.0.0.1:11434`, not cloud model names.
+Google sign-in, department, role, clearance, approval, and Firestore profile ownership
+remain intact. **By the user's explicit decision, only authentication and approval
+are enforced for chat at this stage.** The team's RAG has no per-user scope argument;
+approved users share its indexed corpus. Document clearance filtering is deferred to
+the RAG teammate. The existing `policy_scope()` helper and reviewed source/graph
+index remain available for future integration but are not active retrieval controls.
 
-## Clearance grants
+The team's Chroma collection is `uc_policies`. Their BM25/semantic retrieval, intent
+routing, cross-encoder, rules, Qwen prompts, model setup, token caps, timeouts, and
+citation formatting remain unchanged. The earlier auth branch's span-ID generator,
+full-parent expansion, and graph traversal are not the active chat implementation.
 
-All values come from `users/{uid}` in Firestore. Request-body permissions are rejected.
+## Startup and testing
 
-| Approved user's `clearance` | Accessible classifications |
-| --- | --- |
-| `none`, `public`, missing, or an unknown value | public |
-| `internal` | public, internal |
-| `restricted` | public, internal, restricted |
-
-Only **active** documents are available, even for restricted users. Role `admin`,
-email domain, department name, and legacy strings such as `department_buyer` do not
-implicitly grant internal access. This controls document visibility, not purchasing
-or signing authority. No private profiles were edited during implementation.
-
-## Run and test
-
-From the repository root, restore/build the starter sources as described in
-[the source review](policy-source-review.md). Then:
+See [README](../README.md) and [auth setup](auth-setup.md). Use Python 3.12+ for the
+unchanged DOCX citation PR's f-string syntax. Auth/health load no RAG models; optional
+`RAG_WARM_UP=1` invokes the existing warm-up at API startup.
 
 ```sh
-# Terminal 1; if Ollama is already running, this is unnecessary.
-ollama serve
-# Terminal 2
+./venv/bin/python -m scripts.ingest_policies --ingest
 ./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
-# Terminal 3
-cd frontend
-pnpm dev
+# Separate terminal, from frontend/:
+corepack pnpm dev
 ```
 
-An approved user with clearance `none` can test the two public starter sources.
-Try: “How should I document price reasonableness on the SSPR form?” Then expand
-Supporting text and check the page/link. Questions requiring the unverified checklist
-or private supplier/order records should receive an insufficient-evidence response.
+The policy source/graph tools still support offline inspection. Their versioned Chroma
+publisher and the previous `scripts.evaluate_policy_chat` belong to the old auth
+pipeline; they are not the team's current ingestion/benchmark entry points.
 
 ```sh
-./venv/bin/python -m pytest tests/unit/rag/test_source_index.py tests/unit/rag/test_grounded_chat.py tests/integration/test_auth.py rules/test_engine.py -q
-./venv/bin/python -m scripts.evaluate_policy_chat
-# Additionally exercise actual local models; do not expect instant responses.
-./venv/bin/python -m scripts.evaluate_policy_chat --live --output /private/tmp/policy-chat-evaluation.json
-cd frontend
-pnpm test
-pnpm compile
+./venv/bin/python -m evaluation.benchmarks.run_benchmark
+./venv/bin/python -m evaluation.analyze_benchmark evaluation/results/benchmark_results_full.json
+./venv/bin/python -m evaluation.check_citation_grounding /path/to/saved-api-responses.json --output data/evaluation/citation_grounding.csv
 ```
 
-The evaluation checks expected evidence and answer/abstention behavior for price
-reasonableness, funding thresholds with campus qualification, informal quote counts,
-sole-source brand justification, annual bidding, unavailable checklist and unknown
-supplier data. Unit/integration tests separately exercise unauthorized, pending,
-internal/restricted access, clearance reduction, graph filtering and malformed
-citations. Test policies are synthetic, not actual procurement guidance.
+The benchmark runner drops supporting sources from its saved scoring rows. The
+citation checker needs complete response objects with `answer`, `sources`, and
+`rule_sources`; it cannot validate provenance from those benchmark rows alone.
+Known benchmark, routing, source-coverage, blank-answer, and grading issues remain
+with the teammate rather than being changed during auth integration.
 
-Source-span validation proves provenance, not complete semantic entailment. Inspect live
-answers against their supporting text for funding type, exceptions, annual versus
-aggregate amounts and campus qualifications. These checks are a starter evaluation,
-not an accuracy guarantee for arbitrary questions. The detailed live report is local
-and should not be committed if additional internal sources are later activated.
-
-## Verified implementation checkpoint
-
-On October 10, 2026:
-
-- 148 Python tests passed across the source index, grounded chat, authentication and
-  standalone rules suites. Firebase calls are mocked in integration tests.
-- 16 frontend tests passed, including source links and late-response isolation across
-  logout, account changes and clearance reduction; TypeScript and the extension
-  production build passed.
-- All seven real local-Qwen cases passed retrieval, expected answer-content and
-  abstention checks using numbered source spans. No grounding repair was needed in
-  this final run. Answers were inspected against the cited excerpts. The annual
-  bidding case retains separate supporting source spans on physical PDF pages 9–10.
-- The runtime source snapshot contains two active public documents, three archived
-  supplied byte versions, and 29 documents still under review. No override edges
-  were introduced.
-
-This small checkpoint is not a percentage accuracy estimate for the complete policy
-corpus. In particular, the annual-bidding case checks the annual trigger and examples
-of exceptions; it does not establish which exception applies to a particular purchase.
-The unverified checklist and private supplier/order data remain unavailable.
+Previous live tests of a modified intermediate pipeline are not validation of this
+final untouched version. Final verification and PR dispositions are recorded in
+[the integration review](develop-integration.md).

@@ -194,15 +194,14 @@ def test_approval_is_reloaded_on_each_protected_request(server):
         "/api/ask", headers=HEADERS, json={"question": "Hello"}
     )
     assert response.status_code == 200
-    assert response.json() == {"answer": "Policy answer", "sources": []}
+    assert response.json()["answer"] == "Policy answer"
+    assert response.json()["sources"] == []
     server.records[IDENTITY["uid"]]["is_approved"] = False
     response = server.client.post(
         "/api/ask", headers=HEADERS, json={"question": "Hello"}
     )
     assert response.status_code == 403
-    from rag_pipeline.documents.models import AccessScope
-
-    server.pipeline.assert_called_once_with("Hello", think=False, scope=AccessScope())
+    server.pipeline.assert_called_once_with("Hello", think=False)
 
 
 def test_invalid_permission_data_fails_closed(server):
@@ -271,18 +270,17 @@ def test_pipeline_failures_return_an_actionable_response(
         ("admin", ("public",)),
     ],
 )
-def test_chat_uses_fresh_server_clearance_only(server, clearance, classes):
+def test_profile_keeps_fresh_server_clearance(server, clearance, classes):
     server.records[IDENTITY["uid"]] = {"is_approved": True, "clearance": clearance}
     response = server.client.post(
         "/api/ask", headers=HEADERS, json={"question": "Policy question"}
     )
     assert response.status_code == 200
-    assert server.pipeline.call_args.kwargs["scope"].classifications == classes
-    server.records[IDENTITY["uid"]]["clearance"] = "none"
-    server.client.post(
-        "/api/ask", headers=HEADERS, json={"question": "Policy question"}
+    assert (
+        server.client.get("/auth/me", headers=HEADERS).json()["clearance"] == clearance
     )
-    assert server.pipeline.call_args.kwargs["scope"].classifications == ("public",)
+    server.records[IDENTITY["uid"]]["clearance"] = "none"
+    assert server.client.get("/auth/me", headers=HEADERS).json()["clearance"] == "none"
 
 
 @pytest.mark.parametrize(

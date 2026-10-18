@@ -55,49 +55,28 @@ uvicorn backend.main:app --reload --port 8000
 ```
 
 The auth routes initialize Firebase on demand. Login and `/api/health` do not load
-the RAG models or need Ollama. Approved chat requests require the reviewed SQLite
-policy index, local retrieval models, and Ollama.
+the RAG models or need Ollama. Approved chat requests use the team's unchanged main RAG, its `uc_policies`
+Chroma collection, local models, and Ollama. Per-document clearance filtering is
+deferred; chat currently enforces identity and account approval only.
 
 ### Run chat locally
 
-The new document/section index and policy graph have their own
-[preparation and review workflow](policy-index.md). `--prepare-only` builds them
-without loading models; `--preview-index` embeds local review sources without
-activating them. Normal `--ingest` publication requires reviewed public sources.
+Use Python 3.12+ (CI uses 3.13) for the team's unchanged DOCX citation PR syntax.
+Start Ollama and install `qwen3:8b`. Place the team's policy files in
+`data/raw_policies/`, then run from the repository root:
 
-The extension already calls `POST /api/ask`. A working login does not initialize
-the policy index or the language model service. To run the assistant locally:
+```sh
+./venv/bin/python -m scripts.ingest_policies --ingest
+./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
+```
 
-1. Install the backend dependencies, including the Python `ollama` package.
-2. Start `ollama serve` in a separate terminal (or start the Ollama application).
-   Run `ollama list` to confirm `qwen3:8b` is available; download it with
-   `ollama pull qwen3:8b` if it is missing.
-3. Restore the two verified public starter PDFs and build the source/graph index
-   from the repository root if it has not already been prepared:
-
-   ```sh
-   ./venv/bin/python -m scripts.download_starter_policies
-   ./venv/bin/python -m scripts.build_policy_graph build
-   ```
-
-   Current chat reads the reviewed SQLite index directly; publishing a Chroma
-   collection is optional. Additional sources require the review procedure in
-   [the policy index guide](policy-index.md).
-4. Start FastAPI from the repository root:
-
-   ```sh
-   ./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
-   ```
-
-5. In another terminal, run `cd frontend` and `pnpm dev`. Open the extension,
-   sign in, sync the approved account, and send a question. See
-   [the policy chat guide](policy-chat.md) for demo questions and tests.
-
-The embedding model (`all-MiniLM-L6-v2`) and reranker
-(`cross-encoder/ms-marco-MiniLM-L-6-v2`) download on first use if they are not cached.
-The policy documents/index are local artifacts and are not included in this checkout.
-Pipeline failures return a JSON `503` response; the FastAPI terminal contains the
-underlying exception, while the extension displays an availability message.
+In another terminal, run `cd frontend` and `corepack pnpm dev`. The team pipeline
+reads the collection named `uc_policies`; the older reviewed source-index publisher
+uses separate versioned collections. Run the backend from the repository root to
+preserve the team's relative data paths. Embedding and reranking models download on
+first use if uncached. Pipeline failures return an availability response; inspect the
+FastAPI terminal for the cause. See [policy chat](policy-chat.md) and
+[the integration review](develop-integration.md).
 
 ## Configure the extension
 
@@ -145,11 +124,11 @@ values are preserved on subsequent logins. Clients cannot set permissions throug
 the session endpoints. Restrict client writes to this collection with Firestore
 Security Rules; the backend uses the Admin SDK and its IAM permissions.
 
-`is_approved` gates assistant chat. Exact clearance `internal` permits public/internal
-documents; `restricted` permits all three classifications. `none`, `public`, missing
-and unknown values permit public documents only. Every document must also be active.
-Role and department do not implicitly grant clearance, and clearance does not establish
-purchasing authority. See [policy chat](policy-chat.md) for retrieval and access tests.
+`is_approved` gates assistant chat. Department, role, and clearance remain
+server-owned profile fields. The unchanged team RAG does not accept a per-user
+scope: approved users currently share the indexed corpus. By explicit project
+decision, document clearance filtering is deferred to the RAG teammate. The
+existing clearance mapping helper is retained for that future integration.
 New users can log in and see their profile while awaiting approval.
 
 To approve a test user, edit `users/{uid}` in Firestore, set `is_approved` to a

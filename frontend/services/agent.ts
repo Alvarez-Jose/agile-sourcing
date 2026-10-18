@@ -8,8 +8,8 @@ export interface AskResponse {
     section: string;
     page: string;
     source_url: string | null;
-    is_full_section: boolean;
-    evidence: Array<{ quote: string; start: number; end: number }>;
+    is_full_section?: boolean;
+    evidence: Array<{ quote: string; start?: number; end?: number }>;
   }>;
 }
 

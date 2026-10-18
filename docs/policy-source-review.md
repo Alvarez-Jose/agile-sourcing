@@ -46,14 +46,15 @@ public verified PDFs and prepare their own index from the repository root:
 ```sh
 ./venv/bin/python -m scripts.download_starter_policies
 ./venv/bin/python -m scripts.build_policy_graph build
-./venv/bin/python -m scripts.evaluate_policy_chat
+./venv/bin/python -m scripts.build_policy_graph search "price reasonableness"
 ```
 
 The downloader refuses changed official bytes rather than automatically approving
 a replacement, and does not overwrite a locally modified source. Future changes
 require repeating the review and updating the hash.
-The current runtime has two active public documents; the remaining supplied sources
-are archived or need review. The review tool can still inspect all preserved sources.
+This reviewed source index has two active public documents; other supplied sources
+are archived or need review. The team's main RAG uses a separate ingestion path and
+does not currently enforce these review statuses. The review tool can still inspect all preserved sources.
 
 ## Remaining checklist verification
 

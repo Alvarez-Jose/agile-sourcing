@@ -1,8 +1,19 @@
 # Agile Sourcing
 
-![tests](https://github.com/Alvarez-Jose/agile-sourcing/actions/workflows/tests.yml/badge.svg)
-
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
+
+## Develop integration
+
+`develop` combines `auth`, main, and all five open PR branches for team testing.
+The team's RAG, ingestion, rules, and evaluation code is preserved unchanged,
+including the DOCX citation fix and the two evaluation scripts from PRs #7–#9.
+FastAPI still verifies Firebase identity and account approval. Department, role,
+and clearance remain server-owned profile fields; **document filtering is deferred
+to the RAG teammate**. Approved accounts currently share the same indexed corpus.
+
+See [the branch/PR review](docs/develop-integration.md),
+[authentication setup](docs/auth-setup.md), and [chat integration](docs/policy-chat.md).
+The figures below are main's historical baseline, not a new develop evaluation.
 
 ## Current Status (October 12, 2026)
 
@@ -63,7 +74,6 @@ User (plain language request)
 agile-sourcing/
 ├── backend/
 │   ├── api/              # FastAPI routes & middleware
-│   ├── agents/           # Conversation + Rules agents
 │   ├── rag/              # Policy retrieval pipeline
 │   ├── auth/             # Sign-in and access control
 │   └── main.py           # FastAPI app entry point
@@ -73,45 +83,85 @@ agile-sourcing/
 ├── training/             # Fine-tuning data and scripts
 ├── frontend/             # WXT browser extension (React + Tailwind)
 ├── data/
-│   └── policies/         # Policy documents for ingestion
+│   └── raw_policies/     # Policy documents for the team ingestion script
 ├── tests/                # Unit and integration tests
 ├── scripts/              # Ingestion and evaluation scripts
 ├── docs/                 # Architecture docs, policy notes
 ├── requirements.txt
-├── .env.example
+├── secret/               # Ignored configuration and Admin credentials
 └── README.md
 ```
 
 ## Setup
 
-```bash
-# Clone
-git clone https://github.com/Alvarez-Jose/agile-sourcing
+Use Python **3.12 or 3.13** for the team's unchanged pipeline (the DOCX citation
+PR uses Python 3.12 f-string syntax); CI uses 3.13. Use Node 22.13+ and Corepack/pnpm.
+Commands below assume macOS/Linux and start at the repository root.
+
+```sh
+git clone --branch develop https://github.com/Alvarez-Jose/agile-sourcing.git
 cd agile-sourcing
-
-# Python env
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Local model
-ollama pull qwen3:8b
-
-# Config
-cp .env.example .env
-
-# Ingest policy docs
-cp /path/to/policy-docs/* data/policies/
-python scripts/ingest_policies.py
-
-# Run backend
-uvicorn backend.main:app --reload --port 8000
-
-# Frontend (separate terminal)
-cd frontend
-pnpm install
-pnpm dev
+python3.13 -m venv venv
+./venv/bin/python -m pip install -r requirements.txt
+mkdir -p secret
 ```
+
+Configure `secret/.env` and authorized backend Firebase Admin credentials using
+[the auth guide](docs/auth-setup.md). This directory is excluded from Git.
+Google OAuth must authorize the extension's actual redirect URL.
+
+```sh
+ollama pull qwen3:8b
+# Put the team's policy PDFs/DOCX in data/raw_policies/.
+# Then use their original ingestion entry point from the repository root:
+./venv/bin/python -m scripts.ingest_policies --ingest
+```
+
+The main pipeline reads the collection named `uc_policies`. The older source-index
+publisher's versioned collections are separate and do not replace this ingestion
+step. Source/graph review tools remain available but are not used for chat filtering.
+
+Run in separate terminals:
+
+```sh
+# Terminal 1; unnecessary if Ollama is already running
+ollama serve
+# Terminal 2, repository root
+./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
+# Terminal 3, repository root
+cd frontend
+corepack pnpm install --frozen-lockfile
+corepack pnpm dev
+```
+
+Sign in with Google, have an administrator approve `users/{uid}` in Firestore, and
+sync the session in extension settings. `GET /api/health` is public. Auth/health do
+not import the RAG stack; optional `RAG_WARM_UP=1` invokes the team's warm-up at
+startup. Launch the server from the repository root because the team pipeline uses
+relative data paths.
+
+## Testing
+
+```sh
+./venv/bin/python -m pytest rules tests -q
+cd frontend
+corepack pnpm test
+corepack pnpm compile
+corepack pnpm build
+```
+
+The team's RAG tools remain unchanged:
+
+```sh
+./venv/bin/python -m evaluation.benchmarks.run_benchmark
+./venv/bin/python -m evaluation.analyze_benchmark evaluation/results/benchmark_results_full.json
+./venv/bin/python -m evaluation.check_citation_grounding /path/to/saved-api-responses.json --output data/evaluation/citation_grounding.csv
+```
+
+The existing benchmark runner retains its own defaults and output format. Its saved
+rows omit the `sources`/`rule_sources` needed by the citation checker; supply saved
+complete `/api/ask` responses to that checker. These scripts and their known gaps
+remain owned by the RAG teammate. See [the integration review](docs/develop-integration.md).
 
 ## Key Rules the System Enforces
 

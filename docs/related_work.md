@@ -220,8 +220,7 @@ python -m scripts.download_starter_policies
 python -m scripts.ingest_policies --ingest
 
 # run evaluation
-python -m scripts.evaluate_policy_chat
-python -m evaluation.benchmarks.run_benchmark --help
+python -m evaluation.benchmarks.run_benchmark
 
 # run app
 uvicorn backend.main:app --reload --port 8000
