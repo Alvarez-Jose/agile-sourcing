@@ -12,6 +12,7 @@ from rag_pipeline.documents.models import AccessScope
 from rag_pipeline.documents.store import DEFAULT_INDEX, PolicyIndex
 from rag_pipeline.indexer.source_chroma import CHROMA_DIR, POINTER_NAME, active_collection
 from rag_pipeline.retriever.section_retriever import requested_source_ids, requested_sources_available
+from backend.rag.citations import citation_line
 from rules import RuleEngine, parse_query, should_use_rule_engine
 from rules.answer_format import (format_rule_answer, is_pure_threshold_question, source_citations,
                                  templated_answer)
@@ -243,7 +244,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
-        context += f"\n[{i+1}] {policy}, p.{page}\n{chunk}\n"
+        context += f"\n[{i+1}] {citation_line(policy, page, meta.get('section', ''))}\n{chunk}\n"
         # policy/page are the original fields the frontend reads; the rest is the citation
         citation = corpus.citation(meta, i + 1)
         citation["score"] = round(score, 3) if score is not None else None
