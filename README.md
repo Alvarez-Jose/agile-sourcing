@@ -1,5 +1,7 @@
 # Agile Sourcing
 
+![tests](https://github.com/Alvarez-Jose/agile-sourcing/actions/workflows/tests.yml/badge.svg)
+
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
 ## Current Status (October 12, 2026)

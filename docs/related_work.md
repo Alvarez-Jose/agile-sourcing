@@ -216,14 +216,12 @@ mkdir -p secret
 # Configure secret/.env and Admin credentials as described in docs/auth-setup.md.
 
 # ingest policy docs
-mkdir -p data/raw_policies
-cp /path/to/pdfs/* data/raw_policies/
-python -m scripts.ingest_policies --prepare-only
-python -m scripts.build_policy_graph build
+python -m scripts.download_starter_policies
+python -m scripts.ingest_policies --ingest
 
 # run evaluation
-python scripts/run_evaluation.py
-python scripts/compare_baselines.py
+python -m scripts.evaluate_policy_chat
+python -m evaluation.benchmarks.run_benchmark --help
 
 # run app
 uvicorn backend.main:app --reload --port 8000
