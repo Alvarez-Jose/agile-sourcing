@@ -1,0 +1,5 @@
+question,citation_count,invalid_references,empty_evidence_references,unmatched_dollar_amounts,question_amounts_not_in_evidence,review_needed
+What is the competitive bidding threshold?,1,,,,,False
+What is the competitive bidding threshold?,1,,,"$250,000.00",,True
+Is competitive bidding required?,1,5,,"$100,000.00",,True
+"Does a $150,000 purchase require competitive bidding?",1,,,"$150,000.00","$150,000.00",True
