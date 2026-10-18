@@ -62,12 +62,25 @@ def test_07_mixed_9k_federal_state_rules_only():
     assert F.FEDERAL_FUNDS_CHECKLIST not in r.form_names
 
 
-def test_08_mixed_11k_federal_whole_transaction():
-    r = ev(amount=100_000, funding="federal_grant", federal_amount=11_000)
+def test_08_mixed_60k_federal_grant_whole_transaction():
+    r = ev(amount=100_000, funding="federal_grant", federal_amount=60_000)
     assert r.federal_rules_apply is True
     assert "ENTIRE" in r.funding.explanation
     assert F.FEDERAL_FUNDS_CHECKLIST in r.form_names
     assert F.DEBARMENT in r.form_names
+
+
+def test_08b_mixed_11k_federal_grant_now_state_rules():
+    # was federal under the 2021 FAQ's > $10K trigger; the 12-2025 SSPR form uses the
+    # $50K grant threshold, so $11K federal grant money keeps the purchase on the state side
+    r = ev(amount=100_000, funding="federal_grant", federal_amount=11_000)
+    assert r.federal_rules_apply is False
+    assert F.FEDERAL_FUNDS_CHECKLIST not in r.form_names
+
+
+def test_08c_mixed_federal_contract_uses_15k_trigger():
+    assert ev(amount=100_000, funding="federal_contract", federal_amount=16_000).federal_rules_apply is True
+    assert ev(amount=100_000, funding="federal_contract", federal_amount=11_000).federal_rules_apply is False
 
 
 def test_09_200k_small_business_no_bid():
@@ -167,9 +180,31 @@ def test_sspr_boundaries(amount, funding, sspr):
     assert ev(amount=amount, funding=funding).sspr_required is sspr
 
 
-@pytest.mark.parametrize("fed,federal_rules", [(10_000, False), (10_001, True)])
-def test_mixed_funding_boundary(fed, federal_rules):
-    assert ev(amount=100_000, funding="federal_grant", federal_amount=fed).federal_rules_apply is federal_rules
+@pytest.mark.parametrize("funding,fed,federal_rules", [
+    ("federal_grant", 49_999, False), ("federal_grant", 50_000, True),
+    ("federal_contract", 14_999, False), ("federal_contract", 15_000, True),
+])
+def test_mixed_funding_boundary(funding, fed, federal_rules):
+    assert ev(amount=100_000, funding=funding, federal_amount=fed).federal_rules_apply is federal_rules
+
+
+@pytest.mark.parametrize("amount,quotes", [(99_999, 1), (100_000, 1), (100_001, 2), (249_999, 2)])
+def test_small_business_quote_boundary(amount, quotes):
+    # BUS-43 p.25 C.1(a)/(b): 2 quotes only when "greater than $100,000"
+    assert ev(amount=amount, source_selection="small_business").thresholds.small_business_quotes == quotes
+
+
+def test_small_business_ceiling_conflict_flagged_at_250k():
+    r = ev(amount=250_000, source_selection="small_business")
+    assert r.competitive_bid_required is True          # keeps the SSPR form's "<$250k"
+    assert r.has_flag("SB_CEILING_CONFLICT")
+    assert "up to $250,000" in r.to_prompt_context()
+
+
+def test_federal_reference_thresholds_current():
+    ctx = engine.evaluate(PurchaseRequest(), topics={"federal", "sat", "micro"}).to_prompt_context()
+    assert "$15,000" in ctx and "$350,000" in ctx
+    assert "$10,000" not in ctx and "$250,000" not in ctx
 
 
 def test_fully_federal_under_10k_still_federal():
@@ -295,7 +330,9 @@ def test_nl_mixed_funding_q14():
           "and $13,000 from departmental discretionary funds. Can the $13,000 portion just follow UC standard "
           "procurement rules since it's not federal money?")
     assert r.funding.federal_amount == 12_000 and r.funding.total == 25_000
-    assert r.federal_rules_apply is True
+    # $12K federal grant money is below the SSPR form's $50K grant threshold (was federal
+    # under the 2021 FAQ's $10K trigger)
+    assert r.federal_rules_apply is False
 
 
 def test_nl_mixed_funding_q15():

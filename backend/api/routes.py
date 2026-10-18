@@ -34,6 +34,13 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     sources: list[dict]
+    citations: list[dict] = Field(default_factory=list)
+    rule_sources: list[dict] = Field(default_factory=list)
+    determination: str | None = None
+    intent: str | None = None
+    refused: bool = False
+    refusal_reason: str | None = None
+    llm_called: bool = False
 
 
 @router.get("/health")
@@ -63,4 +70,4 @@ def ask_endpoint(
         raise HTTPException(
             503, "The assistant is temporarily unavailable. Please try again later."
         ) from None
-    return AskResponse(answer=result["answer"], sources=result["sources"])
+    return AskResponse.model_validate(result)
