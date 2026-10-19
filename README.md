@@ -2,19 +2,6 @@
 
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
-## Develop integration
-
-`develop` combines `auth`, main, and all five open PR branches for team testing.
-The team's RAG, ingestion, rules, and evaluation code is preserved unchanged,
-including the DOCX citation fix and the two evaluation scripts from PRs #7–#9.
-FastAPI still verifies Firebase identity and account approval. Department, role,
-and clearance remain server-owned profile fields; **document filtering is deferred
-to the RAG teammate**. Approved accounts currently share the same indexed corpus.
-
-See [the branch/PR review](docs/develop-integration.md),
-[authentication setup](docs/auth-setup.md), and [chat integration](docs/policy-chat.md).
-The figures below are main's historical baseline, not a new develop evaluation.
-
 ## Current Status (October 12, 2026)
 
 Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC policy documents:
