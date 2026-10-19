@@ -92,53 +92,120 @@ agile-sourcing/
 └── README.md
 ```
 
-## Setup
+## First-time setup
 
-Use Python **3.12 or 3.13** for the team's unchanged pipeline (the DOCX citation
-PR uses Python 3.12 f-string syntax); CI uses 3.13. Use Node 22.13+ and Corepack/pnpm.
-Commands below assume macOS/Linux and start at the repository root.
+Install **Git**, **Python 3.12**, **Node.js 22.13+ with Corepack**, and **Ollama**
+before starting. The commands below use macOS/Linux shell syntax. Run them from
+the repository root unless a step says otherwise.
+
+### 1. Clone the development branch
 
 ```sh
 git clone --branch develop https://github.com/Alvarez-Jose/agile-sourcing.git
 cd agile-sourcing
-python3.13 -m venv venv
-./venv/bin/python -m pip install -r requirements.txt
+```
+
+### 2. Create a virtual environment and install dependencies
+
+```sh
+python3.12 -m venv venv
+./venv/bin/python -m pip install --upgrade pip setuptools wheel
+./venv/bin/python -m pip install -r requirements.txt && ./venv/bin/python -m pip check
+cd frontend
+corepack pnpm install --frozen-lockfile
+cd ..
+```
+
+Wait for both installations to finish successfully before continuing.
+
+### 3. Configure Firebase authentication
+
+```sh
 mkdir -p secret
 ```
 
-Configure `secret/.env` and authorized backend Firebase Admin credentials using
-[the auth guide](docs/auth-setup.md). This directory is excluded from Git.
-Google OAuth must authorize the extension's actual redirect URL.
+Obtain the team's Firebase configuration and authorized Admin SDK JSON privately,
+or configure your own Firebase project using the [auth guide](docs/auth-setup.md).
+Place the shared environment file at `secret/.env` and the Admin JSON inside
+`secret/`. These files are ignored by Git.
+
+<!-- In `secret/.env`, set `GOOGLE_APPLICATION_CREDENTIALS` to the JSON filename and
+`VITE_API_BASE_URL=http://localhost:8000`, alongside the Firebase and Google OAuth
+values listed in the auth guide. Register your browser extension's actual redirect
+URL in the Google OAuth client as described there. -->
+
+### 4. Start Ollama and download the model
+
+Open the Ollama application, or run this in a separate terminal and leave it running:
+
+```sh
+ollama serve
+```
+
+If port 11434 is already in use and `ollama list` succeeds, Ollama is already
+running. In your setup terminal, download the model:
 
 ```sh
 ollama pull qwen3:8b
-# Put the team's policy PDFs/DOCX in data/raw_policies/.
-# Then use their original ingestion entry point from the repository root:
+ollama list
+```
+
+### 5. Add policy documents and build the index
+
+```sh
+mkdir -p data/raw_policies
+```
+
+Obtain the team's policy PDFs/DOCX and place them directly in `data/raw_policies/`.
+The full document collection is not included in Git. For a small demo corpus,
+you can download the reviewed BUS-43 and SSPR starter documents instead:
+
+```sh
+./venv/bin/python -m scripts.download_starter_policies
+```
+
+Once the documents are present, build the Chroma index:
+
+```sh
 ./venv/bin/python -m scripts.ingest_policies --ingest
 ```
 
-The main pipeline reads the collection named `uc_policies`. The older source-index
-publisher's versioned collections are separate and do not replace this ingestion
-step. Source/graph review tools remain available but are not used for chat filtering.
+The script should report how many chunks it stored in
+`data/embeddings/chroma_store`. The first run downloads the embedding model;
+the reranking model downloads when chat first loads.
 
-Run in separate terminals:
+### 6. Run the backend and extension
+
+Keep Ollama running. Open two more terminals and navigate to your cloned
+`agile-sourcing` directory in each.
+
+**Backend terminal:**
 
 ```sh
-# Terminal 1; unnecessary if Ollama is already running
-ollama serve
-# Terminal 2, repository root
 ./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
-# Terminal 3, repository root
+```
+
+**Extension terminal:**
+
+```sh
 cd frontend
-corepack pnpm install --frozen-lockfile
 corepack pnpm dev
 ```
 
-Sign in with Google, have an administrator approve `users/{uid}` in Firestore, and
-sync the session in extension settings. `GET /api/health` is public. Auth/health do
-not import the RAG stack; optional `RAG_WARM_UP=1` invokes the team's warm-up at
-startup. Launch the server from the repository root because the team pipeline uses
-relative data paths.
+WXT should open a development browser. If loading manually in Chrome, enable
+Developer mode at `chrome://extensions`, choose **Load unpacked**, and select
+`frontend/.output/chrome-mv3-dev`.
+
+Check the API from another terminal:
+
+```sh
+curl http://localhost:8000/api/health
+```
+
+Expect `{"status":"ok"}`. This checks the API; test chat separately. Sign in with
+Google, have an administrator set `users/{uid}.is_approved` to boolean `true` in
+Firestore, then click **Sync Session with Backend** in extension settings. Try:
+**How should I document price reasonableness on the SSPR form?**
 
 ## Testing
 
@@ -160,8 +227,7 @@ The team's RAG tools remain unchanged:
 
 The existing benchmark runner retains its own defaults and output format. Its saved
 rows omit the `sources`/`rule_sources` needed by the citation checker; supply saved
-complete `/api/ask` responses to that checker. These scripts and their known gaps
-remain owned by the RAG teammate. See [the integration review](docs/develop-integration.md).
+complete `/api/ask` responses to that checker. 
 
 ## Key Rules the System Enforces
 

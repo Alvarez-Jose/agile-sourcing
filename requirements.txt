@@ -1,5 +1,6 @@
 # ---- Core ----
 fastapi==0.136.3
+starlette==1.9.0
 uvicorn[standard]==0.49.0
 python-dotenv==1.0.1
 pydantic==2.13.4
@@ -22,15 +23,18 @@ tiktoken==0.13.0
 
 # ---- Embeddings ----
 sentence-transformers==5.5.1
+numpy==2.5.4
 scikit-learn==1.6.1
 
 # ---- PDF Processing ----
 pypdf==6.12.2
 pdfplumber==0.11.9
+pdfminer.six==20251230
 reportlab==4.5.1
 
 # ---- DOCX Processing ----
 python-docx==1.2.0
+lxml==6.1.3
 
 # ---- Document Generation ----
 jinja2==3.1.4
@@ -44,10 +48,13 @@ psycopg2-binary==2.9.9
 torch==2.8.0
 transformers==4.57.0
 peft==0.19.1
+# Supports the existing SFTConfig(max_seq_length=...) and SFTTrainer(tokenizer=...) calls.
+trl==0.15.2
 bitsandbytes==0.49.2
 sentencepiece==0.2.1
 accelerate==1.7.0
-datasets==3.6.0
+# ragas 0.4.3 requires datasets>=4.0.0.
+datasets==4.0.0
 
 # ---- Utilities ----
 httpx==0.28.1
@@ -67,3 +74,5 @@ black==26.5.1
 
 # ---- Firebase ----
 firebase-admin==6.5.0
+google-api-core==2.42.0
+google-auth==2.62.0
