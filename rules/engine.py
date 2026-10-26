@@ -177,7 +177,7 @@ class EvaluationResult:
         if self.thresholds:
             t = self.thresholds
             parts.append(f"Competitive bid required: {'YES' if t.competitive_bid_required else 'NO'} "
-                         f"(${t.evaluated_value:,.0f}; threshold $100,000"
+                         f"(${t.evaluated_value:,.0f}; threshold ${T.COMPETITIVE_BID_THRESHOLD:,}"
                          + (f"; exemption: {t.bid_exemption}" if t.bid_exemption and t.bid_threshold_exceeded else "") + ").")
             parts.append(f"SSPR required: {'YES' if t.sspr_required else 'NO'} (threshold ${t.sspr_threshold:,.0f}"
                          + (f"; sections {', '.join(t.sspr_sections)}" if t.sspr_required else "") + ").")

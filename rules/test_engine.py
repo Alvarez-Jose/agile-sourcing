@@ -4,6 +4,7 @@ import pytest
 
 from rules import EquipmentItem, PurchaseRequest, RuleEngine, parse_query, should_use_rule_engine
 from rules import form_router as F
+from rules import thresholds as T
 
 engine = RuleEngine()
 
@@ -211,6 +212,26 @@ def test_fully_federal_under_10k_still_federal():
     r = ev(amount=8_000, funding="federal_grant")
     assert r.federal_rules_apply is True
     assert F.DEBARMENT in r.form_names
+
+
+def test_answer_header_uses_bid_threshold_constant(monkeypatch):
+    # AGENTS.md #1: no hardcoded dollar threshold outside rules/. if this literal ever
+    # comes back in engine.py's to_answer_header, the header drifts silently on a policy
+    # update while the YES/NO booleans stay right
+    monkeypatch.setattr(T, "COMPETITIVE_BID_THRESHOLD", 123_456)
+    r = ev(amount=50_000)
+    assert "threshold $123,456" in r.to_answer_header()
+
+
+def test_certified_cost_pricing_form_uses_threshold_constant(monkeypatch):
+    # the trigger is evaluated in thresholds.py but the form detail string lives in
+    # form_router.py, so both modules must read the constant
+    monkeypatch.setattr(T, "CERTIFIED_COST_PRICING_THRESHOLD", 1_234_567)
+    monkeypatch.setattr(F, "CERTIFIED_COST_PRICING_THRESHOLD", 1_234_567)
+    r = ev(amount=1_500_000, funding="federal_contract", source_selection="sole_source",
+           sole_source_justification="one_of_a_kind", commercial_item=False)
+    detail = next(f.reason for f in r.forms if f.name == F.CERTIFIED_COST_PRICING)
+    assert "$1,234,567 or more" in detail
 
 
 # sole source
