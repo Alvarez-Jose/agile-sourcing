@@ -5,7 +5,8 @@
 from rules.category_flags import CategoryResult
 from rules.funding_rules import FundingDetermination
 from rules.models import FormRequirement
-from rules.thresholds import ANTI_LOBBYING_THRESHOLD, ThresholdDetermination
+from rules.thresholds import (ANTI_LOBBYING_THRESHOLD, CERTIFIED_COST_PRICING_THRESHOLD,
+                               ThresholdDetermination)
 
 SSPR = "SSPR Form"
 FEDERAL_FUNDS_CHECKLIST = "Federal Funds Checklist"
@@ -45,7 +46,8 @@ def route_forms(funding: FundingDetermination, thresholds: ThresholdDeterminatio
 
     if thresholds.certified_cost_pricing_required:
         forms.append(FormRequirement(CERTIFIED_COST_PRICING,
-                                     "sole-sourced federal non-commercial contract order of $2,500,000 or more",
+                                     f"sole-sourced federal non-commercial contract order of "
+                                     f"${CERTIFIED_COST_PRICING_THRESHOLD:,} or more",
                                      "FAR 15.403-4"))
 
     if categories.needs_data_security_appendix:
