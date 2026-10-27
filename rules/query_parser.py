@@ -212,6 +212,8 @@ def _equipment_items(text: str, amounts: list) -> list:
 
 
 def parse_query(text: str) -> ParsedQuery:
+    if not isinstance(text, str):
+        raise TypeError("question must be a str")
     topics = {t for t, p in TOPIC_PATTERNS.items() if p.search(text)}
     amounts = extract_amounts(text)
     concrete = [a for a in amounts if not a.reference]
