@@ -26,7 +26,12 @@ Thumbs.db
 # Data
 data/raw/*.pdf
 data/raw/*.csv
+data/raw/*.docx
 data/raw_policies/
+# alternate corpus location accepted by scripts/ingest_policies.py; policy
+# documents must never be committed
+data/policies/*
+!data/policies/.gitkeep
 data/embeddings/chroma_store/
 *.sqlite
 *.db
