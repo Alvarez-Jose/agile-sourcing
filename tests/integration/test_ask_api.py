@@ -22,6 +22,7 @@ def client(monkeypatch):
     stub.ask = lambda question, think=False: {
         "answer": "Yes [1].", "sources": [SOURCE, UNCITED], "citations": [SOURCE],
         "rule_sources": [RULE_SOURCE], "determination": "=== RULE ENGINE ===", "intent": "threshold",
+        "llm_called": True,
     }
     stub.warm_ups = 0
 
@@ -55,3 +56,25 @@ def test_ask_returns_citations_with_supporting_text(client):
     assert body["citations"][0]["text"] and body["citations"][0]["section"]
     assert body["rule_sources"][0]["quote"] == "$100,000 or more"
     assert body["refused"] is False and body["refusal_reason"] is None
+
+
+@pytest.mark.parametrize("question", ["", "   \n\t", "x" * 2001])
+def test_invalid_question_is_rejected_before_the_pipeline(client, question):
+    assert client.post("/api/ask", json={"question": question}).status_code == 422
+
+
+def test_pipeline_failure_returns_503(client, monkeypatch):
+    # routes.py imports ask directly, so patching the stub module is not enough
+    from backend.api import routes
+
+    def boom(question, think=False):
+        raise RuntimeError("ollama down")
+    monkeypatch.setattr(routes, "ask", boom)
+
+    assert client.post("/api/ask", json={"question": "bid threshold?"}).status_code == 503
+
+
+def test_response_reports_llm_called_and_elapsed(client):
+    body = client.post("/api/ask", json={"question": "bid threshold?"}).json()
+    assert body["llm_called"] is True
+    assert isinstance(body["elapsed_ms"], int) and body["elapsed_ms"] >= 0
