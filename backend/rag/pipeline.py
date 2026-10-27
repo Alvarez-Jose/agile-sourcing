@@ -4,6 +4,7 @@ RAG pipeline entry point for the FastAPI backend.
 Call ask() from your API routes to get answers from the UC policy corpus.
 """
 
+import logging
 import re
 from pathlib import Path
 
@@ -12,6 +13,7 @@ import ollama
 from sentence_transformers import SentenceTransformer
 
 from backend.rag.citations import citation_line
+from backend.rag.grounding import evaluate_response
 from rag_pipeline.parser.pdf_extractor import extract_pdf
 from rag_pipeline.parser.docx_extractor import extract_docx
 from rag_pipeline.parser.section_parser import chunk_by_section
@@ -23,6 +25,8 @@ from rules import RuleEngine, parse_query, should_use_rule_engine
 from rules.answer_format import (format_rule_answer, is_pure_threshold_question, source_citations,
                                  templated_answer)
 from rules.query_parser import RULE_TOPICS
+
+logger = logging.getLogger("agile_sourcing.rag")
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
@@ -216,9 +220,12 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     # pure threshold question: answer straight from the engine, no retrieval or LLM
     if rule_result and is_pure_threshold_question(rule_result, intent["intent"]):
         citations = source_citations(rule_result)
-        return {"answer": templated_answer(rule_result), "sources": citations, "citations": citations,
+        answer = templated_answer(rule_result)
+        rule_sources = [s.to_dict() for s in rule_result.sources]
+        return {"answer": answer, "sources": citations, "citations": citations,
                 "intent": intent["intent"], "determination": rule_result.to_prompt_context(),
-                "rule_sources": [s.to_dict() for s in rule_result.sources], "refused": False,
+                "rule_sources": rule_sources, "refused": False,
+                "grounding": _grounding(question, answer, citations, rule_sources),
                 "llm_called": False}
 
     retrieval_query = _rewrite_query(question, intent)
@@ -241,7 +248,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
                         "score": round(score, 3) if score is not None else None})
 
     if not rule_result and scores and scores[0] is not None and scores[0] < REFUSAL_MIN_RERANK:
-        return _refusal(sources, intent, "low_retrieval_score")
+        return _refusal(question, sources, intent, "low_retrieval_score")
 
     mode_tag = "/think" if think else "/no_think"
     if rule_result:
@@ -283,7 +290,7 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         answer = ""     # the engine's determination still answers it (format_rule_answer)
 
     if not rule_result and VAGUE_ANSWER.search(answer):
-        return _refusal(sources, intent, "llm_found_no_answer")
+        return _refusal(question, sources, intent, "llm_found_no_answer")
 
     if rule_result:
         answer = format_rule_answer(rule_result, answer)
@@ -291,22 +298,35 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     for s in sources:
         s["cited"] = f"[{s['ref']}]" in answer
 
+    rule_sources = [s.to_dict() for s in rule_result.sources] if rule_result else []
     return {
         "answer": answer,
         "sources": sources,
         "citations": [s for s in sources if s["cited"]],
         "intent": intent["intent"],
         "determination": rule_result.to_prompt_context() if rule_result else None,
-        "rule_sources": [s.to_dict() for s in rule_result.sources] if rule_result else [],
+        "rule_sources": rule_sources,
         "refused": False,
+        "grounding": _grounding(question, answer, sources, rule_sources),
         "llm_called": True,
     }
 
 
-def _refusal(sources: list, intent: dict, reason: str) -> dict:
+def _grounding(question: str, answer: str, sources: list, rule_sources: list) -> dict:
+    # diagnostics only: flags invalid [n] refs and dollar amounts absent from the cited
+    # evidence. never rewrites the answer or changes a refusal
+    result = evaluate_response({"question": question, "answer": answer,
+                                "sources": sources, "rule_sources": rule_sources})
+    if result["review_needed"]:
+        logger.warning("ungrounded answer: %s", result)
+    return result
+
+
+def _refusal(question: str, sources: list, intent: dict, reason: str) -> dict:
     # closest sections still come back in "sources" so a user can check them
     for s in sources:
         s["cited"] = False
     return {"answer": NOT_FOUND_ANSWER, "sources": sources, "citations": [], "intent": intent["intent"],
             "determination": None, "rule_sources": [], "refused": True, "refusal_reason": reason,
+            "grounding": _grounding(question, NOT_FOUND_ANSWER, sources, []),
             "llm_called": reason != "low_retrieval_score"}

@@ -14,6 +14,7 @@ SOURCE = {"policy": "BFB-BUS-43", "page": "9", "ref": 1, "section": "C. Expendit
           "text": "UC competitively bid all purchases ... $100,000 or more", "score": 4.2, "cited": True}
 UNCITED = {**SOURCE, "ref": 2, "cited": False}
 RULE_SOURCE = {"document_id": "bus-43", "page": 9, "quote": "$100,000 or more", "version": "Interim"}
+GROUNDING = {"review_needed": False, "invalid_references": "", "unmatched_dollar_amounts": ""}
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def client(monkeypatch):
     stub.ask = lambda question, think=False: {
         "answer": "Yes [1].", "sources": [SOURCE, UNCITED], "citations": [SOURCE],
         "rule_sources": [RULE_SOURCE], "determination": "=== RULE ENGINE ===", "intent": "threshold",
-        "llm_called": True,
+        "grounding": GROUNDING, "llm_called": True,
     }
     stub.warm_ups = 0
 
@@ -78,3 +79,8 @@ def test_response_reports_llm_called_and_elapsed(client):
     body = client.post("/api/ask", json={"question": "bid threshold?"}).json()
     assert body["llm_called"] is True
     assert isinstance(body["elapsed_ms"], int) and body["elapsed_ms"] >= 0
+
+
+def test_grounding_is_passed_through(client):
+    body = client.post("/api/ask", json={"question": "bid threshold?"}).json()
+    assert body["grounding"] == GROUNDING
