@@ -1,0 +1,10 @@
+metric,count
+total,4
+evaluated,4
+flagged,3
+execution_errors,0
+refusals,0
+invalid_citations,1
+empty_evidence,0
+unmatched_dollar_amounts,3
+question_amounts_not_in_evidence,1
