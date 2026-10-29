@@ -132,6 +132,10 @@ DOC_TYPE_MAP["SSPR_Official_UCSC_2025-12.pdf"] = "Procurement"
 POLICY_MAP["BUS-43_Interim_2026-01-26.pdf"] = "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
 DOC_TYPE_MAP["BUS-43_Interim_2026-01-26.pdf"] = "Procurement"
 
+# official 48 CFR Part 12 (govinfo.gov), added for the federal-contract commercial items questions
+POLICY_MAP["CFR-2025-title48-vol1-part12.pdf"] = "FAR Part 12: Acquisition of Commercial Products and Commercial Services (48 CFR, 10-1-25 Edition)"
+DOC_TYPE_MAP["CFR-2025-title48-vol1-part12.pdf"] = "Procurement"
+
 
 def _key(filename: str) -> str:
     # downloaded names differ only in punctuation/spacing ("BUS-43_..._Main Policy.pdf"

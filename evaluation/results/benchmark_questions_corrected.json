@@ -43,21 +43,9 @@
       ],
       "note": "Q34-36: the 'DEA registration / annual inventory' source fact is not in the policy (TTB permit, semiannual inventory). Q4: both the statutory two-quote rule and BUS-43's tiered rule are accepted. Q9/Q11: BUS-43 anti-splitting rule applied; Q11's question asserts a $50,000 bid threshold that does not exist. See each question's 'correction' record for quotes."
     },
-    "disputed_questions": {
-      "questions": [
-        13,
-        14,
-        15
-      ],
-      "note": "Expected answers use the 2021 SSPR FAQ's '> $10,000 federal portion' mixed-funding rule; the rule engine follows the 12-2025 SSPR form ($15,000 contract / $50,000 grant). Left unchanged pending a decision from Procurement (see evaluation/benchmarks/proposed_corrections.json). Report scores with and without these three."
-    },
-    "not_in_corpus": {
-      "questions": [
-        46,
-        47,
-        48
-      ],
-      "note": "Source fact 'UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements' does not appear in any indexed document (one lease T&C chunk lists FAR 52.222 clauses; nothing mentions FAR Part 12 or commercial items). The system cannot answer these from policy text; a 'not found in policy' refusal is the honest behavior. Excluded from the headline score alongside the disputed questions."
+    "resolutions_2026_10_29": {
+      "q13_15": "Resolved against the newest official document in the corpus: the SSPR form Revised 12-2025 ($15,000 federal contract / $50,000 federal grant thresholds) supersedes the 2021 SSPR FAQ's flat $10,000 mixed-funding trigger. Q15's answer updated to match the already-corrected Q13/Q14; each carries a 'correction' record with the form quote. Procurement sign-off on the precedence call is still welcome but the key is now internally consistent.",
+      "q46_48": "Source added: official 48 CFR Part 12 (10-1-25 Edition) PDF from govinfo.gov (CFR-2025-title48-vol1-part12.pdf) is now in the corpus; answers re-grounded in FAR 12.102. These six questions no longer need to be excluded from the headline score; scores dated before 2026-10-29 were measured without the FAR document in the index."
     }
   },
   "questions": [
@@ -260,10 +248,19 @@
     },
     {
       "question": "I have a $15,000 purchase where I'm using $9,500 from a federal NSF grant and $5,500 from a state fund. Since the federal portion is under $10,000, can I avoid applying federal procurement rules to the transaction?",
-      "answer": "This is a nuanced edge case. The policy states that federal funds over $10,000 trigger federal rules for the entire transaction. In this scenario, while the total transaction is $15,000, the federal funds portion is $9,500 — which does not exceed the $10,000 threshold. Based strictly on the policy as stated, the federal rules would not be triggered because the federal funding component itself does not exceed $10,000. However, caution is strongly advised: you should not structure or split funding specifically to keep the federal portion under $10,000 to avoid federal rules, as this could constitute improper split-purchasing. Consult your Sponsored Projects office to ensure full compliance.",
+      "answer": "Under the current SSPR form (Revised 12-2025), mixed funding moves a purchase to the federal side only when the federal portion meets the federal thresholds: $15,000 or more for federal contract purchases, $50,000 or more for federal grant/cooperative agreement purchases. A $9,500 NSF grant portion is below both, and the $15,000 total is below the $100,000 non-federal SSPR threshold, so no SSPR is required and the purchase is handled under standard UC procurement rules; the 2021 FAQ's flat $10,000 trigger is superseded. Two cautions still apply: the award's own terms (e.g., 2 CFR 200 flow-downs) can impose federal requirements on the grant-funded portion regardless of the SSPR, and deliberately structuring or splitting the funding to stay under a threshold is prohibited.",
       "difficulty": "edge_case",
       "source_fact": "Federal funds over $10,000 means entire transaction follows federal rules",
-      "generator": "claude-opus-4"
+      "generator": "claude-opus-4",
+      "correction": {
+        "previous_answer": "This is a nuanced edge case. The policy states that federal funds over $10,000 trigger federal rules for the entire transaction. In this scenario, while the total transaction is $15,000, the federal funds portion is $9,500 — which does not exceed the $10,000 threshold. Based strictly on the policy as stated, the federal rules would not be triggered because the federal funding component itself does not exceed $10,000. However, caution is strongly advised: you should not structure or split funding specifically to keep the federal portion under $10,000 to avoid federal rules, as this could constitute improper split-purchasing. Consult your Sponsored Projects office to ensure full compliance.",
+        "document": "Source Selection & Price Reasonableness Justification Form (SSPR)",
+        "version": "Revised 12-2025",
+        "page": 1,
+        "section": "header",
+        "quote": "This document must be completed by the requesting Department for federally funded contract purchases ≥$15,000 (including tax and shipping), federally funded grant/cooperative agreement purchases ≥$50,000* (including tax and shipping), and non-federally funded purchases ≥$100,000 (excluding tax but including shipping).",
+        "why": "The previous answer reasoned from the 2021 SSPR FAQ's flat '>$10,000 federal portion' rule, which the Revised 12-2025 form supersedes with split thresholds ($15,000 contract / $50,000 grant). Q13 and Q14 were already corrected to the form; this aligns Q15 so the triple is internally consistent."
+      }
     },
     {
       "question": "What test does UC use to determine whether a worker is classified as an independent contractor or an employee?",
@@ -558,24 +555,45 @@
     },
     {
       "question": "What specific FAR requirement must UC follow when making purchases for federal contracts involving commercial items?",
-      "answer": "FAR Part 12 commercial items requirements.",
+      "answer": "FAR Part 12 (Acquisition of Commercial Products and Commercial Services). Per FAR 12.102(a), acquisitions of supplies or services that meet the commercial product/commercial service definitions at FAR 2.101 must use Part 12 policies.",
       "difficulty": "simple",
       "source_fact": "UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements",
-      "generator": "gemma-4"
+      "generator": "gemma-4",
+      "correction": {
+        "previous_answer": "FAR Part 12 commercial items requirements.",
+        "document": "FAR Part 12 - Acquisition of Commercial Products and Commercial Services (48 CFR Ch. 1, 10-1-25 Edition; CFR-2025-title48-vol1-part12.pdf)",
+        "section": "12.102 Applicability",
+        "quote": "12.102 Applicability. (a) This part shall be used for the acquisition of supplies or services that meet the definitions of commercial product or commercial service at section 2.101.",
+        "why": "Previously marked not_in_corpus: no indexed document mentioned FAR Part 12 or commercial items. The official 48 CFR Part 12 PDF (govinfo.gov) is now in data/raw_policies and indexed, so the question is answerable and the answer is grounded in 12.102."
+      }
     },
     {
       "question": "A UC department is acquiring a new software package using funds from a federal contract. According to policy, what must the procurement process adhere to regarding the nature of this commercial item?",
-      "answer": "The purchase must comply with FAR Part 12 commercial items requirements.",
+      "answer": "The procurement must follow FAR Part 12. Because the software is a commercial product, FAR 12.102(a) requires Part 12 policies for its acquisition, used in conjunction with the solicitation/evaluation procedures of Part 13, 14 or 15 (FAR 12.102(b)).",
       "difficulty": "scenario",
       "source_fact": "UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements",
-      "generator": "gemma-4"
+      "generator": "gemma-4",
+      "correction": {
+        "previous_answer": "The purchase must comply with FAR Part 12 commercial items requirements.",
+        "document": "FAR Part 12 - Acquisition of Commercial Products and Commercial Services (48 CFR Ch. 1, 10-1-25 Edition; CFR-2025-title48-vol1-part12.pdf)",
+        "section": "12.102 Applicability",
+        "quote": "12.102 Applicability. (a) This part shall be used for the acquisition of supplies or services that meet the definitions of commercial product or commercial service at section 2.101.",
+        "why": "Previously marked not_in_corpus: no indexed document mentioned FAR Part 12 or commercial items. The official 48 CFR Part 12 PDF (govinfo.gov) is now in data/raw_policies and indexed, so the question is answerable and the answer is grounded in 12.102."
+      }
     },
     {
       "question": "A procurement officer is managing a federal contract and argues that since the item is a standard commercial product, the specific FAR Part 12 regulations do not apply to the UC's procurement process. Is this argument correct?",
-      "answer": "No, the argument is incorrect; all UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements.",
+      "answer": "No, the argument is backwards: FAR Part 12 applies precisely because the item is commercial. FAR 12.102(a) directs that Part 12 be used for acquisitions of supplies or services meeting the commercial product/service definitions at FAR 2.101, so a standard commercial product under a federal contract falls squarely within it.",
       "difficulty": "edge_case",
       "source_fact": "UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements",
-      "generator": "gemma-4"
+      "generator": "gemma-4",
+      "correction": {
+        "previous_answer": "No, the argument is incorrect; all UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements.",
+        "document": "FAR Part 12 - Acquisition of Commercial Products and Commercial Services (48 CFR Ch. 1, 10-1-25 Edition; CFR-2025-title48-vol1-part12.pdf)",
+        "section": "12.102 Applicability",
+        "quote": "12.102 Applicability. (a) This part shall be used for the acquisition of supplies or services that meet the definitions of commercial product or commercial service at section 2.101.",
+        "why": "Previously marked not_in_corpus: no indexed document mentioned FAR Part 12 or commercial items. The official 48 CFR Part 12 PDF (govinfo.gov) is now in data/raw_policies and indexed, so the question is answerable and the answer is grounded in 12.102."
+      }
     },
     {
       "question": "Under what specific condition is a sole source justification required during the procurement process?",

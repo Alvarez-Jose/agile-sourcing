@@ -62,6 +62,11 @@ DOCUMENTS = {
         version="Revised 9.19.2025",
         files=("BUS-63 Risk Matrix 9-19-2025.pdf",),
         url=None),
+    "far-part-12": dict(
+        title="FAR Part 12: Acquisition of Commercial Products and Commercial Services",
+        version="48 CFR Ch. 1 (10-1-25 Edition)",
+        files=("CFR-2025-title48-vol1-part12.pdf",),
+        url="https://www.govinfo.gov/content/pkg/CFR-2025-title48-vol1/pdf/CFR-2025-title48-vol1-part12.pdf"),
     # not in the corpus: checked by hand, not by the quote test
     "far-2.101": dict(
         title="FAR 2.101 Definitions (inflation adjustment, 90 FR 41872)",
