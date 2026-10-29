@@ -12,6 +12,10 @@ cd frontend
 pnpm install
 ```
 ### Running the extension
+The backend and extension share `secret/.env` at the repository root. See
+[auth setup](../docs/auth-setup.md) for environment variables and Admin credentials.
+Restart WXT after changing that file.
+
 To run the frontend, run the following command in the frontend folder:
 ```sh
 pnpm dev
