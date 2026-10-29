@@ -67,6 +67,9 @@ def enrich_chunk(chunk: dict, enrichment: dict) -> dict:
     extra = enrichment.get(key)
     if extra:
         parts = ([extra["header"]] if extra.get("header") else []) + extra.get("questions", [])
+        # enriched text is for retrieval only (BM25/embedder/reranker); the LLM gets the
+        # raw chunk back via metadata, so generated text never dilutes the answer context
+        chunk["raw_text"] = chunk["text"]
         chunk["text"] = "\n".join(parts) + "\n" + chunk["text"]
     return chunk
 
@@ -109,6 +112,8 @@ def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
             if prefix_headers:
                 for c in chunks:
                     c["text"] = chunk_header(c) + c["text"]
+                    if "raw_text" in c:
+                        c["raw_text"] = chunk_header(c) + c["raw_text"]
             all_chunks.extend(chunks)
             print(f"    -> {len(chunks)} chunks")
 
@@ -151,6 +156,7 @@ def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
                     "doc_type":    c.get("doc_type", ""),
                     "page":        str(c.get("page", "")),
                     "section":     c.get("section", ""),
+                    "raw_text":    c.get("raw_text", ""),
                 }
                 for c in batch
             ],
@@ -202,6 +208,7 @@ def ask(question, collection, think=False):
 
     context = ""
     for i, (chunk, meta) in enumerate(zip(chunks, metas)):
+        chunk  = meta.get("raw_text") or chunk
         source = meta.get("policy_name") or meta.get("source", "Unknown")
         page   = meta.get("page", "")
         ref    = f"{source}, p.{page}" if page else source

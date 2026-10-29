@@ -269,6 +269,9 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     context = ""
     sources = []
     for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
+        # enriched collections carry the un-enriched chunk in raw_text; serve that to the
+        # LLM so generated headers/questions aid retrieval without eating answer context
+        chunk = meta.get("raw_text") or chunk
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
         context += f"\n[{i+1}] {policy}, p.{page}\n{chunk}\n"
