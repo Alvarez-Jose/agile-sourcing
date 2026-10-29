@@ -2,9 +2,9 @@
 
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
-## Current Status (October 17, 2026)
+## Current Status (October 29, 2026)
 
-Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC policy documents:
+Policy Q&A pipeline, measured on the 60-question benchmark (October 17 run, across the then-32 UC/UCSC policy documents):
 
 | Metric | Default (`think` off) | With `--think` |
 |--------|------|------|
@@ -21,6 +21,19 @@ Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC pol
 - The answer key is AI-generated and has been corrected where it contradicted the policy text (13 questions so far, each with the quote and page in `evaluation/results/benchmark_questions_corrected.json`); real buyer questions are pending from the procurement team.
 - Single run per configuration; expect about ±3 questions of run-to-run variation (a repeat of the same qwen3:32b configuration scored 47 and 44).
 - **The judge matters.** The table above is graded by qwen3:8b. Re-graded by qwen3:32b (`JUDGE_MODEL=qwen3:32b`), the same answers score **41 / 15 / 4** (default) and **46 / 13 / 1** (`--think`): the 8b judge passes about 9 answers the 32b judge calls partial. Use the 32b-judged numbers when comparing models.
+
+### October 29, 2026: corrected key, FAR Part 12, and a fine-tuned embedder
+
+All numbers below are judged by qwen3:32b on the fully corrected answer key (all 60 questions now answerable — see the resolution bullet above), with the official 48 CFR Part 12 PDF added to the corpus (33 documents, 3,216 chunks). They are not comparable to earlier scores, which used the older key and corpus.
+
+| Configuration (qwen3:8b answerer, default mode) | Correct / partial / wrong |
+|---|---|
+| Base embedder (`all-MiniLM-L6-v2`, public default) | 40 / 13 / 7 |
+| **Fine-tuned embedder** (private `EMBED_MODEL` slot) | **41 / 13 / 6** |
+
+- **Embedder fine-tune (adopted).** MiniLM fine-tuned on 12,345 generated (question, chunk) pairs; on a chunk-level held-out split, retrieval accuracy@1 rose from 28.7% to 41.0% and accuracy@5 from 56.7% to 74.6%. The end-to-end gain (+1 correct / −1 wrong) is within run-to-run noise; the held-out gain is the evidence it generalizes to phrasings beyond the benchmark. Details: `evaluation/results/analysis/embedder_finetune_v1_2026-10-29.md`.
+- **Private model slots.** Fine-tuned weights live in a private Hugging Face repo and load via `EMBED_MODEL` + `HF_TOKEN`; unset, everything falls back to the public base models, so the repo works for everyone out of the box. Private training data ships in the repo as AES-256 ciphertext (`*.enc`, `scripts/vault.sh`); plaintext stays untracked.
+- **Chunk enrichment (tried, not adopted).** Contextual headers + likely questions per chunk scored no better than the baseline in either serving mode (36/60 and 39/60 vs 40/60); the generated questions were instead reused as the fine-tune training set. Details: `evaluation/results/analysis/enrichment_v1_2026-10-29.md`.
 
 ### Model comparison (October 16, 2026; rented A100, judge = qwen3:32b, default mode unless noted)
 
