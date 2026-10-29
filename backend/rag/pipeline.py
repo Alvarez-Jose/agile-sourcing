@@ -25,7 +25,7 @@ from rules.answer_format import (NOT_TEMPLATED_TOPICS, format_rule_answer, is_pu
 from rules.query_parser import RULE_TOPICS
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
-COLLECTION_NAME = "uc_policies"
+COLLECTION_NAME = os.environ.get("CHROMA_COLLECTION", "uc_policies")
 # fine-tuned weights drop in via env (a HF repo id or a local path); unset = public
 # base models, so the pipeline works for everyone out of the box
 EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")

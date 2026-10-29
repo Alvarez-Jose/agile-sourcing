@@ -28,7 +28,7 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 
 DATA_DIR        = Path("data/raw_policies")
 CHROMA_DIR      = "data/embeddings/chroma_store"
-COLLECTION_NAME = "uc_policies"
+COLLECTION_NAME = os.environ.get("CHROMA_COLLECTION", "uc_policies")
 # fine-tuned weights / enriched corpus drop in via env; unset = public base model
 # and plain chunks, so ingestion works for everyone out of the box
 EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
