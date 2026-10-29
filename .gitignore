@@ -31,6 +31,14 @@ data/embeddings/chroma_store/
 *.sqlite
 *.db
 
+# Private slots: fine-tuned weights, enriched corpus, training data, held-out evals.
+# The pipeline falls back to public base models when the env paths are unset
+# (EMBED_MODEL, RERANKER_MODEL, LLM_MODEL, ENRICHED_CORPUS_PATH).
+models/private/
+data/enriched/
+training/private/
+evaluation/private/
+
 #--------Node.gitignore----------
 # Logs
 logs

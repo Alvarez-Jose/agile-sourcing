@@ -10,6 +10,9 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
+import os
 import re
 from pathlib import Path
 
@@ -26,8 +29,11 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 DATA_DIR        = Path("data/raw_policies")
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
-EMBED_MODEL     = "all-MiniLM-L6-v2"
-LLM_MODEL       = "qwen3:8b"
+# fine-tuned weights / enriched corpus drop in via env; unset = public base model
+# and plain chunks, so ingestion works for everyone out of the box
+EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+ENRICHED_CORPUS_PATH = os.environ.get("ENRICHED_CORPUS_PATH")
+LLM_MODEL       = os.environ.get("LLM_MODEL", "qwen3:8b")
 TOP_K           = 8
 
 SYSTEM_PROMPT = (
@@ -42,6 +48,27 @@ print("Loading embedding model...")
 embedder     = SentenceTransformer(EMBED_MODEL)
 chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
 hybrid_retriever = None
+
+
+def load_enrichment() -> dict:
+    # optional per-chunk enrichment keyed by sha1 of the raw chunk text:
+    #   {"<sha1>": {"header": "...", "questions": ["...", ...]}, ...}
+    # generated offline (contextual header + likely questions); absent file = no-op
+    if not ENRICHED_CORPUS_PATH or not Path(ENRICHED_CORPUS_PATH).exists():
+        return {}
+    with open(ENRICHED_CORPUS_PATH, encoding="utf-8") as f:
+        enrichment = json.load(f)
+    print(f"Loaded enrichment for {len(enrichment)} chunks from {ENRICHED_CORPUS_PATH}")
+    return enrichment
+
+
+def enrich_chunk(chunk: dict, enrichment: dict) -> dict:
+    key = hashlib.sha1(chunk["text"].encode("utf-8")).hexdigest()
+    extra = enrichment.get(key)
+    if extra:
+        parts = ([extra["header"]] if extra.get("header") else []) + extra.get("questions", [])
+        chunk["text"] = "\n".join(parts) + "\n" + chunk["text"]
+    return chunk
 
 
 def chunk_header(chunk: dict) -> str:
@@ -61,6 +88,7 @@ def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
         print(f"ERROR: No files in {DATA_DIR}.")
         return None
 
+    enrichment = load_enrichment()
     all_chunks = []
 
     for f in sorted(files):
@@ -76,6 +104,8 @@ def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
 
             chunks = chunk_by_section(pages)
             chunks = [tag_chunk(c) for c in chunks]
+            if enrichment:
+                chunks = [enrich_chunk(c, enrichment) for c in chunks]
             if prefix_headers:
                 for c in chunks:
                     c["text"] = chunk_header(c) + c["text"]

@@ -26,7 +26,10 @@ from rules.query_parser import RULE_TOPICS
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
-EMBED_MODEL     = "all-MiniLM-L6-v2"
+# fine-tuned weights drop in via env (a HF repo id or a local path); unset = public
+# base models, so the pipeline works for everyone out of the box
+EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+RERANKER_MODEL  = os.environ.get("RERANKER_MODEL")   # None -> the reranker's public default
 # the Ollama client also honors OLLAMA_HOST, so a rented GPU box running Ollama is a
 # drop-in: OLLAMA_HOST=http://<box>:11434 LLM_MODEL=qwen3:32b python evaluation/benchmarks/run_benchmark.py
 LLM_MODEL       = os.environ.get("LLM_MODEL", "qwen3:8b")
@@ -105,7 +108,7 @@ def _get_retriever(collection):
 def _get_reranker():
     global _reranker
     if _reranker is None:
-        _reranker = Reranker()
+        _reranker = Reranker(RERANKER_MODEL)
     return _reranker
 
 
