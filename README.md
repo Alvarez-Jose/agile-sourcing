@@ -37,6 +37,49 @@ Policy Q&A pipeline, measured on the 60-question benchmark across 32 UC/UCSC pol
 
 Nine questions are answered correctly by none of the six default-mode models: four are the flagged disputed/not-in-corpus ones (Q13, 15, 46, 47); the other five (Q27, 34, 42, 49, 58) are benchmark or retrieval problems, not model problems. Remote results are in `evaluation/results/remote/`.
 
+### Pipeline comparison: rule-engine pipeline vs grounded pipeline (October 29, 2026)
+
+This branch merges the `auth` branch's retrieval stack (SQLite source index, policy
+graph, section retriever, span-verified "grounded" answers) alongside the rule-engine
+pipeline, and runs both on the same 60 questions, same LLM (qwen3:8b on an A100),
+same judge (qwen3:32b). Full analysis: `evaluation/results/analysis/ab_rules_vs_grounded_2026-10-29.md`.
+
+| | rule-engine pipeline (`/api/ask`) | grounded, as shipped | grounded, full corpus |
+|---|---|---|---|
+| Judge correct | **39 / 60** | 4 / 60 | 14 / 60 |
+| Correct + partial | **56 / 60** | 28 / 60 | 32 / 60 |
+| Flat wrong | **4** | 32 | 28 |
+| Refusals | **0** | 34 | 25 |
+| Median latency | **2.6 s** | 5.7 s | 9.5 s |
+
+Why the rule-engine pipeline wins:
+
+1. **Deterministic rules beat retrieval for thresholds.** Known thresholds, forms and
+   prohibitions are answered from the provenance-backed rule engine with a cited
+   quote — no LLM involved, so an 8B model can't get them wrong. The grounded
+   pipeline removed this layer and depends on retrieval + the LLM for everything.
+2. **It answers the question.** The grounded pipeline's manifest marks 31 of 33
+   documents unreviewed and its chat refuses review scopes, so as shipped it
+   retrieves from 2 documents and refuses 34/60 questions. Even over the full corpus
+   (`evaluation/benchmarks/build_grounded_index.py`) its span-verification loop
+   abstains on 25/60 whenever qwen3:8b fails twice to select valid quote spans.
+3. **3.7x faster**, because it ranks pre-built hybrid indexes instead of re-ranking
+   1,724 section candidates per question, and skips the JSON claim-repair loop.
+
+What the grounded pipeline does better — kept in the tree for future adoption: when
+it does answer it is rarely flat wrong (3 of its 35 real answers), and its citations
+carry exact source spans, byte offsets and page locations; its section-level
+retrieval and cross-policy reference hops are worth porting into the main retriever.
+
+Reproduce:
+
+```bash
+python evaluation/benchmarks/run_benchmark.py --pipeline rules --out a.json
+python -m evaluation.benchmarks.build_grounded_index    # one-time, for grounded-full
+python evaluation/benchmarks/run_benchmark.py --pipeline grounded-full --out b.json
+JUDGE_MODEL=qwen3:32b python evaluation/metrics/score.py a.json b.json --judge
+```
+
 Reproduce:
 
 ```bash
