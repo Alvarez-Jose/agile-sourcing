@@ -6,6 +6,7 @@ threshold engine is excluded until its rules have current provenance.
 
 from functools import lru_cache
 import json
+import os
 import re
 from threading import RLock
 
@@ -19,8 +20,11 @@ from rag_pipeline.retriever.section_retriever import (
     requested_sources_available,
 )
 
-LLM_MODEL = "qwen3:8b"
-EMBED_MODEL = "all-MiniLM-L6-v2"
+# same env slots as backend/rag/pipeline.py so A/B benchmarks run both pipelines
+# against the same models (and the same remote Ollama box via OLLAMA_HOST)
+LLM_MODEL = os.environ.get("LLM_MODEL", "qwen3:8b")
+EMBED_MODEL = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 _model_lock = RLock()
 INSUFFICIENT = "I couldn't find enough verified policy evidence available to your account to answer this question. Please check with Procurement."
 
@@ -166,7 +170,7 @@ def generate_answer(question, passages, think=False, correction=None):
             "instruction": "Repair the failed validation. Select numbered quote_ids from the supplied source spans; do not copy quotations. Select every supporting span when a clause crosses pages. Ensure numerical facts occur in those spans, or abstain.",
             "previous_response": correction if isinstance(correction, dict) else None,
         }
-    response = ollama.Client(host="http://127.0.0.1:11434", timeout=150).chat(
+    response = ollama.Client(host=OLLAMA_HOST, timeout=150).chat(
         model=LLM_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},

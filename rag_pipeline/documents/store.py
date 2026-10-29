@@ -1,6 +1,6 @@
 """Atomic SQLite source/graph index with scoped reads and foreign-key integrity."""
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 import json
 import os
@@ -143,7 +143,9 @@ def write_source_index(bundle: SourceIndexBundle, path: Path = DEFAULT_INDEX):
     try:
         descriptor = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         os.close(descriptor)
-        with sqlite3.connect(temporary) as db:
+        # sqlite3's context manager only commits; close explicitly or Windows keeps
+        # the file locked and the atomic os.replace below fails
+        with closing(sqlite3.connect(temporary)) as db, db:
             db.executescript(_SCHEMA)
             db.execute("INSERT INTO metadata VALUES (?, ?)", ("schema_version", "1"))
             db.execute(
