@@ -58,4 +58,4 @@ with the teammate rather than being changed during auth integration.
 
 Previous live tests of a modified intermediate pipeline are not validation of this
 final untouched version. Final verification and PR dispositions are recorded in
-[the integration review](develop-integration.md).
+[the integration review](../documentation/develop-integration.md).

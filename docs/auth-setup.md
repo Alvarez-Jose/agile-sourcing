@@ -76,7 +76,7 @@ uses separate versioned collections. Run the backend from the repository root to
 preserve the team's relative data paths. Embedding and reranking models download on
 first use if uncached. Pipeline failures return an availability response; inspect the
 FastAPI terminal for the cause. See [policy chat](policy-chat.md) and
-[the integration review](develop-integration.md).
+[the integration review](../documentation/develop-integration.md).
 
 ## Configure the extension
 

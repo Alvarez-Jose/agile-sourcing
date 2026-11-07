@@ -2,9 +2,52 @@
 # Launch the local backend, Ollama, and WXT from any working directory.
 set -euo pipefail
 PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PYTHON="$PROJECT_ROOT/venv/bin/python"
+# Prefer existing environments so a custom setup is never silently replaced.
+if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+  for name in venv .venv env .env; do
+    if [[ -f "$PROJECT_ROOT/$name/bin/activate" && -x "$PROJECT_ROOT/$name/bin/python" ]]; then
+      echo "Activating local environment: $name"
+      source "$PROJECT_ROOT/$name/bin/activate"
+      break
+    fi
+  done
+fi
+if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+  # --check remains read-only, even on a fresh clone.
+  for arg in "$@"; do
+    if [[ "$arg" == "--check" || "$arg" == "--help" || "$arg" == "-h" ]]; then
+      echo "No environment found. Activate an existing one, or run ./run.sh to create venv/ and install dependencies." >&2
+      exit 1
+    fi
+  done
+  if [[ -e "$PROJECT_ROOT/venv" ]]; then
+    echo "venv/ exists but is not a usable environment. Activate a valid environment; this directory will not be overwritten." >&2
+    exit 1
+  fi
+  BOOTSTRAP_PYTHON="$(command -v python3.12 || command -v python3 || true)"
+  if [[ -z "$BOOTSTRAP_PYTHON" ]]; then
+    echo "Install Python 3.12+ before running this launcher." >&2
+    exit 1
+  fi
+  "$BOOTSTRAP_PYTHON" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else "Python 3.12+ is required.")'
+  if command -v corepack >/dev/null 2>&1; then
+    PNPM=(corepack pnpm)
+  elif command -v pnpm >/dev/null 2>&1; then
+    PNPM=(pnpm)
+  else
+    echo "Install Node 22.13+ and Corepack or pnpm before running this launcher." >&2
+    exit 1
+  fi
+  echo "No environment found. Creating venv/ and installing dependencies..."
+  "$BOOTSTRAP_PYTHON" -m venv "$PROJECT_ROOT/venv"
+  source "$PROJECT_ROOT/venv/bin/activate"
+  "$VIRTUAL_ENV/bin/python" -m pip install -r "$PROJECT_ROOT/requirements.txt"
+  "$VIRTUAL_ENV/bin/python" -m pip check
+  (cd "$PROJECT_ROOT/frontend" && "${PNPM[@]}" install --frozen-lockfile)
+fi
+PYTHON="$VIRTUAL_ENV/bin/python"
 if [[ ! -x "$PYTHON" ]]; then
-  echo "Missing venv. Follow README first-time setup (Python 3.12+) before running this file." >&2
+  echo "The active environment has no executable bin/python. Activate a valid project environment." >&2
   exit 1
 fi
 exec "$PYTHON" - "$PROJECT_ROOT" "$@" <<'PY'
@@ -45,7 +88,7 @@ missing = [name for name in ("uvicorn", "fastapi", "firebase_admin", "dotenv", "
            if importlib.util.find_spec(name) is None]
 if missing:
     fail("Missing Python dependencies: " + ", ".join(missing) +
-         "\nRun: ./venv/bin/python -m pip install -r requirements.txt")
+         "\nRun in your activated environment: python -m pip install -r requirements.txt")
 for tool in ("node", "ollama"):
     if not shutil.which(tool):
         fail(f"Missing {tool}. Install it using the README first-time setup.")

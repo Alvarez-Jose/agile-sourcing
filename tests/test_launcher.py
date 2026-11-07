@@ -2,9 +2,11 @@
 
 import io
 import json
+import os
 from pathlib import Path
 import signal
 import sqlite3
+import subprocess
 import sys
 from unittest.mock import patch
 
@@ -148,3 +150,78 @@ def test_missing_index_stops_before_any_service_or_download(project):
     with pytest.raises(SystemExit, match="main policy index is missing") as error:
         run_launcher(project)
     assert error.value.launcher_processes == []
+
+
+def shell_launcher(tmp_path, *, local_name=None, active=None):
+    root = tmp_path / "project with spaces"
+    root.mkdir()
+    launcher = root / "run.sh"
+    launcher.write_text((Path(__file__).resolve().parents[1] / "run.sh").read_text())
+    for environment in filter(None, (root / local_name if local_name else None, active)):
+        (environment / "bin").mkdir(parents=True)
+        python = environment / "bin/python"
+        # Stand in for Python so these checks never import models or start services.
+        python.write_text('#!/bin/bash\nprintf "ENV=%s\\n" "$VIRTUAL_ENV"\n')
+        python.chmod(0o755)
+        (environment / "bin/activate").write_text(f'export VIRTUAL_ENV="{environment}"\n')
+    env = {"PATH": os.defpath}
+    if active:
+        env["VIRTUAL_ENV"] = str(active)
+    return root, subprocess.run(["bash", str(launcher), "--check"], env=env,
+                               cwd=tmp_path, capture_output=True, text=True)
+
+
+@pytest.mark.parametrize("name", ["venv", ".venv", "env", ".env"])
+def test_shell_finds_local_environment_from_another_directory(tmp_path, name):
+    root, result = shell_launcher(tmp_path, local_name=name)
+    assert result.returncode == 0, result.stderr
+    assert f"ENV={root / name}" in result.stdout
+
+
+def test_shell_prefers_active_environment_over_local_one(tmp_path):
+    active = tmp_path / "existing environment"
+    _, result = shell_launcher(tmp_path, local_name="venv", active=active)
+    assert result.returncode == 0, result.stderr
+    assert f"ENV={active}" in result.stdout
+    assert "Activating local" not in result.stdout
+
+
+def test_shell_without_environment_stops_with_instructions(tmp_path):
+    root, result = shell_launcher(tmp_path)
+    assert result.returncode == 1
+    assert "run ./run.sh to create venv/" in result.stderr
+    assert not (root / "venv").exists()
+
+
+def test_shell_bootstrap_installs_into_new_environment_and_then_launches(tmp_path):
+    root = tmp_path / "fresh clone"
+    (root / "frontend").mkdir(parents=True)
+    launcher = root / "run.sh"
+    launcher.write_text((Path(__file__).resolve().parents[1] / "run.sh").read_text())
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    log = tmp_path / "commands.log"
+    # These stand-ins record installation commands without network access.
+    python = tools / "python3.12"
+    python.write_text('''#!/bin/bash
+if [[ "$1" == "-c" ]]; then exit 0; fi
+mkdir -p "$3/bin"
+printf 'export VIRTUAL_ENV="%s"\\n' "$3" > "$3/bin/activate"
+cp "$TEST_TOOLS/venv-python" "$3/bin/python"
+''')
+    (tools / "venv-python").write_text('''#!/bin/bash
+printf '%s\\n' "$*" >> "$TEST_LOG"
+''')
+    (tools / "corepack").write_text('''#!/bin/bash
+printf '%s\\n' "$*" >> "$TEST_LOG"
+''')
+    for tool in tools.iterdir():
+        tool.chmod(0o755)
+    result = subprocess.run(["bash", str(launcher)], cwd=tmp_path,
+                            env={"PATH": f"{tools}:{os.defpath}", "TEST_TOOLS": str(tools),
+                                 "TEST_LOG": str(log)}, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    calls = log.read_text().splitlines()
+    assert calls == [f"-m pip install -r {root / 'requirements.txt'}", "-m pip check",
+                     "pnpm install --frozen-lockfile", f"- {root}"]
+    assert (root / "venv/bin/python").is_file()

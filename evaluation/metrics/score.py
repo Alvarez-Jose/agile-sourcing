@@ -66,8 +66,10 @@ def score_judge(r, model=JUDGE_MODEL):
     if not answer or answer.startswith('ERROR:'):
         return 'wrong'
     prompt = JUDGE_PROMPT.format(question=r['question'], truth=r['ground_truth'], answer=answer[:6000])
-    resp = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}], think=False,
-                       options={"temperature": 0})
+    # A stalled local judge must not hang the full benchmark indefinitely.
+    resp = ollama.Client(timeout=90).chat(
+        model=model, messages=[{"role": "user", "content": prompt}], think=False,
+        options={"temperature": 0, "num_predict": 256})
     raw = re.sub(r"<think>.*?</think>", "", resp["message"]["content"], flags=re.DOTALL).upper()
     for label, out in (("INCORRECT", "wrong"), ("PARTIAL", "partial"), ("CORRECT", "correct")):
         if label in raw:

@@ -94,5 +94,5 @@ refusal-wording, numeric-grading, and report edge cases remain with the teammate
 The old auth source/graph index retains its review/classification controls for
 inspection, but those are not active main-RAG filters. Existing auth-only starter
 chat tests that assumed the replaced structured-span pipeline were removed; source
-index, graph, and authentication tests remain. See [policy chat](policy-chat.md)
-and [auth setup](auth-setup.md) for the current integration contract.
+index, graph, and authentication tests remain. See [policy chat](../docs/policy-chat.md)
+and [auth setup](../docs/auth-setup.md) for the current integration contract.

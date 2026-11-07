@@ -2,104 +2,7 @@
 
 AI-powered procurement portal for UCSC. Users describe what they need in plain language, the system determines compliance rules, finds suppliers, and produces a ready-to-submit purchase request.
 
-## Current Status (October 29, 2026)
-
-Policy Q&A pipeline, measured on the 60-question benchmark (October 17 run, across the then-32 UC/UCSC policy documents):
-
-| Metric | Default (`think` off) | With `--think` |
-|--------|------|------|
-| Correct / partial / wrong (LLM judge, corrected answer key) | **55 / 5 / 0** (91.7%) | 52 / 8 / 0 (86.7%, measured before the ladders) |
-| Same, on the 54 questions the corpus can answer (see below) | 51 / 3 / 0 (94%) | 49 / 5 / 0 (91%, before the ladders) |
-| Answers citing a policy source | 60 / 60 | 59 / 60 |
-| Empty answers / explicit "not found in policy" refusals | 0 / 0 | 0 / 1 |
-| Retrieval: expected document at rank 1 / in top 5 (no LLM) | 50 / 60 and 60 / 60 | same |
-| Mean / median latency per question | 1.8 s / 1.8 s | 8.0 s / 7.1 s |
-
-- Thresholds follow the **interim BUS-43 (Jan 2026)**, the **SSPR form (Rev. 12-2025)**, and the **Oct 2025 FAR update**. Every rule carries its document, page, and quote, and a test fails if a quote disappears from the current documents.
-- The October 17 jump (50 → 55) comes from four policy ladders in the rule engine and from indexing the interim BUS-43 and the official SSPR PDF; seven questions that no model had answered correctly the day before (Q27, 34, 36, 42, 47 among them) are now decided deterministically with a cited quote.
-- Six questions were reported separately until October 29, 2026, when both issues were resolved: **Q13–15**'s expected answers now follow the 12-2025 SSPR form's mixed-funding thresholds ($15,000 federal contract / $50,000 federal grant), superseding the 2021 FAQ's flat $10,000 trigger, and **Q46–48** became answerable when the official 48 CFR Part 12 PDF (govinfo.gov) was added to the corpus. Scores dated before October 29 were measured against the older key and without the FAR document.
-- The answer key is AI-generated and has been corrected where it contradicted the policy text (13 questions so far, each with the quote and page in `evaluation/results/benchmark_questions_corrected.json`); real buyer questions are pending from the procurement team.
-- Single run per configuration; expect about ±3 questions of run-to-run variation (a repeat of the same qwen3:32b configuration scored 47 and 44).
-- **The judge matters.** The table above is graded by qwen3:8b. Re-graded by qwen3:32b (`JUDGE_MODEL=qwen3:32b`), the same answers score **41 / 15 / 4** (default) and **46 / 13 / 1** (`--think`): the 8b judge passes about 9 answers the 32b judge calls partial. Use the 32b-judged numbers when comparing models.
-
-### October 29, 2026: corrected key, FAR Part 12, and a fine-tuned embedder
-
-All numbers below are judged by qwen3:32b on the fully corrected answer key (all 60 questions now answerable — see the resolution bullet above), with the official 48 CFR Part 12 PDF added to the corpus (33 documents, 3,216 chunks). They are not comparable to earlier scores, which used the older key and corpus.
-
-| Configuration (qwen3:8b answerer, default mode) | Correct / partial / wrong |
-|---|---|
-| Base embedder (`all-MiniLM-L6-v2`, public default) | 40 / 13 / 7 |
-| **Fine-tuned embedder** (private `EMBED_MODEL` slot) | **41 / 13 / 6** |
-
-- **Embedder fine-tune (adopted).** MiniLM fine-tuned on 12,345 generated (question, chunk) pairs; on a chunk-level held-out split, retrieval accuracy@1 rose from 28.7% to 41.0% and accuracy@5 from 56.7% to 74.6%. The end-to-end gain (+1 correct / −1 wrong) is within run-to-run noise; the held-out gain is the evidence it generalizes to phrasings beyond the benchmark. Details: `evaluation/results/analysis/embedder_finetune_v1_2026-10-29.md`.
-- **Private model slots.** Fine-tuned weights live in a private Hugging Face repo and load via `EMBED_MODEL` + `HF_TOKEN`; unset, everything falls back to the public base models, so the repo works for everyone out of the box. Private training data ships in the repo as AES-256 ciphertext (`*.enc`, `scripts/vault.sh`); plaintext stays untracked.
-- **Chunk enrichment (tried, not adopted).** Contextual headers + likely questions per chunk scored no better than the baseline in either serving mode (36/60 and 39/60 vs 40/60); the generated questions were instead reused as the fine-tune training set. Details: `evaluation/results/analysis/enrichment_v1_2026-10-29.md`.
-
-### Model comparison (October 16, 2026; rented A100, judge = qwen3:32b, default mode unless noted)
-
-| Model | Correct / partial / wrong | Per-question latency |
-|---|---|---|
-| llama3.3:70b | 47 / 12 / 1 | 10.0 s |
-| qwen3:32b `--think` | 47 / 11 / 2 | 21.6 s |
-| qwen3:30b-a3b | 46 / 10 / 4 | 11.8 s |
-| **qwen3:8b `--think` (local)** | **46 / 13 / 1** | 8.0 s |
-| qwen3:32b | 44 / 14 / 2 (repeat: 47) | 7.8 s |
-| qwen3.5:35b | 44 / 15 / 1 | 6.7 s |
-| qwen3:8b (local, default) | 41 / 15 / 4 | 1.8 s |
-| gemma3:27b | 40 / 19 / 1 | 6.6 s |
-
-Nine questions are answered correctly by none of the six default-mode models: four are the flagged disputed/not-in-corpus ones (Q13, 15, 46, 47); the other five (Q27, 34, 42, 49, 58) are benchmark or retrieval problems, not model problems. Remote results are in `evaluation/results/remote/`.
-
-### Pipeline comparison: rule-engine pipeline vs grounded pipeline (October 29, 2026)
-
-This branch merges the `auth` branch's retrieval stack (SQLite source index, policy
-graph, section retriever, span-verified "grounded" answers) alongside the rule-engine
-pipeline, and runs both on the same 60 questions, same LLM (qwen3:8b on an A100),
-same judge (qwen3:32b). Full analysis: `evaluation/results/analysis/ab_rules_vs_grounded_2026-10-29.md`.
-
-| | rule-engine pipeline (`/api/ask`) | grounded, as shipped | grounded, full corpus |
-|---|---|---|---|
-| Judge correct | **39 / 60** | 4 / 60 | 14 / 60 |
-| Correct + partial | **56 / 60** | 28 / 60 | 32 / 60 |
-| Flat wrong | **4** | 32 | 28 |
-| Refusals | **0** | 34 | 25 |
-| Median latency | **2.6 s** | 5.7 s | 9.5 s |
-
-Why the rule-engine pipeline wins:
-
-1. **Deterministic rules beat retrieval for thresholds.** Known thresholds, forms and
-   prohibitions are answered from the provenance-backed rule engine with a cited
-   quote — no LLM involved, so an 8B model can't get them wrong. The grounded
-   pipeline removed this layer and depends on retrieval + the LLM for everything.
-2. **It answers the question.** The grounded pipeline's manifest marks 31 of 33
-   documents unreviewed and its chat refuses review scopes, so as shipped it
-   retrieves from 2 documents and refuses 34/60 questions. Even over the full corpus
-   (`evaluation/benchmarks/build_grounded_index.py`) its span-verification loop
-   abstains on 25/60 whenever qwen3:8b fails twice to select valid quote spans.
-3. **3.7x faster**, because it ranks pre-built hybrid indexes instead of re-ranking
-   1,724 section candidates per question, and skips the JSON claim-repair loop.
-
-What the grounded pipeline does better — kept in the tree for future adoption: when
-it does answer it is rarely flat wrong (3 of its 35 real answers), and its citations
-carry exact source spans, byte offsets and page locations; its section-level
-retrieval and cross-policy reference hops are worth porting into the main retriever.
-
-Reproduce:
-
-```bash
-python evaluation/benchmarks/run_benchmark.py --pipeline rules --out a.json
-python -m evaluation.benchmarks.build_grounded_index    # one-time, for grounded-full
-python evaluation/benchmarks/run_benchmark.py --pipeline grounded-full --out b.json
-JUDGE_MODEL=qwen3:32b python evaluation/metrics/score.py a.json b.json --judge
-```
-
-Reproduce:
-
-```bash
-python evaluation/benchmarks/run_benchmark.py                 # add --think for the slower, more accurate mode
-python evaluation/metrics/score.py <results.json> --judge
-python evaluation/metrics/retrieval_recall.py                 # retrieval only, ~10 s, no LLM
-```
+[Progress updates and experiment history](documentation/prgress.md)
 
 ## Architecture
 
@@ -131,7 +34,17 @@ User (plain language request)
 
 **How a policy question is answered:** intent classifier → query parser (amount, funding type) → threshold questions go straight to the rule engine with a cited source; four policy ladders (post-employment contracting bans, business-meal documentation, tax-free alcohol permits, BUS-63 risk matrix / certificate of insurance) decide their questions the same way, with a page-cited quote and a test per quote (`rules/policy_ladders.py`); everything else uses query rewriting, hybrid BM25 + semantic retrieval, cross-encoder reranking (8 chunks to the LLM), and a fixed Answer / Rule / Source / Conditions response when the engine decided something. Questions the engine can only annotate (what counts as a sole source reason, that split orders are prohibited) get those facts as background and a free-form answer. Low-confidence retrieval returns "not found in policy." Every chunk is indexed with its policy name and section in the text, so the embedder, BM25 and the reranker all see which document it is from. All LLM calls have token caps, 90 s timeouts, fallbacks, and thinking disabled at the API level (qwen3 ignores the `/no_think` tag often enough to return empty answers otherwise).
 
-## Project Structure
+### Tech Stack
+
+- **Backend:** FastAPI (Python)
+- **LLM:** qwen3:8b via Ollama (local)
+- **Retrieval:** all-MiniLM-L6-v2 embeddings, BM25 + semantic hybrid search, ms-marco-MiniLM-L-6-v2 cross-encoder reranker
+- **Vector DB:** Chroma (prototype) → pgvector (production)
+- **Frontend:** WXT browser extension (React + Tailwind)
+- **Database:** SQLite (prototype) → PostgreSQL (production)
+- **Auth:** Google sign-in (prototype) → UC SSO / CruzID (production)
+
+### Project Structure
 
 ```
 agile-sourcing/
@@ -149,221 +62,126 @@ agile-sourcing/
 │   └── raw_policies/     # Policy documents for the team ingestion script
 ├── tests/                # Unit and integration tests
 ├── scripts/              # Ingestion and evaluation scripts
-├── docs/                 # Architecture docs, policy notes
+├── docs/                 # Setup guides, policy references, architecture assets
+├── documentation/        # Progress history, integration notes, experiment writeups
 ├── requirements.txt
+├── run.sh                # Start local services
+├── test.sh               # Run a named test group
 ├── secret/               # Ignored configuration and Admin credentials
 └── README.md
 ```
 
-## Integration status (November 6, 2026)
-
-`cb-integration` combines the authenticated extension and cart helper with the
-`rag-v2-hybrid` pipeline. The performance tables above are upstream experiments,
-not a rerun of this integrated branch. Google sign-in and server-owned account
-approval still gate `/api/ask` and `/api/cart/guide`; the cart helper remains a
-separate deterministic two-source check. Document-level filtering is not enabled
-on the shared rule-engine chat endpoint.
-
-Model slots `LLM_MODEL`, `EMBED_MODEL`, `RERANKER_MODEL`, and `CHROMA_COLLECTION`
-may be configured in `secret/.env` or the process environment. Public defaults work
-without private weights. A different embedder requires a matching, rebuilt index;
-do not query an index generated by a different embedding model. `HF_TOKEN` is
-needed only for authorized private model access. Encrypted upstream artifacts do
-not activate themselves; do not commit decrypted files or vault keys.
-
-See [the branch integration report](docs/branch-integration-2026-11-06.md) for
-branch-by-branch changes, preserved behavior, and verification limits.
-
 ## First-time setup
 
-After completing the setup below, start everything from one terminal:
+Install **Git**, **Python 3.12**, **Node.js 22.13+**, **pnpm** (or Corepack),
+**Google Chrome**, and [Ollama](https://ollama.com/download). These instructions
+use macOS/Linux shell commands.
+
+### 1. Clone the repository
 
 ```sh
-./run.sh
+git clone https://github.com/Alvarez-Jose/agile-sourcing.git
 ```
 
-The launcher starts Ollama if needed, downloads the configured Qwen model if missing,
-starts FastAPI, and runs the extension development server/browser. Press Ctrl+C to
-stop the services it started; an existing Ollama service is left running. Log paths
-are printed in the terminal. It works when invoked from any directory.
-
-Use `./run.sh --check` to check installed tools, configuration, and index presence
-without starting services. If the main policy index has not been built, review the
-intended PDF/DOCX files in `data/raw_policies`, then use `./run.sh --index` once to
-build it and launch the project. This explicitly rebuilds the main index from all
-top-level policy PDFs/DOCX, so exclude held documents unless their use is authorized.
-The launcher does not install Python/frontend dependencies or configure Firebase;
-complete those first-time steps below first.
-
-Install **Git**, **Python 3.12**, **Node.js 22.13+ with Corepack**, and **Ollama**
-before starting. The commands below use macOS/Linux shell syntax. Run them from
-the repository root unless a step says otherwise.
-
-### 1. Clone the development branch
+### 2. Open the repository in your terminal
 
 ```sh
-git clone --branch cb-integration https://github.com/Alvarez-Jose/agile-sourcing.git
 cd agile-sourcing
 ```
 
-### 2. Create a virtual environment and install dependencies
+### 3. Prepare your environment
+
+If you already have a project environment, activate it (whatever its name or
+location) and ensure its project dependencies are installed. Otherwise, `./run.sh`
+will create `venv/` and install Python and frontend dependencies automatically.
+System prerequisites, Firebase configuration, and policy documents still need to
+be supplied separately.
+
+Before launching:
+
+- Place the team's Firebase `.env` and authorized Admin SDK JSON in `secret/`;
+  follow the [auth guide](docs/auth-setup.md) for configuration and your browser's
+  OAuth callback. These files stay out of Git.
+- Put the intended policy PDFs/DOCX directly in `data/raw_policies/`. For a small
+  demo corpus, run `python -m scripts.download_starter_policies` in your active environment.
+  The full corpus is not included in the repository.
+
+### 4. Run the project
 
 ```sh
-python3.12 -m venv venv
-./venv/bin/python -m pip install --upgrade pip setuptools wheel
-./venv/bin/python -m pip install -r requirements.txt && ./venv/bin/python -m pip check
-cd frontend
-corepack pnpm install --frozen-lockfile
-cd ..
+./run.sh --index   # First launch: build the index and start services
+./run.sh           # Later launches
 ```
 
-Wait for both installations to finish successfully before continuing.
+The launcher uses your active virtual environment. If none is active, it finds
+and activates `venv/`, `.venv/`, `env/`, or `.env/` under the repository root.
+The folders are checked in that order; the first usable environment wins.
+If none exists, it creates `venv/` and installs dependencies before starting.
+An existing environment is reused, not replaced. A custom-named environment must
+be activated first to avoid creating an additional one. Activation inside the
+script lasts only for that run. `--check` never creates environments or installs packages.
 
-### 3. Configure Firebase authentication
+`--index` rebuilds the index from **all top-level PDFs/DOCX** in
+`data/raw_policies/`; review that folder first. The launcher starts Ollama if
+needed, downloads the configured Qwen model if missing, and starts FastAPI and
+WXT's extension development browser. Initial model downloads/indexing take time.
+Keep the terminal open; **Ctrl+C** stops services started by the launcher.
 
-```sh
-mkdir -p secret
-```
+Check [API health](http://localhost:8000/api/health), then sign in with Google.
+An administrator must approve your account in Firestore before chat works.
+Health checks confirm the API is running, not answer quality. Use `--check` in
+place of `--index` to check setup without starting services.
 
-Obtain the team's Firebase configuration and authorized Admin SDK JSON privately,
-or configure your own Firebase project using the [auth guide](docs/auth-setup.md).
-Place the shared environment file at `secret/.env` and the Admin JSON inside
-`secret/`. These files are ignored by Git.
-
-<!-- In `secret/.env`, set `GOOGLE_APPLICATION_CREDENTIALS` to the JSON filename and
-`VITE_API_BASE_URL=http://localhost:8000`, alongside the Firebase and Google OAuth
-values listed in the auth guide. Register your browser extension's actual redirect
-URL in the Google OAuth client as described there. -->
-
-### 4. Start Ollama and download the model
-
-Open the Ollama application, or run this in a separate terminal and leave it running:
-
-```sh
-ollama serve
-```
-
-If port 11434 is already in use and `ollama list` succeeds, Ollama is already
-running. In your setup terminal, download the model:
-
-```sh
-ollama pull qwen3:8b
-ollama list
-```
-
-### 5. Add policy documents and build the index
-
-```sh
-mkdir -p data/raw_policies
-```
-
-Obtain the team's policy PDFs/DOCX and place them directly in `data/raw_policies/`.
-The full document collection is not included in Git. For a small demo corpus,
-you can download the reviewed BUS-43 and SSPR starter documents instead:
-
-```sh
-./venv/bin/python -m scripts.download_starter_policies
-```
-
-Once the documents are present, build the Chroma index:
-
-```sh
-./venv/bin/python -m scripts.ingest_policies --ingest
-```
-
-The script should report how many chunks it stored in
-`data/embeddings/chroma_store`. The first run downloads the embedding model;
-the reranking model downloads when chat first loads.
-
-### 6. Run the backend and extension
-
-Keep Ollama running. Open two more terminals and navigate to your cloned
-`agile-sourcing` directory in each.
-
-**Backend terminal:**
-
-```sh
-./venv/bin/python -m uvicorn backend.main:app --reload --port 8000
-```
-
-**Extension terminal:**
-
-```sh
-cd frontend
-corepack pnpm dev
-```
-
-WXT should open a development browser. If loading manually in Chrome, enable
-Developer mode at `chrome://extensions`, choose **Load unpacked**, and select
-`frontend/.output/chrome-mv3-dev`.
-
-Check the API from another terminal:
-
-```sh
-curl http://localhost:8000/api/health
-```
-
-Expect `{"status":"ok"}`. This checks the API; test chat separately. Sign in with
-Google, have an administrator set `users/{uid}.is_approved` to boolean `true` in
-Firestore, then click **Sync Session with Backend** in extension settings. Try:
-**How should I document price reasonableness on the SSPR form?**
+Optional model settings and troubleshooting: [auth/setup guide](docs/auth-setup.md).
+Changing the embedder requires rebuilding a matching index.
 
 ## Testing
 
-For the limited two-source CruzBuy cart-to-SSPR workflow, see the
-[cart demo instructions](docs/cart-demo.md). Open **Cart helper** in the extension
-popup while viewing your signed-in CruzBuy Simple Shopping Cart. It previews cart
-details and asks for funding/charge confirmation before checking SSPR applicability.
-It requires the two reviewed PDFs but does not use the general RAG or call Qwen.
+Run these commands from the repository root after completing setup. Start with
+`./test.sh all` for the normal development checks; long model evaluations are
+separate so they do not run accidentally.
+
+| What to check | One command | What it reports / needs |
+| --- | --- | --- |
+| Quick development suite | `./test.sh all` | Backend tests, frontend tests, TypeScript and extension build. No running API or Ollama needed. |
+| Backend, rules and evaluation helpers | `./test.sh backend` | Passed, failed, skipped and test pass rate. Firebase and model calls are simulated in integration tests. |
+| Authentication and sessions | `./test.sh auth` | Backend token/approval tests and frontend sign-in/session tests. No live Google login needed. |
+| Frontend | `./test.sh frontend` | Test counts, TypeScript check and extension build result. |
+| Cart paperwork helper | `./test.sh cart` | API/rule test counts plus eight synthetic cart scenarios. Needs the reviewed BUS-43 and SSPR PDFs. |
+| Running API health | `./test.sh health` | HTTP status and response time. Start `./run.sh` first. |
+| RAG answer quality | `./test.sh rag` | All 60 questions, corrected-key LLM-judged accuracy, partial/incorrect counts, latency and citation diagnostics. Needs Ollama, models and the policy index. |
+| Retrieval quality | `./test.sh retrieval` | Expected-document recall@1, recall@5 and candidate-pool recall over 60 questions. Needs the embedding/reranking models and policy index; no answer generation or running API needed. |
+
+The long RAG check shows a loading indicator, an **Answering** progress bar and a
+**Grading** progress bar. Retrieval has its own progress bar. In an interactive
+terminal, elapsed time keeps updating during each model call; ETA is an estimate.
+RAG answers and grades are saved after each question so completed work survives
+interruption. Model logs and reports go to a new, ignored folder under
+`data/evaluation/`; the terminal prints its location.
+
+For a short trial before the full 60-question run:
 
 ```sh
-./venv/bin/python -m pytest rules tests -q
-cd frontend
-corepack pnpm test
-corepack pnpm compile
-corepack pnpm build
+./test.sh rag --limit 5
 ```
 
-The integrated RAG evaluation tools can be run separately:
+Use `./test.sh --help` for options such as a different health URL or an installed
+judge model. Each command returns a nonzero exit code for test failures, failed
+health checks, model execution errors or ungraded answers. A completed quality
+benchmark reports its score; an incorrect model answer is not a program crash.
 
-```sh
-./venv/bin/python -m evaluation.benchmarks.run_benchmark
-./venv/bin/python -m evaluation.analyze_benchmark evaluation/results/benchmark_results_full.json
-./venv/bin/python -m evaluation.check_citation_grounding /path/to/saved-api-responses.json --output data/evaluation/citation_grounding.csv
-```
+**How to read results:** unit-test pass rates measure code checks. RAG accuracy is
+an automated judge's estimate, not Procurement validation. Retrieval recall checks
+whether an expected document appears in the results, not whether every passage or
+answer is correct. Citation amount flags can include question-supplied amounts or
+shorthand parsing issues. Different corpora, model settings and judges produce
+results that should not be compared directly.
 
-The original `run_benchmark` runner retains its defaults and output format; its
-saved rows omit the evidence needed by the citation checker. On `cb-integration`,
-the new evidence-preserving runner supports a short smoke evaluation:
-
-```sh
-./venv/bin/python -m evaluation.benchmarks.run_grounding_benchmark --limit 5 --out data/evaluation/cb_grounding_responses.json
-./venv/bin/python -m evaluation.summarize_grounding data/evaluation/cb_grounding_responses.json --output data/evaluation/cb_grounding_summary.csv
-./venv/bin/python -m evaluation.check_citation_grounding data/evaluation/cb_grounding_responses.json --output data/evaluation/cb_grounding_details.csv
-```
-
-Ollama, cached/downloaded models, and the main `uc_policies` index from setup step 5
-are required. Increase `--limit` to 60 for the full question set. The runner stops
-without writing results when that index is missing. These commands run the local
-pipeline directly for developer evaluation; the browser-facing `/api/ask` endpoint
-still verifies the Firebase token and requires account approval before invoking it.
-
-Grounding checks flag invalid citation numbers, empty cited evidence, and dollar
-amounts absent from evidence. They are diagnostics, not correctness grades or
-automatic answer blocking. Purchase amounts supplied in a question may legitimately
-be flagged for human review. The summary separates execution errors and refusals
-from evaluated answers. An unflagged answer is not proof of a correct answer.
-
-For a tool-only smoke check without Ollama, use the deliberately synthetic fixtures:
-
-```sh
-./venv/bin/python -m evaluation.summarize_grounding evaluation/results/citation_grounding_test.json --output data/evaluation/cb_fixture_summary.csv
-```
-
-Those four fixtures intentionally include three faulty responses; their counts are
-not live Qwen benchmark results. See [the integration notes](docs/cb-integration.md)
-for imported branch versions and validation limits. The performance table above is
-the historical team baseline and was not rerun for these integration changes.
+Automated tests do not open Google sign-in or your private CruzBuy session. For a
+manual browser check, follow the [auth guide](docs/auth-setup.md) and
+[cart helper instructions](docs/cart-demo.md). Raw benchmark tools remain in
+`evaluation/` for experiments; historical measurements are in the
+[progress log](documentation/prgress.md).
 
 ## Key Rules the System Enforces
 
@@ -383,16 +201,6 @@ the historical team baseline and was not rerun for these integration changes.
 | Simplified acquisition threshold | $350,000 | FAR (Oct 2025) |
 
 The authoritative values, with page-level quotes, live in `rules/`. If this table and `rules/` ever disagree, `rules/` wins.
-
-## Tech Stack
-
-- **Backend:** FastAPI (Python)
-- **LLM:** qwen3:8b via Ollama (local)
-- **Retrieval:** all-MiniLM-L6-v2 embeddings, BM25 + semantic hybrid search, ms-marco-MiniLM-L-6-v2 cross-encoder reranker
-- **Vector DB:** Chroma (prototype) → pgvector (production)
-- **Frontend:** WXT browser extension (React + Tailwind)
-- **Database:** SQLite (prototype) → PostgreSQL (production)
-- **Auth:** Google sign-in (prototype) → UC SSO / CruzID (production)
 
 ## Team
 
