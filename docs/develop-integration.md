@@ -5,6 +5,10 @@ main at `864be07`, all fetched origin/fork branch tips, and the five open PR bra
 `auth` and `main` have not been advanced. Integration merges preserve original history.
 GitHub PRs remain open for the team's review before develop is proposed for main.
 
+> Historical integration record. The October 28 teammate updates on `cb-integration`
+> supersede the source-version and validation statements below for that branch.
+> See [cb-integration notes](cb-integration.md); authentication remains required.
+
 ## Scope agreed with the user
 
 - Use the teammate's main RAG and merge the pending teammate PRs.

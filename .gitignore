@@ -6,6 +6,8 @@ dist/
 build/
 .eggs/
 venv/
+/venv-backup-*/
+.venv/
 .env
 *.env.local
 
@@ -26,13 +28,33 @@ Thumbs.db
 # Data
 data/raw/*.pdf
 data/raw/*.csv
+data/raw/*.docx
 data/raw_policies/
+# alternate corpus location accepted by scripts/ingest_policies.py; policy
+# documents must never be committed
+data/policies/*
+!data/policies/.gitkeep
+!data/policies/document_manifest.json
 data/embeddings/chroma_store/
 data/parsed/policy_index.sqlite*
 data/graphs/policy_index/
 data/evaluation/
 *.sqlite
 *.db
+
+# Private slots: fine-tuned weights, enriched corpus, training data, held-out evals.
+# The pipeline falls back to public base models when the env paths are unset
+# (EMBED_MODEL, RERANKER_MODEL, LLM_MODEL, ENRICHED_CORPUS_PATH).
+models/private/
+data/enriched/*
+training/private/*
+evaluation/private/*
+# AES-256 ciphertext of private artifacts may be committed (scripts/vault.sh);
+# only the key holder (key lives outside the repo) can decrypt them
+!data/enriched/*.enc
+!training/private/*.enc
+!evaluation/private/*.enc
+*.key
 
 #--------Node.gitignore----------
 # Logs

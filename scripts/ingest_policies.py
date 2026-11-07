@@ -10,7 +10,11 @@ Usage:
 """
 
 import argparse
+import hashlib
+import json
+import os
 import re
+import sys
 from pathlib import Path
 
 import chromadb
@@ -25,10 +29,16 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 
 DATA_DIR        = Path("data/raw_policies")
 CHROMA_DIR      = "data/embeddings/chroma_store"
-COLLECTION_NAME = "uc_policies"
-EMBED_MODEL     = "all-MiniLM-L6-v2"
-LLM_MODEL       = "qwen3:8b"
+COLLECTION_NAME = os.environ.get("CHROMA_COLLECTION", "uc_policies")
+# fine-tuned weights / enriched corpus drop in via env; unset = public base model
+# and plain chunks, so ingestion works for everyone out of the box
+EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+ENRICHED_CORPUS_PATH = os.environ.get("ENRICHED_CORPUS_PATH")
+LLM_MODEL       = os.environ.get("LLM_MODEL", "qwen3:8b")
 TOP_K           = 8
+LLM_TIMEOUT = 90
+REWRITE_MAX_TOKENS = 48
+ANSWER_MAX_TOKENS = 1024
 
 SYSTEM_PROMPT = (
     "You are a UC procurement policy assistant for UC Santa Cruz. "
@@ -42,19 +52,53 @@ print("Loading embedding model...")
 embedder     = SentenceTransformer(EMBED_MODEL)
 chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
 hybrid_retriever = None
+llm = ollama.Client(timeout=LLM_TIMEOUT)
 
 
-def ingest():
+def load_enrichment() -> dict:
+    # optional per-chunk enrichment keyed by sha1 of the raw chunk text:
+    #   {"<sha1>": {"header": "...", "questions": ["...", ...]}, ...}
+    # generated offline (contextual header + likely questions); absent file = no-op
+    if not ENRICHED_CORPUS_PATH or not Path(ENRICHED_CORPUS_PATH).exists():
+        return {}
+    with open(ENRICHED_CORPUS_PATH, encoding="utf-8") as f:
+        enrichment = json.load(f)
+    print(f"Loaded enrichment for {len(enrichment)} chunks from {ENRICHED_CORPUS_PATH}")
+    return enrichment
+
+
+def enrich_chunk(chunk: dict, enrichment: dict) -> dict:
+    key = hashlib.sha1(chunk["text"].encode("utf-8")).hexdigest()
+    extra = enrichment.get(key)
+    if extra:
+        parts = ([extra["header"]] if extra.get("header") else []) + extra.get("questions", [])
+        # enriched text is for retrieval only (BM25/embedder/reranker); the LLM gets the
+        # raw chunk back via metadata, so generated text never dilutes the answer context
+        chunk["raw_text"] = chunk["text"]
+        chunk["text"] = "\n".join(parts) + "\n" + chunk["text"]
+    return chunk
+
+
+def chunk_header(chunk: dict) -> str:
+    # policy name + section in front of the text so the embedder, BM25 and the reranker
+    # all see which document a chunk is from (the metadata alone never reaches them)
+    section = (chunk.get("section") or "").strip()
+    return f"[{chunk.get('policy_name', '')}" + (f" | {section}" if section else "") + "]\n"
+
+
+def ingest(collection_name=COLLECTION_NAME, prefix_headers=False):
     if not DATA_DIR.exists():
         print(f"ERROR: {DATA_DIR} not found.")
-        return None
+        return None, []
 
     files = list(DATA_DIR.iterdir())
     if not files:
         print(f"ERROR: No files in {DATA_DIR}.")
-        return None
+        return None, []
 
+    enrichment = load_enrichment()
     all_chunks = []
+    failed = []
 
     for f in sorted(files):
         print(f"  Processing: {f.name}")
@@ -69,16 +113,26 @@ def ingest():
 
             chunks = chunk_by_section(pages)
             chunks = [tag_chunk(c) for c in chunks]
+            if enrichment:
+                chunks = [enrich_chunk(c, enrichment) for c in chunks]
+            if prefix_headers:
+                for c in chunks:
+                    c["text"] = chunk_header(c) + c["text"]
+                    if "raw_text" in c:
+                        c["raw_text"] = chunk_header(c) + c["raw_text"]
             all_chunks.extend(chunks)
             print(f"    -> {len(chunks)} chunks")
 
         except Exception as e:
             print(f"    ERROR processing {f.name}: {e}")
+            failed.append(f.name)
             continue
 
+    if failed:
+        print(f"WARNING: {len(failed)} file(s) failed: {', '.join(sorted(failed))}")
     if not all_chunks:
         print("No chunks produced.")
-        return None
+        return None, failed
 
     print(f"\nTotal chunks: {len(all_chunks)}")
     print("Embedding chunks (this takes a few minutes on first run)...")
@@ -87,12 +141,12 @@ def ingest():
     vectors = embedder.encode(texts, show_progress_bar=True)
 
     try:
-        chroma_client.delete_collection(COLLECTION_NAME)
+        chroma_client.delete_collection(collection_name)
     except Exception:
         pass
 
     collection = chroma_client.get_or_create_collection(
-        name=COLLECTION_NAME,
+        name=collection_name,
         metadata={"hnsw:space": "cosine"}
     )
 
@@ -111,14 +165,15 @@ def ingest():
                     "doc_type":    c.get("doc_type", ""),
                     "page":        str(c.get("page", "")),
                     "section":     c.get("section", ""),
+                    "raw_text":    c.get("raw_text", ""),
                 }
                 for c in batch
             ],
             ids=[f"chunk_{i + j}" for j in range(len(batch))],
         )
 
-    print(f"Stored {len(all_chunks)} chunks in ChromaDB at '{CHROMA_DIR}'")
-    return collection
+    print(f"Stored {len(all_chunks)} chunks in ChromaDB collection '{collection_name}' at '{CHROMA_DIR}'")
+    return collection, failed
 
 
 def get_collection():
@@ -148,9 +203,11 @@ def rewrite_query(question):
         "Output keywords only, no question format, no punctuation, under 10 words.\n\n"
         "Question: " + question + "\n\nKeywords:"
     )
-    response = ollama.chat(
+    response = llm.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        think=False,
+        options={"num_predict": REWRITE_MAX_TOKENS},
     )
     raw = response["message"]["content"]
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -162,6 +219,7 @@ def ask(question, collection, think=False):
 
     context = ""
     for i, (chunk, meta) in enumerate(zip(chunks, metas)):
+        chunk  = meta.get("raw_text") or chunk
         source = meta.get("policy_name") or meta.get("source", "Unknown")
         page   = meta.get("page", "")
         ref    = f"{source}, p.{page}" if page else source
@@ -182,9 +240,11 @@ def ask(question, collection, think=False):
         "ANSWER:"
     )
 
-    response = ollama.chat(
+    response = llm.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        think=think,
+        options={"num_predict": ANSWER_MAX_TOKENS * (4 if think else 1)},
     )
     raw = response["message"]["content"]
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -195,6 +255,12 @@ def main():
     parser.add_argument("--ingest", action="store_true")
     parser.add_argument("--query",  type=str)
     parser.add_argument("--think",  action="store_true")
+    parser.add_argument("--collection", default=COLLECTION_NAME,
+                        help="chroma collection to (re)build; use a different name to compare indexes")
+    # on by default: lifted recall@1 on the 60-question benchmark from 40 to 46 with the same
+    # reranker (evaluation/metrics/retrieval_recall.py)
+    parser.add_argument("--prefix-headers", action=argparse.BooleanOptionalAction, default=True,
+                        help="put '[policy name | section]' in front of every chunk's text")
     args = parser.parse_args()
 
     if not args.ingest and not args.query:
@@ -205,7 +271,9 @@ def main():
 
     if args.ingest:
         print("\n--- Ingestion ---")
-        collection = ingest()
+        collection, failed = ingest(args.collection, args.prefix_headers)
+        if collection is None:
+            sys.exit(1)
 
     if args.query:
         print("\n--- Query ---")
@@ -218,6 +286,9 @@ def main():
         print(f"Q: {args.query}  [{mode_label} mode]\n")
         answer = ask(args.query, collection, think=args.think)
         print(f"A: {answer}")
+
+    if args.ingest and failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

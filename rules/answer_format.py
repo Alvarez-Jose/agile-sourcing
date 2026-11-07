@@ -40,7 +40,8 @@ def source_line(result: EvaluationResult) -> str:
 # facts are the whole answer, so no retrieval or LLM call is needed
 TEMPLATE_INTENTS = {"bidding_threshold", "sspr_form", "federal_funding", "equipment_tagging"}
 TEMPLATE_TOPICS = {"bid", "sspr", "federal", "micro", "sat", "small_business", "equipment", "mixed"}
-NOT_TEMPLATED_TOPICS = {"split", "sole_source", "covered"}   # need explanation, not a number
+NOT_TEMPLATED_TOPICS = {"split", "sole_source", "covered", "post_employment", "business_meal",
+                        "alcohol_permit", "risk_matrix"}   # need explanation, not a number
 
 
 def is_pure_threshold_question(result: EvaluationResult, intent: str) -> bool:

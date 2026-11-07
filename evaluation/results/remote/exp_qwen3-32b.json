@@ -1,0 +1,482 @@
+[
+  {
+    "question": "At what dollar threshold does UC policy require competitive bidding for purchases?",
+    "ground_truth": "Under BFB-BUS-43, competitive bidding is required for purchases that exceed $100,000 annually. Any purchase or aggregate spending with a supplier that surpasses this threshold must go through a competitive bidding process.",
+    "system_answer": "Answer: Competitive bid required at $100,000 or more (BUS-43: more than $100,000 annually, aggregated per supplier; CA Public Contract Code). The same $100,000 bid threshold applies to federal funds because the CA PCC is stricter than the $350,000 federal Simplified Acquisition Threshold.\nRule: Competitive bid required at $100,000 or more (BUS-43: more than $100,000 annually, aggregated per supplier; CA Public Contract Code). The same $100,000 bid threshold applies to federal funds because the CA PCC is stricter than the $350,000 federal Simplified Acquisition Threshold.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"\nConditions: These are the general thresholds. For a determination on a specific purchase, ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).",
+    "difficulty": "simple",
+    "generator": "claude-opus-4",
+    "latency_s": 0.09
+  },
+  {
+    "question": "I'm a lab manager and I need to order reagents and lab supplies from a single vendor. I expect to place multiple orders throughout the fiscal year totaling approximately $125,000. Each individual order will be under $20,000. Do I need to go through competitive bidding?",
+    "ground_truth": "Yes, competitive bidding is required. Under BFB-BUS-43, the $100,000 threshold applies to purchases on an annual aggregate basis, not per transaction. Even though each individual order is well under $100,000, the combined annual spend of $125,000 with that single vendor exceeds the $100,000 threshold, triggering the competitive bidding requirement. You should work with your procurement office to initiate a competitive solicitation before continuing to place orders with that vendor.",
+    "system_answer": "Answer: Yes, competitive bidding is required because the total annual expenditure across multiple orders with the same vendor exceeds the $100,000 competitive bid threshold. Intentionally splitting the purchase into smaller orders to avoid competitive bidding is prohibited under UC procurement policy [1].\nRule: Intentionally dividing a purchase into smaller orders to avoid bidding requirements is prohibited under BUS-43. For reference, the combined value is $125,000; the competitive bid threshold is $100,000. Competitive bid required: YES ($125,000; threshold $100,000). SSPR required: YES (threshold $100,000; sections I, VII, VIII).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.11, Solicitation, a. Competition: \"UC must not artificially divide requirements into separate transactions in order to avoid competition\"\nConditions: The combined annual value of $125,000 meets the $100,000 competitive bid threshold set by BUS-43 and requires competitive bidding. Additionally, an SSPR form (Sections I, VII, VIII) must be completed to document the justification for the procurement method [2].",
+    "difficulty": "scenario",
+    "generator": "claude-opus-4",
+    "latency_s": 38.51
+  },
+  {
+    "question": "Our department has been purchasing maintenance services from a vendor at $90,000 per year, which is under the $100,000 competitive bidding threshold. This year, we need to add a one-time $15,000 equipment repair from the same vendor, bringing our annual total to $105,000. Does this one-time addition push us into competitive bidding territory, even though our recurring commitment is under the threshold?",
+    "ground_truth": "Yes, competitive bidding would be required. Under BFB-BUS-43, the competitive bidding threshold of $100,000 is based on total annual expenditure with a vendor, regardless of whether the spending is composed of recurring services, one-time purchases, or a combination of both. Since the combined annual spend with this vendor would reach $105,000, exceeding the $100,000 threshold, the purchase triggers the competitive bidding requirement. The department should consult with Procurement Services to determine whether a competitive solicitation is needed or whether an existing competitively bid contract can cover the expanded scope of work.",
+    "system_answer": "Answer: Yes, the one-time $15,000 addition pushes the total procurement to $105,000, which meets the $100,000 competitive bid threshold. Requirements must not be artificially divided to avoid competition, so the combined total must be treated as one procurement requiring competitive bidding.\nRule: Potential split order: $90,000 + $15,000 = $105,000. Each order is below the $100,000 competitive bid threshold but together they meet it. Requirements must not be artificially divided to avoid competition; treat this as one $105,000 procurement. Competitive bid required: YES ($105,000; threshold $100,000). SSPR required: YES (threshold $100,000; sections I, VII, VIII).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.11, Solicitation, a. Competition: \"UC must not artificially divide requirements into separate transactions in order to avoid competition\"\nConditions: The combined procurement of $105,000 meets the $100,000 competitive bid threshold [4], and the orders cannot be artificially split to avoid competition [6]. Competitive bidding is required, and an SSPR form must be completed for sections I, VII, and VIII [2].",
+    "difficulty": "edge_case",
+    "generator": "claude-opus-4",
+    "latency_s": 16.6
+  },
+  {
+    "question": "What is the small business set-aside exception and how many price quotes do I need?",
+    "ground_truth": "The UC small business set-aside exception allows procurement from small businesses for purchases up to $250,000 without going through the full competitive bidding process. You are required to obtain a minimum of two price quotes from small business suppliers to use this exception.",
+    "system_answer": "Answer: Certified small business/DVBE: may award up to $250,000 without formal bid, any funding source. BUS-43: 1 SB/DVBE quote for $10K-$100K; 2 quotes from certified SB/DVBEs above $100K. (SSPR form federal SB option: under $100K.) BUS-43 allows small business/DVBE awards \"up to $250,000\" but the SSPR form says \"Only <$250k\"; at exactly $250,000 confirm with Procurement.\nRule: Certified small business/DVBE: may award up to $250,000 without formal bid, any funding source. BUS-43: 1 SB/DVBE quote for $10K-$100K; 2 quotes from certified SB/DVBEs above $100K. (SSPR form federal SB option: under $100K.) BUS-43 allows small business/DVBE awards \"up to $250,000\" but the SSPR form says \"Only <$250k\"; at exactly $250,000 confirm with Procurement.\nSource: Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection, Non-Federal Funds: \"Certified Small Business or DVBE (Only <$250k; Complete III, VII, VIII)\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First: \"award purchase agreements valued up to $250,000 to a certified Small Business\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First, 1. General Requirements (a)-(b): \"If the goods and/or services are valued greater than $100,000 but less than $250,000 annually, UC must obtain at least two (2) quotes\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection, Federal Funds: \"Certified Small Business (Only <$100K; Complete III, VII, VIII)\"\nConditions: These are the general thresholds. For a determination on a specific purchase, ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).",
+    "difficulty": "simple",
+    "generator": "claude-opus-4",
+    "latency_s": 0.01
+  },
+  {
+    "question": "I'm a lab manager and need to purchase $185,000 worth of specialized lab furniture from a certified small business vendor. Can I use the small business set-aside exception, and if so, what steps do I need to take?",
+    "ground_truth": "Yes, you can use the small business set-aside exception because your purchase of $185,000 falls within the $250,000 threshold. To proceed, you must obtain at least two price quotes from small business vendors for the lab furniture. Once you have documented those two quotes, you can award the purchase to the selected small business supplier without conducting a full competitive bid process.",
+    "system_answer": "Answer: Yes, you can use the small business set-aside exception for this $185,000 purchase from a certified small business, as the exemption allows purchases up to $250,000 without competitive bidding if two quotes are obtained. However, you must complete and submit the SSPR form with sections I, III, VII, and VIII.\nRule: Competitive bid required: NO ($185,000; threshold $100,000; exemption: certified small business / DVBE (under $250,000)). SSPR required: YES (threshold $100,000; sections I, III, VII, VIII).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection, Non-Federal Funds: \"Certified Small Business or DVBE (Only <$250k; Complete III, VII, VIII)\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First: \"award purchase agreements valued up to $250,000 to a certified Small Business\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First, 1. General Requirements (a)-(b): \"If the goods and/or services are valued greater than $100,000 but less than $250,000 annually, UC must obtain at least two (2) quotes\"\nConditions: You must obtain at least two quotes from certified small businesses or DVBEs for purchases over $100,000 under $250,000 [2]. The SSPR form is required for non-federal purchases over $100,000 [1].",
+    "difficulty": "scenario",
+    "generator": "claude-opus-4",
+    "latency_s": 18.69
+  },
+  {
+    "question": "I have a purchase for $248,000 from a small business, but I was only able to locate one other small business that provides the same product, and that vendor declined to provide a quote. Can I still use the small business set-aside exception with only one quote, or does the requirement for two price quotes mean I must find a second willing vendor?",
+    "ground_truth": "The small business set-aside exception requires two price quotes. If you are unable to obtain a second quote because the only other available small business vendor declined to provide one, you likely cannot satisfy the two-quote requirement as stated in the policy. You should document your good-faith efforts to obtain the second quote and consult with your procurement office about next steps. The procurement office may advise you to pursue alternative procurement methods, seek additional small business vendors, or determine whether another applicable exception might apply. Simply having one quote does not meet the stated policy threshold of two price quotes for the small business set-aside exception up to $250,000.",
+    "system_answer": "Answer: No, you cannot use the small business set-aside exception with only one quote. For purchases valued between $100,000 and $250,000 annually, the University must obtain at least two quotes from certified small businesses or DVBEs.\nRule: Competitive bid required: NO ($248,000; threshold $100,000; exemption: certified small business / DVBE (under $250,000)). SSPR required: YES (threshold $100,000; sections I, III, VII, VIII).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection, Non-Federal Funds: \"Certified Small Business or DVBE (Only <$250k; Complete III, VII, VIII)\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First: \"award purchase agreements valued up to $250,000 to a certified Small Business\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.25, III, Part 3, C. Small Business First, 1. General Requirements (a)-(b): \"If the goods and/or services are valued greater than $100,000 but less than $250,000 annually, UC must obtain at least two (2) quotes\"\nConditions: If only one certified small business or DVBE is willing to provide a quote, the procurement cannot qualify for the small business exemption, and competitive bidding would be required unless another exception applies [2].",
+    "difficulty": "edge_case",
+    "generator": "claude-opus-4",
+    "latency_s": 14.8
+  },
+  {
+    "question": "When is an SSPR form required for federal purchases?",
+    "ground_truth": "An SSPR (Sole Source Procurement Request) form is required for federal purchases that exceed $50,000. Any federally funded procurement over this threshold must have a completed SSPR form as part of the compliance documentation.",
+    "system_answer": "Answer: SSPR form required for: federal contract purchases >= $15,000; federal grant/cooperative agreement purchases >= $50,000; non-federal purchases >= $100,000. SSPR sections by source selection: competitive bid I, VII, VIII; federal competitive proposals (<$100K, 3 quotes per 2 CFR 200.320(a)(2)(i)) I, II, VII, VIII; federal sole source I, III, IV, VII, VIII; non-federal sole source I, III-VIII; small business/DVBE I, III, VII, VIII; professional/personal services (non-federal) I, III, V, VII, VIII; unusual & compelling urgency (non-federal) I, VI, VII, VIII. Federal micro-purchase threshold: $15,000; campuses may set up to $50,000 for grants/cooperative agreements (OMB). Simplified Acquisition Threshold: $350,000. Federally funded orders require the Federal Funds Checklist, Debarment & Suspension verification, Anti-Lobbying (Byrd) verification at $100,000+, and flow-down articles (grants: UC T&C Articles 1, 8.1(c)(i-v), 11.8, 11.9, 11.10; contracts: 8.1(a) or 8.1(b), 1, 11.10).\nRule: SSPR form required for: federal contract purchases >= $15,000; federal grant/cooperative agreement purchases >= $50,000; non-federal purchases >= $100,000.\nSource: Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Federal Contract purchases \u2265$15,000\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Federal Grant/Cooperative Agreement purchases \u2265$50,000\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Micro-purchase threshold: \"Micro-purchase threshold means $15,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, B. Expenditure of Less Than $100,000 Annually, 4. Micro-purchase Award: \"may establish a micro-purchase threshold of up to $50,000 in accordance with the OMB\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, footnote *: \"Campus locations may establish a micro-purchase threshold of up to $50,000 for grants and cooperative agreements\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"; UC Procurement Federal Funds Checklist (Rev. 11.2025 (file dated 12/15/25)), Required documentation table: \"Anti-Lobby Verification \u2265 $100,000\"\nConditions: These are the general thresholds. For a determination on a specific purchase, ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).",
+    "difficulty": "simple",
+    "generator": "claude-opus-4",
+    "latency_s": 0.02
+  },
+  {
+    "question": "I'm a PI on an NSF grant and need to purchase a specialized mass spectrometer for $62,500 from a specific vendor. My department admin says I need to fill out additional paperwork. What form is required and why?",
+    "ground_truth": "Because your purchase is federally funded (NSF grant) and the amount of $62,500 exceeds the $50,000 threshold, you are required to complete an SSPR (Sole Source Procurement Request) form. This form is mandatory for all federal purchases over $50,000 and must be submitted as part of the procurement process before the purchase can be approved.",
+    "system_answer": "Answer: Yes, you are required to complete the Source Selection & Price Reasonableness (SSPR) Form because the purchase of $62,500 is funded by an NSF grant and meets the $50,000 threshold for federal grant/cooperative agreement purchases. Additionally, the Federal Funds Checklist, Debarment & Suspension Verification, and Uniform Guidance (2 CFR 200) Flow-Down Articles are required because the transaction involves federal funds.\nRule: Competitive bid required: NO ($62,500; threshold $100,000). SSPR required: YES (threshold $50,000; sections I, II, VII, VIII). Also required: Federal Funds Checklist; Debarment & Suspension Verification; Uniform Guidance (2 CFR 200) Flow-Down Articles.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Federal Grant/Cooperative Agreement purchases \u2265$50,000\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"\nConditions: The SSPR Form must include Sections I, II, VII, and VIII [2]. The Federal Funds Checklist is required for purchases involving federal grants of $50,000 or more [1]. Debarment & Suspension Verification is mandatory for all federally funded orders [1]. Uniform Guidance (2 CFR 200) Flow-Down Articles are required and cannot be deleted or edited for purchases using federal grant funds [1].",
+    "difficulty": "scenario",
+    "generator": "claude-opus-4",
+    "latency_s": 22.89
+  },
+  {
+    "question": "I have a federal grant and need to buy two separate pieces of equipment from the same vendor \u2014 one for $30,000 and another for $28,000. They are for related experiments in the same project. Since each individual purchase is under $50,000, do I still need to submit an SSPR form?",
+    "ground_truth": "Based strictly on the stated policy, the SSPR form is required for federal purchases over $50,000. Each individual purchase in your scenario is below the $50,000 threshold, so on a per-transaction basis, neither would independently trigger the SSPR requirement. However, you should exercise caution: if these purchases could be reasonably viewed as a single procurement that was split to avoid the $50,000 threshold (known as order splitting), this could raise compliance concerns. The policy as stated sets the trigger at federal purchases over $50,000, so if there is any possibility the two orders could be considered a combined $58,000 procurement, you should consult your procurement office to determine whether an SSPR form is required and to ensure you are not inadvertently violating federal split-purchase prohibitions.",
+    "system_answer": "Answer: Yes, you need to submit an SSPR form because the combined value of the two purchases ($30,000 + $28,000 = $58,000) meets the $50,000 SSPR form threshold for federal grant purchases, and requirements must not be artificially divided to avoid compliance.\nRule: Potential split order: $30,000 + $28,000 = $58,000. Each order is below the $50,000 SSPR form threshold but together they meet it. Requirements must not be artificially divided to avoid competition; treat this as one $58,000 procurement. Competitive bid required: NO ($58,000; threshold $100,000). SSPR required: YES (threshold $50,000; sections I, II, VII, VIII). Also required: Federal Funds Checklist; Debarment & Suspension Verification; Uniform Guidance (2 CFR 200) Flow-Down Articles.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Federal Grant/Cooperative Agreement purchases \u2265$50,000\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.11, Solicitation, a. Competition: \"UC must not artificially divide requirements into separate transactions in order to avoid competition\"\nConditions: The SSPR form must include sections I, II, VII, and VIII. Other required documentation includes the Federal Funds Checklist, Debarment & Suspension Verification, and Uniform Guidance (2 CFR 200) Flow-Down Articles [2].",
+    "difficulty": "edge_case",
+    "generator": "claude-opus-4",
+    "latency_s": 15.6
+  },
+  {
+    "question": "Can I break up a large purchase into smaller orders to avoid having to go through the competitive bidding process?",
+    "ground_truth": "No. UC policy explicitly prohibits split-order purchasing (also known as order splitting) to avoid bidding thresholds. If a purchase reasonably constitutes a single procurement need, it must be processed as one transaction and subjected to the appropriate bidding requirements based on the total value.",
+    "system_answer": "No, you cannot break up a large purchase into smaller orders to avoid having to go through the competitive bidding process. Requirements must not be artificially divided into separate transactions to avoid competition [6]. This includes prohibiting transactions that are artificially divided to falsely create multiple small Purchase Orders under the authorization limit [1].",
+    "difficulty": "simple",
+    "generator": "claude-opus-4",
+    "latency_s": 8.8
+  },
+  {
+    "question": "I need to buy $60,000 worth of lab equipment from the same vendor. The competitive bid threshold is $50,000. My colleague suggested I place two separate purchase orders \u2014 one for $35,000 and another for $25,000 \u2014 so we can process them faster without going through the formal bid process. Is this allowed?",
+    "ground_truth": "No, this is not allowed. Splitting the $60,000 equipment purchase into two separate orders of $35,000 and $25,000 to stay under the $50,000 competitive bidding threshold is a textbook example of split-order purchasing, which is explicitly prohibited by UC policy. You must process the full $60,000 as a single procurement and follow the required competitive bidding procedures for purchases at or above the applicable threshold.",
+    "system_answer": "Answer: No, it is not allowed to split the $60,000 purchase into two smaller orders to avoid the formal bid process. Intentionally dividing a purchase to bypass competitive bidding requirements is prohibited under UC policy [1].\nRule: Intentionally dividing a purchase into smaller orders to avoid bidding requirements is prohibited under BUS-43. For reference, the combined value is $60,000; the competitive bid threshold is $100,000. Competitive bid required: NO ($60,000; threshold $100,000). SSPR required: NO (threshold $100,000).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.11, Solicitation, a. Competition: \"UC must not artificially divide requirements into separate transactions in order to avoid competition\"\nConditions: The combined value of $60,000 is below the $100,000 competitive bid threshold, so competitive bidding is not required. However, splitting the purchase to avoid scrutiny or procedures is not permitted [4].",
+    "difficulty": "scenario",
+    "generator": "claude-opus-4",
+    "latency_s": 13.7
+  },
+  {
+    "question": "Our department needs to purchase similar office furniture for three different building renovations happening at different times over the next four months, totaling $75,000. Each renovation's furniture order is about $25,000 and each has a separate project budget code. Since these are technically different projects with different funding sources and different delivery dates, can we process them as three independent purchases without triggering the competitive bid threshold?",
+    "ground_truth": "This would likely be considered prohibited split-order purchasing. Even though the purchases are tied to different projects, budget codes, and timelines, UC policy looks at the substance of the procurement need. Because the purchases involve similar goods from what would reasonably be the same vendor pool, within a relatively close timeframe, and for the same department, aggregating them into a single procurement is expected. Processing them separately to remain below the bidding threshold would violate the prohibition on split-order purchasing. The department should consult with its Procurement Services office to determine the correct approach, but the safest and most compliant path is to treat the $75,000 total as one procurement subject to competitive bidding requirements.",
+    "system_answer": "Answer: No, you cannot process the purchases as three independent purchases to avoid the competitive bid requirements if the combined value is intended to circumvent the $100,000 threshold. Intentionally dividing a purchase into smaller orders to avoid bidding requirements is prohibited under UC policy [1].\nRule: Intentionally dividing a purchase into smaller orders to avoid bidding requirements is prohibited under BUS-43. For reference, the combined value is $75,000; the competitive bid threshold is $100,000. Competitive bid required: NO ($75,000; threshold $100,000). SSPR required: NO (threshold $100,000).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.11, Solicitation, a. Competition: \"UC must not artificially divide requirements into separate transactions in order to avoid competition\"\nConditions: The total purchase value is $75,000, which is below the $100,000 competitive bid threshold, so competitive bidding is not required [2]. However, the purchase must not be artificially divided to avoid compliance with procurement requirements [2].",
+    "difficulty": "edge_case",
+    "generator": "claude-opus-4",
+    "latency_s": 16.6
+  },
+  {
+    "question": "If my purchase uses federal funding and exceeds $10,000, what procurement rules do I need to follow?",
+    "ground_truth": "When federal funds are involved in a transaction exceeding $10,000, the entire transaction must follow federal procurement rules \u2014 not just the federally funded portion. This means all federal requirements (such as those under the Uniform Guidance 2 CFR 200) apply to the full purchase, regardless of whether other funding sources are also contributing.",
+    "system_answer": "Answer: Federal micro-purchase threshold: $15,000; campuses may set up to $50,000 for grants/cooperative agreements (OMB). Simplified Acquisition Threshold: $350,000. Federally funded orders require the Federal Funds Checklist, Debarment & Suspension verification, Anti-Lobbying (Byrd) verification at $100,000+, and flow-down articles (grants: UC T&C Articles 1, 8.1(c)(i-v), 11.8, 11.9, 11.10; contracts: 8.1(a) or 8.1(b), 1, 11.10). Mixed funding: if the federal portion meets the SSPR federal threshold (federal contract >= $15,000; federal grant/cooperative agreement >= $50,000), federal requirements apply to the ENTIRE transaction (check Federal side only); below that, only UC/State rules apply (SSPR form Rev. 12-2025, Section I).\nRule: Federal micro-purchase threshold: $15,000; campuses may set up to $50,000 for grants/cooperative agreements (OMB). Simplified Acquisition Threshold: $350,000.\nSource: FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Micro-purchase threshold: \"Micro-purchase threshold means $15,000\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, B. Expenditure of Less Than $100,000 Annually, 4. Micro-purchase Award: \"may establish a micro-purchase threshold of up to $50,000 in accordance with the OMB\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, footnote *: \"Campus locations may establish a micro-purchase threshold of up to $50,000 for grants and cooperative agreements\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"; UC Procurement Federal Funds Checklist (Rev. 11.2025 (file dated 12/15/25)), Required documentation table: \"Anti-Lobby Verification \u2265 $100,000\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection (Required): \"where the federal portion exceeds the above thresholds, check Federal side only\"\nConditions: These are the general thresholds. For a determination on a specific purchase, ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).",
+    "difficulty": "simple",
+    "generator": "claude-opus-4",
+    "latency_s": 0.02
+  },
+  {
+    "question": "I'm purchasing a $25,000 piece of lab equipment. I plan to pay $12,000 from my federal NIH grant and $13,000 from departmental discretionary funds. Can the $13,000 portion just follow UC standard procurement rules since it's not federal money?",
+    "ground_truth": "No. Because the transaction involves federal funds exceeding $10,000 (specifically $12,000 from your NIH grant), the entire $25,000 purchase must comply with federal procurement rules. You cannot split the transaction into separate compliance frameworks \u2014 the federal portion triggers federal rules for the whole transaction, including the $13,000 paid from departmental discretionary funds.",
+    "system_answer": "Answer: Yes, the $13,000 portion from departmental discretionary funds follows UC standard procurement rules, as the federal portion is below the $50,000 federal grant threshold, and the total purchase value of $25,000 is below the $100,000 competitive bid and SSPR requirements.\nRule: Federal rules do NOT apply; UC/State rules only (federal portion $12,000 is below the $50,000 federal grant threshold). Competitive bid required: NO ($25,000; threshold $100,000). SSPR required: NO (threshold $100,000).\nSource: Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection (Required): \"where the federal portion exceeds the above thresholds, check Federal side only\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: Since the federal portion ($12,000) is below the $50,000 federal grant threshold, only UC/State rules apply [1]. Additionally, the total purchase value ($25,000) is below the $100,000 competitive bid and SSPR form thresholds [1].",
+    "difficulty": "scenario",
+    "generator": "claude-opus-4",
+    "latency_s": 19.29
+  },
+  {
+    "question": "I have a $15,000 purchase where I'm using $9,500 from a federal NSF grant and $5,500 from a state fund. Since the federal portion is under $10,000, can I avoid applying federal procurement rules to the transaction?",
+    "ground_truth": "This is a nuanced edge case. The policy states that federal funds over $10,000 trigger federal rules for the entire transaction. In this scenario, while the total transaction is $15,000, the federal funds portion is $9,500 \u2014 which does not exceed the $10,000 threshold. Based strictly on the policy as stated, the federal rules would not be triggered because the federal funding component itself does not exceed $10,000. However, caution is strongly advised: you should not structure or split funding specifically to keep the federal portion under $10,000 to avoid federal rules, as this could constitute improper split-purchasing. Consult your Sponsored Projects office to ensure full compliance.",
+    "system_answer": "Answer: Yes, you can avoid applying federal procurement rules to the transaction because the federal portion is below the $50,000 federal grant threshold, and UC/State rules apply instead.\nRule: Federal rules do NOT apply; UC/State rules only (federal portion $9,500 is below the $50,000 federal grant threshold). Competitive bid required: NO ($15,000; threshold $100,000). SSPR required: NO (threshold $100,000).\nSource: Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, I. Source Selection (Required): \"where the federal portion exceeds the above thresholds, check Federal side only\"; BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: Only UC/State procurement rules apply since the federal portion is below the $50,000 threshold for federal grants [1]. Competitive bid and SSPR form are not required as the purchase value is below $100,000 [1].",
+    "difficulty": "edge_case",
+    "generator": "claude-opus-4",
+    "latency_s": 8.0
+  },
+  {
+    "question": "What test does UC use to determine whether a worker is classified as an independent contractor or an employee?",
+    "ground_truth": "UC uses the IRS common law test to determine whether a worker is classified as an independent contractor or an employee.",
+    "system_answer": "UC uses the common law \"direction and control\" test to determine whether a worker is classified as an independent contractor or an employee [1]. This test focuses on three areas: behavioral control, financial control, and the relationship between the parties [1].",
+    "difficulty": "simple",
+    "generator": "gpt-4o",
+    "latency_s": 4.32
+  },
+  {
+    "question": "Suppose a UC department wants to hire an individual consultant for a $3,000 project to redesign a website. What evaluation method should they use to decide if this consultant should be classified as an independent contractor or an employee?",
+    "ground_truth": "The department should use the IRS common law test to determine whether the consultant is classified as an independent contractor or an employee.",
+    "system_answer": "To determine whether the individual consultant should be classified as an independent contractor or an employee, the UC department should use the evaluation method outlined in the UC Independent Contractor Guidelines, specifically the \"EVALUATION OF CLASSIFICATION FACTORS\" checklist on page 23 [3]. This evaluation considers factors that support employee status versus those that support contractor status. The decision should be based on whether the University has the right to direct and control the work, not only as to the results but also as to the methods and means by which the results are accomplished, as described on page 5 [8]. If the department concludes the individual should be an employee, they should select the \"Hire worker as an employee\" option; if an independent contractor, they should select \"Enter into contract with worker as an independent contractor.\" Additionally, the department must consult with HR and Finance, and provide a copy of the completed checklist to procurement as part of the request [3].",
+    "difficulty": "scenario",
+    "generator": "gpt-4o",
+    "latency_s": 7.88
+  },
+  {
+    "question": "A department wants to hire a lecturer as an independent contractor for a one-time, specialty workshop, but the lecturer is already employed by UC. Could this scenario lead to misclassification, and what should they consider based on the IRS common law test?",
+    "ground_truth": "Yes, this scenario could lead to misclassification. Under the IRS common law test, the department must consider factors such as the lecturer's degree of control and independence, potential conflicts of interest, and how the lecturer's role differs from their regular employment duties. If the lecturer's work for the workshop is not sufficiently independent, they may need to be classified as an employee instead of an independent contractor.",
+    "system_answer": "Yes, hiring a lecturer who is already employed by UC as an independent contractor could lead to misclassification. The IRS common law test evaluates whether the worker is economically dependent on the University or operates as an independent business. If the lecturer is already a UC employee, classifying them as an independent contractor could violate federal tax withholding laws and result in penalties, as outlined in the policy [6]. Additionally, the IRS leans toward classifying University Extension instructors as employees unless the facts clearly support independent contractor status [5]. The department should evaluate the classification factors described in the UC Independent Contractor Guidelines for Federal Tax Purposes and consult with HR and Finance to ensure proper classification [8].",
+    "difficulty": "edge_case",
+    "generator": "gpt-4o",
+    "latency_s": 6.75
+  },
+  {
+    "question": "Is a Business Associate Agreement (BAA) required if a vendor handles UC protected health information?",
+    "ground_truth": "Yes, a BAA is required when a vendor handles UC protected health information.",
+    "system_answer": "Yes, a Business Associate Agreement (BAA) is required if a vendor handles UC protected health information. UC is a \"Covered Entity\" under HIPAA, and vendors that perform functions or activities involving PHI must act as a \"Business Associate\" of UC and enter into a BAA to ensure compliance with HIPAA, HITECH, and applicable California laws [3].",
+    "difficulty": "simple",
+    "generator": "gpt-4o",
+    "latency_s": 4.36
+  },
+  {
+    "question": "We are hiring a vendor for a research project funded at $50,000, and they will access UC protected health information as part of their duties. Do we need to establish a Business Associate Agreement with this vendor?",
+    "ground_truth": "Yes, you need to establish a Business Associate Agreement because they will access UC protected health information.",
+    "system_answer": "Answer: Yes, a Business Associate Agreement (BAA) is required because the vendor will access protected health information (PHI) as part of their duties.\nRule: Competitive bid required: NO ($50,000; threshold $100,000). SSPR required: NO (threshold $100,000). Also required: Appendix Data Security; Business Associate Agreement (BAA).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: The BAA is required under HIPAA regulations [2] and the UC Terms and Conditions of Purchase [1].",
+    "difficulty": "scenario",
+    "generator": "gpt-4o",
+    "latency_s": 4.64
+  },
+  {
+    "question": "A vendor is contracted for $1,000 to survey patients but will receive only de-identified health information. Does a Business Associate Agreement still need to be executed in this case?",
+    "ground_truth": "No, a Business Associate Agreement is not required if the vendor only receives de-identified health information and does not handle any UC protected health information.",
+    "system_answer": "No, a Business Associate Agreement (BAA) does not need to be executed in this case if the vendor receives only de-identified health information. According to UC policy, a BAA is required only when the vendor requires access to Protected Health Information (PHI) to perform services. If the vendor unintentionally receives PHI or later requires access to PHI, then a BAA must be executed. However, if the vendor is only working with de-identified information, there is no requirement for a BAA [5].",
+    "difficulty": "edge_case",
+    "generator": "gpt-4o",
+    "latency_s": 5.68
+  },
+  {
+    "question": "When is a Data Security Appendix required according to UC policy?",
+    "ground_truth": "A Data Security Appendix is required when a vendor accesses UC institutional data.",
+    "system_answer": "A Data Security Appendix is required according to UC policy when a Supplier gains access to the University of California\u2019s (UC) Institutional Information and/or IT Resources in the course of providing Goods and/or Services contemplated by an Agreement [4].",
+    "difficulty": "simple",
+    "generator": "gpt-4o",
+    "latency_s": 3.6
+  },
+  {
+    "question": "We are engaging a vendor for an IT service contract worth $50,000 to manage our student records system, which involves accessing UC student data. Is a Data Security Appendix required?",
+    "ground_truth": "Yes, a Data Security Appendix is required because the vendor will access UC institutional data.",
+    "system_answer": "Answer: Yes, the Data Security Appendix is required.\nRule: Competitive bid required: NO ($50,000; threshold $100,000). SSPR required: NO (threshold $100,000). Also required: Appendix Data Security; IS-3 Compliance.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: Since the vendor will access UC institutional data (student records), the Appendix Data Security must be included in the agreement [1]. Additionally, because the vendor provides IT services involving UC data, compliance with UC IS-3 Electronic Information Security is required [5].",
+    "difficulty": "scenario",
+    "generator": "gpt-4o",
+    "latency_s": 4.2
+  },
+  {
+    "question": "Our department is sharing anonymized UC research data with a third-party vendor for data analysis. The vendor claims the data has been sufficiently anonymized to not require a Data Security Appendix. Is the Data Security Appendix still required?",
+    "ground_truth": "Yes, a Data Security Appendix is still required because the vendor is accessing UC institutional data, regardless of whether it is anonymized.",
+    "system_answer": "Yes, the Data Security Appendix is still required. The purpose of the Appendix is to ensure that Institutional Information, including data accessed or processed by third-party vendors, is appropriately protected, regardless of whether it is anonymized [8]. Vendors must adhere to the specified cybersecurity and risk management responsibilities when handling such data. Additionally, the Appendix mandates that suppliers implement commercially acceptable security policies and practices to mitigate risks to Institutional Information [1]. Therefore, even with anonymized data, the Data Security Appendix remains applicable.",
+    "difficulty": "edge_case",
+    "generator": "gpt-4o",
+    "latency_s": 7.8
+  },
+  {
+    "question": "What is the duration of the ban on UC contracts for former employees?",
+    "ground_truth": "The ban on UC contracts for former employees is one year.",
+    "system_answer": "The duration of the ban on UC contracts for former employees is two years for contracts that the former employee negotiated while employed by the University [1]. Additionally, there is a flat 12-month ban on former policymaking employees entering into contracts with their former University departments [2].",
+    "difficulty": "simple",
+    "generator": "gpt-4o",
+    "latency_s": 4.52
+  },
+  {
+    "question": "A former UC staff member left her position and immediately started her own consulting firm. Three months later, she wants to submit a proposal for a $50,000 project with UC. Is she allowed to do this?",
+    "ground_truth": "No, she is not allowed to submit a proposal for a UC contract until one year has passed since leaving her position.",
+    "system_answer": "Yes, she is allowed to submit a proposal for a $50,000 project with UC, provided that the project does not fall under the specific prohibitions outlined in the Post-Employment Conflict of Interest Rules. \n\nThe one-year post-employment ban on former employees entering into contracts with their former departments does not prohibit uncompensated appearances or communications, and it does not apply to advising clients or employers who might appear before or communicate with the University, as long as the former employee is not identified in connection with the appearance or communication to the University or does not accompany the client or employer at the appearance [8]. Since she is submitting a proposal and not directly appearing or communicating on behalf of another party, the one-year ban does not prohibit this activity. However, any applicable permanent bans or other conflict of interest rules would still apply if relevant [8].",
+    "difficulty": "scenario",
+    "generator": "gpt-4o",
+    "latency_s": 7.5
+  },
+  {
+    "question": "A former UC employee was subject to a one-year contract ban. If a UC department wants to hire him temporarily as an independent contractor for a specialized project that receives no direct UC funding, does the ban still apply?",
+    "ground_truth": "Yes, the one-year ban on UC contracts applies regardless of the source of funding for the project.",
+    "system_answer": "Yes, the one-year ban still applies. The Political Reform Act prohibits certain former employees from interacting with the University for one year, regardless of whether the former employee was previously involved in any specific proceedings at issue. This means that even if the hiring is for a specialized project that receives no direct UC funding, the former employee remains subject to the one-year ban on representing other parties before the University [7].",
+    "difficulty": "edge_case",
+    "generator": "gpt-4o",
+    "latency_s": 5.45
+  },
+  {
+    "question": "What must be included when making an exception to the competitive bidding process in UC procurement?",
+    "ground_truth": "When making an exception to the competitive bidding process, the exception must be documented with justification.",
+    "system_answer": "Answer: When making an exception to the competitive bidding process in UC procurement, exceptions must be approved by the Policy Exception Authority, and the decision must be documented in writing [1]. The exception must also meet specific criteria, such as sole source, professional/personal services, unusual urgency, or participation in the Small Business First Program [6].\nRule: Competitive bid required at $100,000 or more (BUS-43: more than $100,000 annually, aggregated per supplier; CA Public Contract Code). The same $100,000 bid threshold applies to federal funds because the CA PCC is stricter than the $350,000 federal Simplified Acquisition Threshold.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; FAR 2.101 Definitions (inflation adjustment, 90 FR 41872) (effective October 1, 2025), Simplified acquisition threshold: \"Simplified acquisition threshold means $350,000\"\nConditions: Exceptions require approval and written documentation, and they must be justified based on predefined circumstances [1][6].",
+    "difficulty": "simple",
+    "generator": "gpt-4o",
+    "latency_s": 6.05
+  },
+  {
+    "question": "I need to purchase specialized lab equipment necessary for a research project, totaling $90,000. The equipment is only available from a single supplier. What should I ensure according to UC procurement policies to proceed with the purchase?",
+    "ground_truth": "You should ensure that the exception to the competitive bidding process is documented with a clear justification explaining why the exception is necessary.",
+    "system_answer": "Answer: No competitive bid or Source Selection & Price Reasonableness (SSPR) form is required for this $90,000 purchase, as both are only required for purchases of $100,000 or more. Since the equipment is only available from a single supplier, you should ensure that the purchase aligns with UC procurement guidelines for specialized or unique items.\nRule: Competitive bid required: NO ($90,000; threshold $100,000). SSPR required: NO (threshold $100,000).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: Ensure that the procurement process is reviewed and approved by the Procurement/Supply Chain Director, especially for unusually complex or high-value items, as noted in policy [1].",
+    "difficulty": "scenario",
+    "generator": "gpt-4o",
+    "latency_s": 6.2
+  },
+  {
+    "question": "The procurement department identified an emergency situation that requires the immediate purchase of safety equipment for $150,000. Due to urgency, competitive bidding is bypassed. What documentation is required for compliance given the situation, and does the emergency nature impact the documentation requirement?",
+    "ground_truth": "Despite the emergency nature, the exception to the competitive bidding process must be documented with a justification detailing the urgency and the reasons for bypassing the usual process.",
+    "system_answer": "Answer: Yes, documentation is required for compliance. Because the purchase is $150,000 and uses non-federal funds, the Source Selection & Price Reasonableness (SSPR) Justification Form must be completed, citing the emergency situation under the \"Unusual and Compelling Urgency\" section. Competitive bidding is exempt in this case due to the emergency, but the SSPR form is still mandatory [1][3][7].\nRule: Competitive bid required: NO ($150,000; threshold $100,000; exemption: unusual & compelling urgency (non-federal only)). SSPR required: YES (threshold $100,000; sections I, VI, VII, VIII).\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"\nConditions: The emergency situation must be clearly documented on the SSPR form, explaining why immediate action is necessary to prevent harm or significant loss. The form must include justification for the supplier selection and why other suppliers were not considered. Failure to complete the form would result in non-compliance with UC procurement policies [3][4][7].",
+    "difficulty": "edge_case",
+    "generator": "gpt-4o",
+    "latency_s": 7.75
+  },
+  {
+    "question": "What is the minimum dollar value for UC equipment that must be tagged and tracked in the asset management system?",
+    "ground_truth": "Equipment valued over $5,000 must be tagged and tracked.",
+    "system_answer": "Answer: BUS-29: equipment costing $5,000 or more must be inventoried, tagged, tracked, and assigned a CAAN (threshold was $1,500 before July 1, 2004). Items under $5,000 are not inventorial equipment. Accessories of $5,000+ acquired later must also be capitalized.\nRule: BUS-29: equipment costing $5,000 or more must be inventoried, tagged, tracked, and assigned a CAAN (threshold was $1,500 before July 1, 2004). Items under $5,000 are not inventorial equipment. Accessories of $5,000+ acquired later must also be capitalized.\nSource: BFB-BUS-29: Management and Control of University Equipment (UC-FA-21-0555 (accessible)), p.3, II. Definitions, Non-Inventorial Equipment: \"NON-INVENTORIAL EQUIPMENT: Equipment which is non-expendable, tangible, personal property acquired for less than $5,000\"; BFB-BUS-29: Management and Control of University Equipment (UC-FA-21-0555 (accessible)), p.2, footnote 1: \"Prior to July 1, 2004, the threshold was $1,500\"\nConditions: These are the general thresholds. For a determination on a specific purchase, ask with its dollar amount and funding source (federal contract, federal grant, or non-federal).",
+    "difficulty": "simple",
+    "generator": "deepseek-chat",
+    "latency_s": 0.01
+  },
+  {
+    "question": "I'm a lab manager purchasing a centrifuge for $4,800 and a microscope for $5,200. Do I need to have either or both tagged and tracked in the asset management system?",
+    "ground_truth": "Only the microscope valued at $5,200 (over $5,000) must be tagged and tracked. The centrifuge at $4,800 does not meet the threshold.",
+    "system_answer": "Answer: The centrifuge does not need to be tagged or tracked because it is below the $5,000 threshold, but the microscope must be tagged and tracked as it meets the $5,000 inventorial equipment threshold.\nRule: centrifuge ($4,800): no tagging required (BUS-29 threshold $5,000). microscope ($5,200): must be tagged (BUS-29 threshold $5,000).\nSource: BFB-BUS-29: Management and Control of University Equipment (UC-FA-21-0555 (accessible)), p.3, II. Definitions, Non-Inventorial Equipment: \"NON-INVENTORIAL EQUIPMENT: Equipment which is non-expendable, tangible, personal property acquired for less than $5,000\"\nConditions: Equipment costing $5,000 or more must be inventoried, tagged, and assigned a CAAN [1].",
+    "difficulty": "scenario",
+    "generator": "deepseek-chat",
+    "latency_s": 5.29
+  },
+  {
+    "question": "We received a donated piece of equipment with a market value of $5,500 but we paid $0 for it. Does the $5,000 threshold apply to donated equipment, and if so, how is value determined?",
+    "ground_truth": "Yes, the $5,000 threshold applies to all equipment, including donations. Value should be based on fair market value at the time of receipt, which in this case would be $5,500, so it must be tagged and tracked.",
+    "system_answer": "Answer: Yes, the $5,000 threshold applies to donated equipment. The value is determined by its fair market value, and since the donated equipment has a market value of $5,500, it must be inventoried, tagged, tracked, and assigned a CAAN.\nRule: Item 1 ($5,500): must be tagged (BUS-29 threshold $5,000).\nSource: BFB-BUS-29: Management and Control of University Equipment (UC-FA-21-0555 (accessible)), p.3, II. Definitions, Non-Inventorial Equipment: \"NON-INVENTORIAL EQUIPMENT: Equipment which is non-expendable, tangible, personal property acquired for less than $5,000\"\nConditions: The threshold is based on the fair market value, not the amount paid by the University [4].",
+    "difficulty": "edge_case",
+    "generator": "deepseek-chat",
+    "latency_s": 5.7
+  },
+  {
+    "question": "What are the two key requirements for obtaining a tax-free alcohol permit at UC?",
+    "ground_truth": "The permit requires DEA registration and annual inventory reconciliation.",
+    "system_answer": "The two key requirements for obtaining a tax-free alcohol permit at UC are:  \n1. Submitting the application form along with the necessary supporting documentation to establish eligibility for tax-free alcohol under the applicable federal regulations (27 CFR 22.104 for educational institutions) [5].  \n2. Posting the approved permit and the application form in a conspicuous place in the alcohol storage room [6].",
+    "difficulty": "simple",
+    "generator": "deepseek-chat",
+    "latency_s": 5.34
+  },
+  {
+    "question": "Our lab needs to purchase 500 mL of 200-proof ethanol for research, tax-free, at a cost of $1,200. I have a DEA registration but haven't done an inventory count since last year. Can I proceed with the purchase?",
+    "ground_truth": "No, you cannot proceed because the tax-free alcohol permit requires both DEA registration AND annual inventory reconciliation. Even with a valid DEA registration, the purchase is not allowed until the annual inventory is completed and reconciled.",
+    "system_answer": "To determine whether you can proceed with the purchase of 500 mL of 200-proof ethanol for research purposes under a tax-free permit, the following factors must be considered:\n\n1. **Inventory Requirements**: Federal law requires a physical inventory of tax-free alcohol to be taken semiannually, or at intervals of approximately six months [6], [7]. Since it has been over a year since the last inventory count, you are out of compliance with the mandatory inventory schedule. This must be corrected before any additional withdrawals or purchases can be made.\n\n2. **Cumulative Quantity Limits**: The cumulative quantity of tax-free alcohol withdrawn or received in any calendar year must not exceed the amount authorized by the permit [5]. While 500 mL is a relatively small volume, you must ensure that the total quantity being withdrawn this year, including this purchase, does not exceed the permitted limit.\n\n3. **Permitted Use and Storage**: Tax-free alcohol may only be used on university premises and cannot be transported to non-University locations [5]. Since this purchase is for research purposes and is within the permitted use, it meets this requirement.\n\n4. **Delivery Approval**: Deliveries exceeding the stated monthly requirement or more than 25 gallons must have prior approval from the Chancellor or designee [5]. However, 500 mL does not meet the threshold for this condition, so no additional approvals are required for this specific quantity.\n\n**Conclusion**: You cannot proceed with the purchase until you have conducted the required semiannual inventory and ensured compliance with the inventory schedule [6], [7]. Once the inventory is completed and the cumulative quantity does not exceed the permitted limit, the purchase may proceed.",
+    "difficulty": "scenario",
+    "generator": "deepseek-chat",
+    "latency_s": 14.06
+  },
+  {
+    "question": "Our department uses tax-free alcohol for both research and occasional classroom demonstrations. The DEA registration is under a principal investigator who is retiring next month. We have the annual inventory scheduled for next week. Can we still use the tax-free permit for a small classroom order of $50 worth of alcohol this week, before the inventory is done?",
+    "ground_truth": "No, the tax-free alcohol permit requires an annual inventory reconciliation to be current. Using the permit without having completed that year's reconciliation violates the policy, regardless of the low dollar amount or purpose. Additionally, the pending retirement of the DEA-registered PI may affect the permit's validity for future use.",
+    "system_answer": "Yes, you can still use the tax-free permit for a small classroom order of $50 worth of alcohol this week before the annual inventory is done, provided that the use is for legitimate research or educational purposes and complies with all permit conditions. The policy does not prohibit alcohol use before inventory as long as it is within the authorized permit limits and properly recorded. However, all withdrawals must be made in quantities conforming to stated requirements, and individuals authorized to withdraw alcohol must sign a receipt for each delivery and maintain accurate records [6].",
+    "difficulty": "edge_case",
+    "generator": "deepseek-chat",
+    "latency_s": 6.53
+  },
+  {
+    "question": "What is the minimum general liability insurance a vendor must carry per occurrence?",
+    "ground_truth": "$1 million per occurrence.",
+    "system_answer": "The minimum general liability insurance a vendor must carry per occurrence is $1,000,000 [4].",
+    "difficulty": "simple",
+    "generator": "deepseek-chat",
+    "latency_s": 3.67
+  },
+  {
+    "question": "I'm hiring a caterer for our department event. The vendor has a general liability policy with a $500,000 per occurrence limit. Can I proceed with this vendor as is?",
+    "ground_truth": "No, the vendor must carry at least $1 million per occurrence according to UC risk transfer requirements.",
+    "system_answer": "No, you cannot proceed with this vendor as is. The UC policy requires Commercial Form General Liability Insurance with a minimum limit of $1,000,000 per occurrence [2]. The vendor\u2019s $500,000 per occurrence limit does not meet this requirement.",
+    "difficulty": "scenario",
+    "generator": "deepseek-chat",
+    "latency_s": 5.4
+  },
+  {
+    "question": "A small, non-profit vendor we want to contract with argues that their general liability insurance is only $500,000 per occurrence, but they have a $2 million umbrella policy that kicks in after the $500,000 is exhausted. Does this satisfy the $1 million per occurrence requirement?",
+    "ground_truth": "No, the $1 million per occurrence requirement must be met by the primary general liability policy, not supplemented by an umbrella or excess policy that only attaches after exhaustion of the primary limit. The vendor must carry a minimum $1 million per occurrence general liability policy.",
+    "system_answer": "No, the vendor\u2019s general liability insurance with a $500,000 per occurrence limit and a $2 million umbrella policy does not satisfy the $1 million per occurrence requirement specified in the UC procurement policies. The policies explicitly require a minimum limit of $1,000,000 per occurrence for Commercial Form General Liability Insurance [1] [2]. Umbrella coverage that kicks in after the primary policy is exhausted does not fulfill the required minimum limit.",
+    "difficulty": "edge_case",
+    "generator": "deepseek-chat",
+    "latency_s": 5.7
+  },
+  {
+    "question": "Does UC policy prohibit contracting out work that would displace UC employees?",
+    "ground_truth": "Yes, Regents Policy 5402 prohibits contracting out work that displaces UC employees.",
+    "system_answer": "Yes, UC policy prohibits contracting out work that would displace UC employees. Displacement is defined as demotion, layoff, or involuntary reduction in time due to entering into a contract for services [4]. Contracts for covered services must not displace UC employees [1].",
+    "difficulty": "simple",
+    "generator": "deepseek-chat",
+    "latency_s": 5.0
+  },
+  {
+    "question": "Our department wants to contract out a $50,000 janitorial service contract for a new building. We currently have three UC janitorial staff who clean adjacent buildings. If this contract would eliminate their jobs, is it allowed?",
+    "ground_truth": "No, the contract would be prohibited under Regents Policy 5402 because it would displace current UC employees.",
+    "system_answer": "Answer: No, it is not allowed to contract out the janitorial service as it would displace UC employees, which is prohibited under Regents Policy 5402.\nRule: Competitive bid required: NO ($50,000; threshold $100,000). SSPR required: NO (threshold $100,000). Covered service (janitorial) under Regents Policy 5402: PROHIBITED (displaces UC employees). AFSCME notice: NO.\nSource: BFB-BUS-43: Purchases of Goods and Services; Supply Chain Management (Interim, issued/effective January 26, 2026), p.9, III, C. Expenditures of $100,000 or More Annually, 1. General Requirements: \"requires that UC competitively bid all purchases with proposed annual expenditure of $100,000 or more unless an exception applies\"; Source Selection & Price Reasonableness Justification Form (SSPR) (Revised 12-2025), p.1, header: \"Non-Federal purchases \u2265$100,000\"; Regents Policy 5402: Policy Generally Prohibiting Contracting for Services (Approved November 14, 2019; amended January 23, 2020), p.1, Policy Summary: \"There shall be a general prohibition on contracting out for services and functions that can be performed by University staff\"; AFSCME 3299 Article 5: Contracting Out (1-31-20), p.3, D. Notice Provisions, 1: \"The University shall provide notice to AFSCME 3299 prior to entering into, extending or renewing a contract that includes Covered Services valued at over $100,000\"\nConditions: Janitorial services are a covered service under Regents Policy 5402 and AFSCME 3299 Article 5, and displacement of UC employees through such contracts is not permitted regardless of the contract value [1][3].",
+    "difficulty": "scenario",
+    "generator": "deepseek-chat",
+    "latency_s": 6.1
+  },
+  {
+    "question": "We need to hire an external IT consultant for a 6-month project developing a new software system. No UC employee has these specific skills, but the project will require reassigning two UC IT staff from their current roles to support the consultant, potentially leading to layoffs of other workers who cover their usual duties. Does Policy 5402 apply here?",
+    "ground_truth": "Yes, the policy applies. Even though the consultant themselves isn't displacing UC employees directly, the resulting reassignment could indirectly displace employees performing the usual duties, which triggers the prohibition.",
+    "system_answer": "Not found in policy: I couldn't find UC policy text in the indexed documents that answers this question. Please check with Procurement, or rephrase with the policy or form name.",
+    "difficulty": "edge_case",
+    "generator": "deepseek-chat",
+    "latency_s": 5.0
+  },
+  {
+    "question": "I am a department chair about to serve on a selection committee for a new laboratory equipment supplier. Do I need to disclose anything if my brother-in-law works for one of the bidding companies?",
+    "ground_truth": "Yes, you must disclose any financial interest before participating in any procurement decision. A family member's employment at a bidding company constitutes a potential conflict of interest that requires disclosure under the policy.",
+    "system_answer": "Yes, you need to disclose this relationship. Under UC Santa Cruz procurement policies, designated employees must disclose any personal or financial interests that could influence their official responsibilities, including serving on a selection committee. This includes close family relationships with individuals employed by companies involved in procurement processes. The Conflict of Interest Training for Procurement explicitly outlines the need for such disclosures [1].",
+    "difficulty": "simple",
+    "generator": "deepseek-chat",
+    "latency_s": 5.14
+  },
+  {
+    "question": "I am a principal investigator (PI) on a $500,000 grant. I need to purchase specialized software from a small vendor. My spouse owns 10% equity in that vendor. The software costs $12,000. Do I need to disclose this before I approve the purchase order?",
+    "ground_truth": "Yes, you must disclose your spouse's financial interest (10% equity) in the vendor before participating in any procurement decision, regardless of the dollar amount. The policy requires disclosure for any financial interest, without a de minimis threshold, and applies to all procurement decisions involving that interest.",
+    "system_answer": "Yes, you need to disclose this before approving the purchase order. UC policy prohibits conflicts of interest in procurement decisions, particularly when a PI or their spouse has a financial interest in a vendor. Specifically, the Employee\u2013Supplier Relationship section of the conflict of interest policies governs such situations and requires disclosure [7]. Additionally, the Health Care Vendor Relations Policy and other related policies address interactions between UC personnel and vendors, including responsibilities for committees overseeing purchasing decisions [7].",
+    "difficulty": "scenario",
+    "generator": "deepseek-chat",
+    "latency_s": 4.88
+  },
+  {
+    "question": "I am a tenured professor and I serve on a university committee that selects vendors for campus-wide printing services. I recently inherited a small number of shares in a large publicly traded company that is one of many potential bidders. The inheritance just occurred and I have no involvement in that company's operations. Since the shares are less than 1% of the company's total stock and the procurement is competitively bid, can I participate without disclosure?",
+    "ground_truth": "No. The policy requires disclosure before participating in any procurement decision involving a financial interest, even a small, indirect, or inherited one. The size of the shareholding (less than 1%) and the competitive nature of the bidding do not exempt you from the disclosure requirement. You must disclose the inherited shares before any participation in the committee's decisions regarding that vendor.",
+    "system_answer": "No, you cannot participate without disclosure. University policy requires that you disclose any financial interest in a company that is a potential bidder in a procurement process, even if the ownership is less than 1% and you have no involvement in the company's operations. This is to ensure transparency and avoid potential conflicts of interest in purchasing decisions. The Conflict of Interest Training: Procurement 2024 emphasizes the need for disclosures in such situations [4]. Additionally, the Compendium of Conflict of Interest & Related Policies outlines the importance of managing conflicts in employee-supplier relationships [7].",
+    "difficulty": "edge_case",
+    "generator": "deepseek-chat",
+    "latency_s": 5.78
+  },
+  {
+    "question": "What specific FAR requirement must UC follow when making purchases for federal contracts involving commercial items?",
+    "ground_truth": "FAR Part 12 commercial items requirements.",
+    "system_answer": "When making purchases for federal contracts involving commercial items, UC must follow the specific FAR requirements listed in the UC Terms and Conditions of Purchase (April 2025), which include, but are not limited to:\n\n(i) FAR 52.203-13, Contractor Code of Business Ethics and Conduct;\n(ii) FAR 52.203-17, Contractor Employee Whistleblower Rights and Requirement to Inform Employees of Whistleblower Rights;\n(iii) FAR 52.203-19, Prohibition on Requiring Certain Internal Confidentiality Agreements or Statements;\n(iv) FAR 52.219-8, Utilization of Small Business Concerns;\n(v) FAR 52.222-17, Nondisplacement of Qualified Workers;\n(vi) FAR 52.222-21, Prohibition of Segregated Facilities;\n(vii) FAR 52.222-26, Equal Opportunity;\n(viii) FAR 52.222-35, Equal Opportunity for Veterans;\n(ix) FAR 52.222-36, Equal Opportunity for Workers with Disabilities;\n(x) FAR 52.222-37, Employment Reports on Veterans;\n(xi) FAR 52.222-40, Notification of Employee Rights Under the National Labor Relations Act;\n(xii) FAR 52.222-41, Service Contract Labor Standards;\n(xiii) FAR 52.222-50, Combating Trafficking in Persons;\n(xiv) FAR 52.222-51, Exemption from Application of the Service Contract Labor Standards to Contracts for Maintenance, Calibration, or Repair of Certain Equipment - Requirements [1], [4].",
+    "difficulty": "simple",
+    "generator": "gemma-4",
+    "latency_s": 16.1
+  },
+  {
+    "question": "A UC department is acquiring a new software package using funds from a federal contract. According to policy, what must the procurement process adhere to regarding the nature of this commercial item?",
+    "ground_truth": "The purchase must comply with FAR Part 12 commercial items requirements.",
+    "system_answer": "The procurement process for acquiring a new software package using funds from a federal contract must adhere to Article 8.1 (a) Commercial Transactions of the UC Terms and Conditions of Purchase, which is a mandatory clause that cannot be deleted or edited during contract negotiations with suppliers [5]. Additionally, the Supplier must certify and represent compliance with applicable clauses, and promptly notify UC of any changes in status regarding these certifications [2].",
+    "difficulty": "scenario",
+    "generator": "gemma-4",
+    "latency_s": 5.92
+  },
+  {
+    "question": "A procurement officer is managing a federal contract and argues that since the item is a standard commercial product, the specific FAR Part 12 regulations do not apply to the UC's procurement process. Is this argument correct?",
+    "ground_truth": "No, the argument is incorrect; all UC purchases using federal contracts must comply with FAR Part 12 commercial items requirements.",
+    "system_answer": "No, the argument is not correct. Even if the item is a standard commercial product, the applicability of FAR Part 12 (which governs the acquisition of commercial items) depends on whether the procurement is for a federal contract and whether the requirements of the FAR are in conformance with the procurement policies. The UC\u2019s procurement policies apply to purchases funded by federal agencies to the extent they are in conformance with applicable federal law, including the Federal Acquisition Regulations (FAR) [2]. Additionally, certain articles from the Federal Acquisition Regulations (FAR) must be included in contracts and cannot be deleted or edited during negotiations [3]. Therefore, the specific FAR Part 12 regulations may still apply depending on the nature of the federal contract and the requirements imposed by the federal awarding agency.",
+    "difficulty": "edge_case",
+    "generator": "gemma-4",
+    "latency_s": 7.68
+  },
+  {
+    "question": "Under what specific condition is a sole source justification required during the procurement process?",
+    "ground_truth": "A sole source justification is required when only one vendor is capable of meeting specialized research requirements.",
+    "system_answer": "A sole source justification is required during the procurement process when the goods and/or services are the only ones available that will meet the University\u2019s needs because they are unique or one-of-a-kind [1][5]. This includes situations such as emergency procurements, match existing purchases (via UC PO#), or when awarding agency approval is obtained (for federal grants and cooperative agreements) [8]. Additionally, if the procurement is federally funded and the transaction is a non-commercial contract order of $2,500,000 or more, certified cost or pricing data must be submitted as part of the sole source justification [2]. Sole source justifications must be documented in the Source Selection and Price Reasonableness Justification Form, specifically in Section IV [2][8].",
+    "difficulty": "simple",
+    "generator": "gemma-4",
+    "latency_s": 8.4
+  },
+  {
+    "question": "A Principal Investigator needs a specific high-resolution microscope for a unique imaging study, and after market research, determines that no other manufacturer produces a model with the necessary technical specifications. What must the PI provide to proceed with this purchase?",
+    "ground_truth": "The PI must provide a sole source justification.",
+    "system_answer": "The Principal Investigator must provide a specification that includes a description of the technical features necessary to determine if other available goods are equivalent to those specified, since the use of brand or trade names should be for descriptive purposes only when no other equivalent options exist [8]. Additionally, if the microscope requires fabrication or modification, the PI must complete a Fabrication Justification Form (or University location equivalent) and submit it to the Equipment Administrator for review and approval prior to commencing any fabrication [3][4].",
+    "difficulty": "scenario",
+    "generator": "gemma-4",
+    "latency_s": 5.9
+  },
+  {
+    "question": "A researcher requests a sole source procurement for a specific brand of software because their existing team is already proficient in it, even though other software packages offer the same technical capabilities. Is this a valid application of the sole source policy?",
+    "ground_truth": "No. Sole source justification is only valid when only one vendor can meet the specialized research requirements; preference based on familiarity or training does not qualify.",
+    "system_answer": "No, this is not a valid application of the sole source policy. The policy allows sole source justifications for non-federal procurements if the goods or services are \"unique\" or \"match existing (UC PO#)\" [1]. However, simply preferring a specific brand due to existing proficiency\u2014even if other technically capable alternatives exist\u2014does not meet the criteria for a valid sole source justification. Brand name or trade names should not be used to exclude competition unless no equivalent goods or services are available [8]. Therefore, this situation does not qualify as a valid sole source procurement under the stated policy.",
+    "difficulty": "edge_case",
+    "generator": "gemma-4",
+    "latency_s": 5.92
+  },
+  {
+    "question": "Which terms and conditions govern all UC purchase orders?",
+    "ground_truth": "UC Terms and Conditions govern all purchase orders.",
+    "system_answer": "The Terms and Conditions of Purchase outlined in the UC Terms and Conditions of Purchase (April 2025) govern all UC purchase orders. These terms specify that they apply to the provision of equipment, materials, supplies, and services under the UC Purchase Order or agreement entered into by UC and the Supplier [1].",
+    "difficulty": "simple",
+    "generator": "gemma-4",
+    "latency_s": 4.4
+  },
+  {
+    "question": "A vendor sends a purchase order including their own standard terms, claiming that their terms take precedence over any other agreement. According to UC policy, which terms will govern the transaction?",
+    "ground_truth": "The UC Terms and Conditions will govern the transaction because they supersede vendor terms.",
+    "system_answer": "According to UC policy, the UC Terms and Conditions will govern the transaction. Any additional terms included by the vendor in their standard terms, order forms, or other documents not incorporated into the UC Agreement will not be binding on UC unless UC expressly agrees to them in writing. Supplier acceptance of the UC Purchase Order, by shipping Goods or performing Services, constitutes acceptance of the UC Terms and Conditions, and any inconsistent Additional Terms provided by the vendor are rejected by UC in their entirety [1].",
+    "difficulty": "scenario",
+    "generator": "gemma-4",
+    "latency_s": 5.9
+  },
+  {
+    "question": "If a vendor's specific terms and conditions are included in a purchase order and they directly conflict with the UC Terms and Conditions, which terms will take precedence?",
+    "ground_truth": "The UC Terms and Conditions will take precedence because they supersede vendor terms.",
+    "system_answer": "If a vendor's specific terms and conditions are included in a purchase order and they directly conflict with the UC Terms and Conditions, the UC Terms and Conditions will take precedence. Any additional terms that the Supplier includes in an order form or other document not incorporated into the Agreement, or in any click-through, or other end user terms and conditions or agreements provided with any Goods and/or Services (\u201cAdditional Terms\u201d), will not be binding on UC unless UC expressly agrees to such Additional Terms in writing [1].",
+    "difficulty": "edge_case",
+    "generator": "gemma-4",
+    "latency_s": 6.58
+  },
+  {
+    "question": "Who is eligible for reimbursement of moving and relocation expenses according to the policy?",
+    "ground_truth": "Only newly hired employees are eligible for reimbursement.",
+    "system_answer": "New appointees to certain nonacademic positions requiring specialized training and/or experience of a technical, professional, or administrative nature are eligible for reimbursement of moving expenses if they reside outside the commuting distance of the campus to which they have been appointed. Additionally, current employees who are required to transfer or accept a position, including a position at the same grade or a lower grade, at a campus outside a reasonable commuting distance may be eligible for reimbursement at the campus's discretion. The move must be closely related to the start of work and meet both the time and distance tests under I.R.C. Section 217(c).2 [3].",
+    "difficulty": "simple",
+    "generator": "gemma-4",
+    "latency_s": 7.5
+  },
+  {
+    "question": "An existing UC employee is transferring from the UCLA campus to the UC Berkeley campus to take on a new role. Can they request reimbursement for their moving expenses under the relocation policy?",
+    "ground_truth": "No, because the policy states that relocation expenses are reimbursable only for newly hired employees, not for current employees transferring between locations.",
+    "system_answer": "Yes, an existing UC employee transferring from UCLA to UC Berkeley can request reimbursement for moving expenses under the relocation policy, provided certain conditions are met. The move must be closely related to the start of work at the new location and must meet both the time and distance tests under I.R.C. Section 217(c). Specifically, the moving expenses must be incurred within one year from the time the employee first reports to the new job, and during the 12-month period following the move, the employee must be employed full-time for at least 39 weeks [1]. Additionally, the employee must reside outside the commuting distance of the UC Berkeley campus [1].",
+    "difficulty": "scenario",
+    "generator": "gemma-4",
+    "latency_s": 7.4
+  },
+  {
+    "question": "A newly hired staff member submits a relocation expense claim for $12,000, but the maximum amount allowed by policy for their specific grade is $10,000. How much of the claim is reimbursable?",
+    "ground_truth": "Only $10,000 is reimbursable, as expenses must be within policy limits.",
+    "system_answer": "The reimbursable amount for the newly hired staff member's relocation expense claim is limited to $10,000, as that is the maximum amount allowed by policy for their specific grade. Any amount exceeding this limit will not be reimbursed. [1]",
+    "difficulty": "edge_case",
+    "generator": "gemma-4",
+    "latency_s": 4.4
+  },
+  {
+    "question": "What two specific pieces of information must be documented for a business meal expense?",
+    "ground_truth": "The business purpose and the names of all attendees.",
+    "system_answer": "For a business meal expense, two specific pieces of information that must be documented are:\n\n1. The business-related nature of the occasion or purpose of the event.\n2. The number of participants, including a guest list with the name and title of each participant, along with their occupation or group affiliation to establish their business-related relationship to the University [3].",
+    "difficulty": "simple",
+    "generator": "gemma-4",
+    "latency_s": 4.7
+  },
+  {
+    "question": "An employee submits a reimbursement request for a lunch with a vendor. The documentation includes the receipt and states the purpose was 'to discuss contract terms,' but it only lists the employee's name. Is this compliant?",
+    "ground_truth": "No, the documentation must include the names of all attendees, including the vendor.",
+    "system_answer": "No, this is not compliant. According to [1], reimbursement requests for meals must include the number of participants and a guest list containing the name and title of participants, along with their occupation or group affiliation to establish the business-related relationship to the University. Additionally, the request must include the business-related nature of the occasion or purpose of the event. While the purpose is stated as \"to discuss contract terms,\" the absence of the vendor's name and details fails to establish the business relationship required by policy.",
+    "difficulty": "scenario",
+    "generator": "gemma-4",
+    "latency_s": 6.2
+  },
+  {
+    "question": "A department hosts a working lunch for a project team of 15 people. The expense report includes the business purpose and the names of the project lead and the two most senior staff members. Does this meet the documentation requirement?",
+    "ground_truth": "No, the policy requires the names of all attendees, not just the most senior members or the lead.",
+    "system_answer": "No, this does not meet the documentation requirement. According to policy, the expense report must include a guest list containing the name and title of all participants and their occupation or group affiliation to establish the business-related relationship to the University [1]. Including only the names of the project lead and the two most senior staff members does not satisfy this requirement.",
+    "difficulty": "edge_case",
+    "generator": "gemma-4",
+    "latency_s": 5.5
+  }
+]

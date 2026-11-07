@@ -4,6 +4,7 @@ API routes. The frontend Send button calls POST /api/ask.
 """
 
 import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -41,6 +42,8 @@ class AskResponse(BaseModel):
     refused: bool = False
     refusal_reason: str | None = None
     llm_called: bool = False
+    grounding: dict | None = None
+    elapsed_ms: int | None = None
 
 
 @router.get("/health")
@@ -54,6 +57,7 @@ def ask_endpoint(
 ):
     # Login and health endpoints work without loading local ML models or Ollama.
     # Unauthorized requests are rejected before importing or running the pipeline.
+    started = time.perf_counter()
     try:
         from backend.rag.pipeline import ask
 
@@ -71,5 +75,9 @@ def ask_endpoint(
             503, "The assistant is temporarily unavailable. Please try again later."
         ) from None
     return AskResponse.model_validate(
-        {**result, "sources": frontend_sources(result["sources"])}
+        {
+            **result,
+            "sources": frontend_sources(result["sources"]),
+            "elapsed_ms": int((time.perf_counter() - started) * 1000),
+        }
     )

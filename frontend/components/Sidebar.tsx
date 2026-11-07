@@ -175,6 +175,10 @@ export function Sidebar({ isCollapsed, setIsCollapsed, onOpenNewTab }: SidebarPr
 
                 <Login isOpen={loginIsOpen} onClose={() => setLoginIsOpen(false)} />
 
+                <Link to="/cart.html" title="Cart paperwork helper" className="flex items-center justify-center p-2 rounded-lg bg-blue-50 text-[#00539b] text-xs font-semibold">
+                    {isCollapsed ? 'Cart' : 'Cart helper'}
+                </Link>
+
                 {/* Settings Link */}
                 <Link
                     to="/settings.html"

@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [main, develop, auth]
+    branches: [main, develop, auth, cb-integration]
   pull_request:
 
 jobs:

@@ -39,6 +39,9 @@ importers:
       autoprefixer:
         specifier: ^10.5.0
         version: 10.5.0(postcss@8.5.15)
+      linkedom:
+        specifier: 0.18.12
+        version: 0.18.12
       postcss:
         specifier: ^8.5.15
         version: 8.5.15

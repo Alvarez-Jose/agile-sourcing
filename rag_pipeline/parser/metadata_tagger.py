@@ -123,9 +123,18 @@ FILE_FORMAT_MAP = {
 # Everything not in FILE_FORMAT_MAP is assumed to be pdf
  
  
+# official UCSC SSPR PDF (Rev. 12-2025); the .docx is the same form, this is the version the
+# rule-engine page numbers refer to
+POLICY_MAP["SSPR_Official_UCSC_2025-12.pdf"] = "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)"
+DOC_TYPE_MAP["SSPR_Official_UCSC_2025-12.pdf"] = "Procurement"
+
 # official 2026 interim BUS-43 (same identity, new bytes)
 POLICY_MAP["BUS-43_Interim_2026-01-26.pdf"] = "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
 DOC_TYPE_MAP["BUS-43_Interim_2026-01-26.pdf"] = "Procurement"
+
+# official 48 CFR Part 12 (govinfo.gov), added for the federal-contract commercial items questions
+POLICY_MAP["CFR-2025-title48-vol1-part12.pdf"] = "FAR Part 12: Acquisition of Commercial Products and Commercial Services (48 CFR, 10-1-25 Edition)"
+DOC_TYPE_MAP["CFR-2025-title48-vol1-part12.pdf"] = "Procurement"
 
 
 def _key(filename: str) -> str:

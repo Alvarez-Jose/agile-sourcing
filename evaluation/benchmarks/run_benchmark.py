@@ -17,13 +17,46 @@ os.chdir(ROOT)
 
 import ollama
 
-from backend.rag.pipeline import ask
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--out', default='evaluation/results/benchmark_results_full.json')
+parser.add_argument('--pipeline', choices=['rules', 'grounded', 'grounded-full'], default='rules',
+                    help='rules = our rule-engine pipeline; grounded = the auth branch pipeline '
+                         'as shipped (only reviewed public docs, 2 of 33); grounded-full = the '
+                         'auth pipeline over the full corpus (build_grounded_index.py first)')
 parser.add_argument('--no-rules', action='store_true', help='turn off the rule engine')
 parser.add_argument('--no-rerank', action='store_true', help='turn off the cross-encoder reranker')
+parser.add_argument('--think', action='store_true', help='let qwen3 reason before answering (slower)')
+parser.add_argument('--top-k', type=int, default=None, help='chunks given to the LLM after reranking')
 args = parser.parse_args()
+
+if args.pipeline == 'rules':
+    from backend.rag.pipeline import ask
+
+    def run_question(q):
+        return ask(q, think=args.think, use_rules=not args.no_rules,
+                   use_reranker=not args.no_rerank)['answer']
+else:
+    from backend.rag.grounded_pipeline import ask as grounded_ask
+    if args.pipeline == 'grounded-full':
+        from pathlib import Path as _Path
+        from rag_pipeline.documents.models import AccessScope
+        _full_index = _Path('data/parsed/policy_index_full.sqlite')
+        if not _full_index.exists():
+            sys.exit('Full-corpus index missing. Build it first: '
+                     'python -m evaluation.benchmarks.build_grounded_index')
+        _scope = AccessScope(classifications=('public', 'internal', 'restricted'))
+
+        def run_question(q):
+            return grounded_ask(q, think=args.think, use_reranker=not args.no_rerank,
+                                scope=_scope, index_path=_full_index)['answer']
+    else:
+        def run_question(q):
+            return grounded_ask(q, think=args.think,
+                                use_reranker=not args.no_rerank)['answer']
+
+if args.top_k and args.pipeline == 'rules':
+    import backend.rag.pipeline as _pipeline
+    _pipeline.RERANK_TOP_K = args.top_k
 
 # if ollama isn't running every answer comes back as an error, so just stop
 try:
@@ -32,13 +65,16 @@ except Exception as e:
     sys.exit(f'Ollama is not reachable ({e}). Start it with `ollama serve` and rerun.')
 
 questions = json.load(open('evaluation/results/benchmark_questions_multi.json', encoding='utf-8'))['questions']
-print(f'Running {len(questions)} questions (rules={not args.no_rules}, rerank={not args.no_rerank})...')
+print(f'Running {len(questions)} questions (pipeline={args.pipeline}, '
+      f'model={os.environ.get("LLM_MODEL", "qwen3:8b")}, host={os.environ.get("OLLAMA_HOST", "local")}, '
+      f'rules={not args.no_rules}, rerank={not args.no_rerank}, think={args.think}, top_k={args.top_k or "default"})...')
 
 answers = []
 start = time.time()
 for i, q in enumerate(questions):
+    t0 = time.time()
     try:
-        answer = ask(q['question'], use_rules=not args.no_rules, use_reranker=not args.no_rerank)['answer']
+        answer = run_question(q['question'])
     except Exception as e:
         answer = f'ERROR: {e}'
 
@@ -47,7 +83,8 @@ for i, q in enumerate(questions):
         'ground_truth':  q['answer'],
         'system_answer': answer,
         'difficulty':    q['difficulty'],
-        'generator':     q.get('generator', '')
+        'generator':     q.get('generator', ''),
+        'latency_s':     round(time.time() - t0, 2),
     })
     elapsed = time.time() - start
     eta = elapsed / (i + 1) * (len(questions) - i - 1)
