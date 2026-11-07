@@ -184,7 +184,7 @@ agile-sourcing/
 │   ├── metrics/               # retrieval accuracy, hallucination rate
 │   └── scenarios/             # real purchase test cases
 ├── frontend/                  # WXT browser extension (React + Tailwind)
-├── data/policies/             # the actual policy PDFs
+├── data/raw_policies/         # the actual policy PDFs (gitignored)
 ├── experiments/               # notebooks + configs
 ├── paper/                     # LaTeX writeup
 └── docs/                      # architecture diagrams, related work
@@ -215,9 +215,9 @@ pip install -r requirements.txt
 cp .env.example .env
 # add your API keys
 
-# ingest policy docs
-cp /path/to/pdfs/* data/policies/
-python scripts/ingest_policies.py
+# ingest policy docs (data/policies/ is accepted too)
+cp /path/to/pdfs/* data/raw_policies/
+python scripts/ingest_policies.py --ingest
 
 # run app
 uvicorn backend.main:app --reload --port 8000

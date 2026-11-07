@@ -100,9 +100,9 @@ ollama pull qwen3:8b
 # Config
 cp .env.example .env
 
-# Ingest policy docs
-cp /path/to/policy-docs/* data/policies/
-python scripts/ingest_policies.py
+# Ingest policy docs (data/policies/ is accepted too)
+cp /path/to/policy-docs/* data/raw_policies/
+python scripts/ingest_policies.py --ingest
 
 # Run backend
 uvicorn backend.main:app --reload --port 8000

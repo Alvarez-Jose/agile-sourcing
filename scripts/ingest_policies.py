@@ -11,6 +11,7 @@ Usage:
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 import chromadb
@@ -23,12 +24,20 @@ from rag_pipeline.parser.section_parser import chunk_by_section
 from rag_pipeline.parser.metadata_tagger import tag_chunk
 from rag_pipeline.indexer.hybrid_index import HybridRetriever
 
-DATA_DIR        = Path("data/raw_policies")
+# data/raw_policies is the canonical location (rules/test_provenance.py reads it);
+# data/policies is kept as a fallback because the README used to point there
+DATA_DIRS       = [Path("data/raw_policies"), Path("data/policies")]
+DATA_DIR        = next((d for d in DATA_DIRS if d.exists()), DATA_DIRS[0])
 CHROMA_DIR      = "data/embeddings/chroma_store"
 COLLECTION_NAME = "uc_policies"
 EMBED_MODEL     = "all-MiniLM-L6-v2"
 LLM_MODEL       = "qwen3:8b"
 TOP_K           = 8
+
+# same caps as backend/rag/pipeline.py: a looping local model must not hang the CLI
+LLM_TIMEOUT       = 90
+REWRITE_MAX_TOKENS = 48
+ANSWER_MAX_TOKENS  = 1024
 
 SYSTEM_PROMPT = (
     "You are a UC procurement policy assistant for UC Santa Cruz. "
@@ -42,19 +51,22 @@ print("Loading embedding model...")
 embedder     = SentenceTransformer(EMBED_MODEL)
 chroma_client = chromadb.PersistentClient(path=CHROMA_DIR)
 hybrid_retriever = None
+llm = ollama.Client(timeout=LLM_TIMEOUT)
 
 
 def ingest():
+    """Rebuild the collection. Returns (collection or None, failed filenames)."""
     if not DATA_DIR.exists():
         print(f"ERROR: {DATA_DIR} not found.")
-        return None
+        return None, []
 
     files = list(DATA_DIR.iterdir())
     if not files:
         print(f"ERROR: No files in {DATA_DIR}.")
-        return None
+        return None, []
 
     all_chunks = []
+    failed = []
 
     for f in sorted(files):
         print(f"  Processing: {f.name}")
@@ -74,11 +86,15 @@ def ingest():
 
         except Exception as e:
             print(f"    ERROR processing {f.name}: {e}")
+            failed.append(f.name)
             continue
+
+    if failed:
+        print(f"WARNING: {len(failed)} file(s) failed: {', '.join(sorted(failed))}")
 
     if not all_chunks:
         print("No chunks produced.")
-        return None
+        return None, failed
 
     print(f"\nTotal chunks: {len(all_chunks)}")
     print("Embedding chunks (this takes a few minutes on first run)...")
@@ -88,8 +104,8 @@ def ingest():
 
     try:
         chroma_client.delete_collection(COLLECTION_NAME)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"  Note: could not delete existing collection ({e})")
 
     collection = chroma_client.get_or_create_collection(
         name=COLLECTION_NAME,
@@ -118,7 +134,7 @@ def ingest():
         )
 
     print(f"Stored {len(all_chunks)} chunks in ChromaDB at '{CHROMA_DIR}'")
-    return collection
+    return collection, failed
 
 
 def get_collection():
@@ -148,9 +164,10 @@ def rewrite_query(question):
         "Output keywords only, no question format, no punctuation, under 10 words.\n\n"
         "Question: " + question + "\n\nKeywords:"
     )
-    response = ollama.chat(
+    response = llm.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        options={"num_predict": REWRITE_MAX_TOKENS},
     )
     raw = response["message"]["content"]
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -182,9 +199,10 @@ def ask(question, collection, think=False):
         "ANSWER:"
     )
 
-    response = ollama.chat(
+    response = llm.chat(
         model=LLM_MODEL,
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
+        options={"num_predict": ANSWER_MAX_TOKENS},
     )
     raw = response["message"]["content"]
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
@@ -202,22 +220,28 @@ def main():
         return
 
     collection = None
+    failed = []
 
     if args.ingest:
         print("\n--- Ingestion ---")
-        collection = ingest()
+        collection, failed = ingest()
+        if collection is None:
+            sys.exit(1)
 
     if args.query:
         print("\n--- Query ---")
         if collection is None:
             collection = get_collection()
         if collection is None:
-            return
+            sys.exit(1)
 
         mode_label = "thinking" if args.think else "direct"
         print(f"Q: {args.query}  [{mode_label} mode]\n")
         answer = ask(args.query, collection, think=args.think)
         print(f"A: {answer}")
+
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
