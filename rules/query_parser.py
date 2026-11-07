@@ -113,9 +113,22 @@ TOPIC_PATTERNS = {
     "micro": re.compile(r"micro-?purchase", re.I),
     "sat": re.compile(r"simplified acquisition", re.I),
     "covered": re.compile(r"contract(ing)? out|covered services?|regents policy 5402|afscme|wage parity", re.I),
+    # policy ladders (rules/policy_ladders.py); the ladder itself re-checks the text
+    "post_employment": re.compile(r"former (uc |university |campus )?(employee|staff|official|director|manager)|"
+                                  r"ex-?employee|\bretire[ds]?\b|\bretiree|\bretiring\b|left (the )?(university|uc)\b|"
+                                  r"post-?employment|after (leaving|retir\w+)|used to work (at|for) (uc|the university)|"
+                                  r"no longer (works?|employed)", re.I),
+    "business_meal": re.compile(r"business (meal|meeting|lunch|dinner|breakfast)|entertainment (expense|event|check)|"
+                                r"meal expense|\b(catering|caterer|reception|banquet|refreshments)\b|"
+                                r"(lunch|dinner|breakfast|meal)s? (for|with|at) |hospitality expense", re.I),
+    "alcohol_permit": re.compile(r"tax-?free (alcohol|permit)|alcohol (permit|use permit)|\b(190|200)-?proof\b|\bethanol\b|"
+                                 r"\bttb\b|alcohol free of tax", re.I),
+    "risk_matrix": re.compile(r"certificate of insurance|\bcoi\b|risk matrix|risk level|risk exposure|"
+                              r"(high|moderate|low)[- ]risk", re.I),
 }
 RULE_TOPICS = {"bid", "sspr", "mixed", "multi_year", "small_business", "sole_source", "split",
-               "equipment", "micro", "sat", "covered"}
+               "equipment", "micro", "sat", "covered",
+               "post_employment", "business_meal", "alcohol_permit", "risk_matrix"}
 
 
 @dataclass

@@ -6,6 +6,7 @@ dist/
 build/
 .eggs/
 venv/
+/venv-backup-*/
 .venv/
 .env
 *.env.local
@@ -24,18 +25,37 @@ chroma_db/
 .DS_Store
 Thumbs.db
 
-# Data
-data/raw/*.pdf
-data/raw/*.csv
-data/raw/*.docx
-data/raw_policies/
-# alternate corpus location accepted by scripts/ingest_policies.py; policy
-# documents must never be committed
-data/policies/*
-!data/policies/.gitkeep
-data/embeddings/chroma_store/
+# Data: exclude source documents, requisitions (including spreadsheets), model
+# artifacts, indexes and generated outputs, including nested folders.
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+# Reviewed source configuration is needed by ingestion; it is not purchase data.
+!/data/policies/document_manifest.json
+
+# Generated evaluation outputs stay local. Keep benchmark inputs and the two
+# historical fixtures read by tests/test_evaluation_tools.py.
+/evaluation/results/**
+!/evaluation/results/**/
+!/evaluation/results/.gitkeep
+!/evaluation/results/benchmark_questions*.json
+!/evaluation/results/citation_grounding_test.json
+!/evaluation/results/benchmark_results_v2.json
 *.sqlite
 *.db
+
+# Private slots: fine-tuned weights, enriched corpus, training data, held-out evals.
+# The pipeline falls back to public base models when the env paths are unset
+# (EMBED_MODEL, RERANKER_MODEL, LLM_MODEL, ENRICHED_CORPUS_PATH).
+models/private/
+data/enriched/*
+training/private/*
+evaluation/private/*
+# AES-256 ciphertext under training/evaluation may be committed (scripts/vault.sh);
+# only the key holder (key lives outside the repo) can decrypt them
+!training/private/*.enc
+!evaluation/private/*.enc
+*.key
 
 #--------Node.gitignore----------
 # Logs
@@ -209,3 +229,8 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Keys
+*.pem
+/secret/
+*-firebase-adminsdk-*.json

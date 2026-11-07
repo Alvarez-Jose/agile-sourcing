@@ -5,47 +5,30 @@ import json
 import os
 import sys
 import time
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
+from evaluation.progress import Progress
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--limit", type=int, default=5)
-    parser.add_argument(
-        "--out",
-        type=Path,
-        default=Path("evaluation/results/grounding_responses.json")
-    )
-    args = parser.parse_args()
 
-    if args.limit < 1 or args.limit > 60:
-        parser.error("--limit must be between 1 and 60")
+def save_results(out, results):
+    # Preserve completed questions on interruption; never leave a partial JSON file.
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out.with_suffix(out.suffix + ".tmp")
+    temporary.write_text(json.dumps(results, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary.replace(out)
 
-    # Importing the pipeline loads the model and retrieval components.
-    import ollama
-    from backend.rag.pipeline import ask
 
-    try:
-        ollama.list()
-    except Exception as e:
-        sys.exit(f"Ollama is not reachable: {e}")
-
-    questions_path = Path(
-        "evaluation/results/benchmark_questions_multi.json"
-    )
-
-    with questions_path.open(encoding="utf-8") as f:
-        questions = json.load(f)["questions"][:args.limit]
-
+def run_questions(questions, ask, out, progress=None):
     results = []
 
     for i, q in enumerate(questions, start=1):
         start = time.time()
-        print(f"Running question {i}/{len(questions)}...", flush=True)
 
         try:
             response = ask(q["question"])
@@ -81,13 +64,55 @@ def main():
             }
 
         results.append(record)
+        save_results(out, results)
+        if progress:
+            progress(i)
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    return results
 
-    with args.out.open("w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
 
-    print(f"Saved {len(results)} responses to {args.out}")
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", type=int, default=5)
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=Path("evaluation/results/grounding_responses.json")
+    )
+    args = parser.parse_args()
+
+    if args.limit < 1 or args.limit > 60:
+        parser.error("--limit must be between 1 and 60")
+
+    import ollama
+
+    try:
+        ollama.list()
+    except Exception as e:
+        sys.exit(f"Ollama is not reachable: {e}")
+
+    # Importing the pipeline loads local model and retrieval components. A missing
+    # index otherwise returns a plain message that can look clean to the citation
+    # heuristic, even though no policy answer was evaluated.
+    from backend.rag.pipeline import ask, get_collection
+
+    if get_collection() is None:
+        sys.exit(
+            "Policy index 'uc_policies' is not loaded. Run "
+            "'python -m scripts.ingest_policies --ingest' with the intended corpus "
+            "and restart the backend before benchmarking. No results were written."
+        )
+
+    questions_path = Path(
+        "evaluation/results/benchmark_questions_multi.json"
+    )
+
+    with questions_path.open(encoding="utf-8") as f:
+        questions = json.load(f)["questions"][:args.limit]
+
+    with Progress("Answering", len(questions)) as progress:
+        run_questions(questions, ask, args.out, progress.update)
+    print(f"Saved {len(questions)} responses to {args.out}")
 
 
 if __name__ == "__main__":

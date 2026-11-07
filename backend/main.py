@@ -9,19 +9,29 @@ The frontend Send button should POST to:
     http://localhost:8000/api/ask
 """
 
+import logging
+import os
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes import router
-from backend.rag.pipeline import warm_up
+from backend.api.auth_routes import router as auth_router
+from backend.api.cart_routes import router as cart_router
 
 
 @asynccontextmanager
 async def lifespan(app):
-    # load the retriever, reranker and LLM once at startup instead of on the first question
-    warm_up()
+    # Auth/health remain available without local models or a policy database.
+    if os.getenv("RAG_WARM_UP") == "1":
+        from starlette.concurrency import run_in_threadpool
+
+        try:
+            from backend.rag.pipeline import warm_up
+
+            await run_in_threadpool(warm_up)
+        except Exception:
+            logging.getLogger(__name__).exception("Optional RAG warm-up failed")
     yield
 
 
@@ -35,3 +45,5 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(auth_router)
+app.include_router(cart_router)

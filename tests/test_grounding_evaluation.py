@@ -2,9 +2,31 @@
 """Tests for citation grounding diagnostics and summary reporting."""
 
 import unittest
+import sys
+from types import SimpleNamespace
+from unittest.mock import Mock
+
+import pytest
 
 from evaluation.check_citation_grounding import evaluate_response
 from evaluation.summarize_grounding import summarize_responses
+
+
+def test_benchmark_missing_index_cannot_produce_a_clean_report(monkeypatch, tmp_path):
+    from evaluation.benchmarks.run_grounding_benchmark import main
+
+    ask = Mock()
+    monkeypatch.setitem(sys.modules, "ollama", SimpleNamespace(list=lambda: []))
+    monkeypatch.setitem(
+        sys.modules, "backend.rag.pipeline",
+        SimpleNamespace(ask=ask, get_collection=lambda: None),
+    )
+    output = tmp_path / "responses.json"
+    monkeypatch.setattr(sys, "argv", ["benchmark", "--limit", "1", "--out", str(output)])
+    with pytest.raises(SystemExit, match="Policy index 'uc_policies' is not loaded"):
+        main()
+    ask.assert_not_called()
+    assert not output.exists()
 
 
 class TestGroundingEvaluation(unittest.TestCase):

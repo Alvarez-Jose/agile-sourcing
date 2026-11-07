@@ -184,7 +184,7 @@ agile-sourcing/
 │   ├── metrics/               # retrieval accuracy, hallucination rate
 │   └── scenarios/             # real purchase test cases
 ├── frontend/                  # WXT browser extension (React + Tailwind)
-├── data/raw_policies/         # the actual policy PDFs (gitignored)
+├── data/raw_policies/         # actual policy PDFs/DOCX for RAG ingestion
 ├── experiments/               # notebooks + configs
 ├── paper/                     # LaTeX writeup
 └── docs/                      # architecture diagrams, related work
@@ -212,12 +212,15 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env
-# add your API keys
+mkdir -p secret
+# Configure secret/.env and Admin credentials as described in docs/auth-setup.md.
 
-# ingest policy docs (data/policies/ is accepted too)
-cp /path/to/pdfs/* data/raw_policies/
-python scripts/ingest_policies.py --ingest
+# ingest policy docs
+python -m scripts.download_starter_policies
+python -m scripts.ingest_policies --ingest
+
+# run evaluation
+python -m evaluation.benchmarks.run_benchmark
 
 # run app
 uvicorn backend.main:app --reload --port 8000

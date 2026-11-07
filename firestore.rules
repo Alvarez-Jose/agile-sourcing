@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Profiles and permissions are managed through FastAPI/Admin SDK only.
+    // Admin SDK access uses server IAM and bypasses client Security Rules.
+    match /users/{uid} {
+      allow read, write: if false;
+    }
+  }
+}

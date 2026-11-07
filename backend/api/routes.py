@@ -7,38 +7,42 @@ import logging
 import time
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, StringConstraints
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from backend.rag.pipeline import ask
-
-logger = logging.getLogger("agile_sourcing.api")
+from backend.auth.dependencies import require_approved_user
+from backend.auth.models import UserProfile
+from backend.api.citations import frontend_sources
 
 router = APIRouter()
-
-# a blank question used to run the classifier, retriever and LLM against arbitrary
-# chunks; 2000 chars is ~4x the longest benchmark question, so this only rejects abuse
-Question = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
+logger = logging.getLogger(__name__)
 
 
 class AskRequest(BaseModel):
-    question: Question
+    model_config = ConfigDict(extra="forbid")
+    question: str = Field(min_length=1, max_length=4000)
     think: bool = False
+
+    @field_validator("question")
+    @classmethod
+    def nonempty_question(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("Question must not be blank")
+        return value
 
 
 class AskResponse(BaseModel):
-    # answer + sources are what the frontend already reads; sources entries keep
-    # policy/page and now also carry ref/section/file/text/score/cited
     answer: str
     sources: list[dict]
-    citations: list[dict] = []          # the retrieved chunks the answer actually cites ([n])
-    rule_sources: list[dict] = []       # provenance for the rule-engine determination
+    citations: list[dict] = Field(default_factory=list)
+    rule_sources: list[dict] = Field(default_factory=list)
     determination: str | None = None
     intent: str | None = None
-    refused: bool = False               # explicit "not found in policy" answer
+    refused: bool = False
     refusal_reason: str | None = None
-    grounding: dict | None = None       # citation/amount checks, diagnostics only
-    llm_called: bool = False            # False for the templated threshold path
+    llm_called: bool = False
+    grounding: dict | None = None
     elapsed_ms: int | None = None
 
 
@@ -48,20 +52,32 @@ def health():
 
 
 @router.post("/ask", response_model=AskResponse)
-def ask_endpoint(req: AskRequest):
+def ask_endpoint(
+    req: AskRequest, user: Annotated[UserProfile, Depends(require_approved_user)]
+):
+    # Login and health endpoints work without loading local ML models or Ollama.
+    # Unauthorized requests are rejected before importing or running the pipeline.
     started = time.perf_counter()
     try:
+        from backend.rag.pipeline import ask
+
         result = ask(req.question, think=req.think)
+    except ModuleNotFoundError as error:
+        logger.exception("Assistant dependency is missing: %s", error.name)
+        raise HTTPException(
+            503, "The assistant server is not ready yet. Please try again later."
+        ) from None
+    except HTTPException:
+        raise
     except Exception:
-        # the pipeline re-raises Ollama/retrieval failures when the rule engine has no
-        # answer; an unlogged 500 hides which stage failed and gives the client nothing
-        logger.exception("ask failed")
-        raise HTTPException(status_code=503, detail="Policy answer service unavailable")
-    return AskResponse(
-        answer=result["answer"], sources=result["sources"],
-        citations=result.get("citations", []), rule_sources=result.get("rule_sources", []),
-        determination=result.get("determination"), intent=result.get("intent"),
-        refused=result.get("refused", False), refusal_reason=result.get("refusal_reason"),
-        grounding=result.get("grounding"), llm_called=result.get("llm_called", False),
-        elapsed_ms=int((time.perf_counter() - started) * 1000),
+        logger.exception("Assistant pipeline failed")
+        raise HTTPException(
+            503, "The assistant is temporarily unavailable. Please try again later."
+        ) from None
+    return AskResponse.model_validate(
+        {
+            **result,
+            "sources": frontend_sources(result["sources"]),
+            "elapsed_ms": int((time.perf_counter() - started) * 1000),
+        }
     )
