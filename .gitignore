@@ -7,6 +7,7 @@ build/
 .eggs/
 venv/
 .venv/
+.venv-py311/
 .env
 *.env.local
 
@@ -204,3 +205,7 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Generated robustness evaluation results
+evaluation/results/robustness/
+evaluation/results/robustness_v2/
