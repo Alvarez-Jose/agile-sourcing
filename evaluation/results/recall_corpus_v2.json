@@ -1,0 +1,1478 @@
+[
+ {
+  "q": 1,
+  "difficulty": "simple",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness FAQ",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness FAQ",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 3,
+  "first_hit_rank": 2,
+  "hit_in_pool": true,
+  "pool_size": 31,
+  "top_score": 4.692
+ },
+ {
+  "q": 2,
+  "difficulty": "scenario",
+  "intent": "split_order",
+  "expected": [
+   "BUS-43"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 38,
+  "top_score": -5.105
+ },
+ {
+  "q": 3,
+  "difficulty": "edge_case",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 4,
+  "hit_in_pool": true,
+  "pool_size": 33,
+  "top_score": 0.333
+ },
+ {
+  "q": 4,
+  "difficulty": "simple",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness Justification Form"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 35,
+  "top_score": -2.646
+ },
+ {
+  "q": 5,
+  "difficulty": "scenario",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness Justification Form"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-29: Management & Control of University Equipment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -4.496
+ },
+ {
+  "q": 6,
+  "difficulty": "edge_case",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness Justification Form"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 36,
+  "top_score": -2.654
+ },
+ {
+  "q": 7,
+  "difficulty": "simple",
+  "intent": "sspr_form",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness FAQ",
+   "Federal Funds Checklist",
+   "Federal Funds Checklist",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Federal Funds Checklist"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 27,
+  "top_score": 6.124
+ },
+ {
+  "q": 8,
+  "difficulty": "scenario",
+  "intent": "sspr_form",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "UCFO-000180: Financial Policy (a0007)",
+   "Federal Funds Checklist",
+   "Federal Funds Checklist",
+   "Federal Funds Checklist",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 31,
+  "top_score": -6.89
+ },
+ {
+  "q": 9,
+  "difficulty": "edge_case",
+  "intent": "sspr_form",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Federal Funds Checklist",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 31,
+  "top_score": -1.912
+ },
+ {
+  "q": 10,
+  "difficulty": "simple",
+  "intent": "split_order",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 35,
+  "top_score": -3.992
+ },
+ {
+  "q": 11,
+  "difficulty": "scenario",
+  "intent": "bidding_threshold",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 31,
+  "top_score": -2.252
+ },
+ {
+  "q": 12,
+  "difficulty": "edge_case",
+  "intent": "split_order",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "top_docs": [
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness FAQ",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 4,
+  "hit_in_pool": true,
+  "pool_size": 38,
+  "top_score": -4.536
+ },
+ {
+  "q": 13,
+  "difficulty": "simple",
+  "intent": "federal_funding",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness FAQ",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness FAQ",
+   "Federal Funds Checklist",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 30,
+  "top_score": 2.278
+ },
+ {
+  "q": 14,
+  "difficulty": "scenario",
+  "intent": "federal_funding",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Federal Funds Checklist"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 32,
+  "top_score": -1.385
+ },
+ {
+  "q": 15,
+  "difficulty": "edge_case",
+  "intent": "federal_funding",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "Federal Funds Checklist"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness FAQ",
+   "Source Selection & Price Reasonableness FAQ",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness FAQ"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 30,
+  "top_score": 1.931
+ },
+ {
+  "q": 16,
+  "difficulty": "simple",
+  "intent": "independent_contractor",
+  "expected": [
+   "Independent Contractor"
+  ],
+  "top_docs": [
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 29,
+  "top_score": 6.515
+ },
+ {
+  "q": 17,
+  "difficulty": "scenario",
+  "intent": "independent_contractor",
+  "expected": [
+   "Independent Contractor"
+  ],
+  "top_docs": [
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 31,
+  "top_score": -2.339
+ },
+ {
+  "q": 18,
+  "difficulty": "edge_case",
+  "intent": "independent_contractor",
+  "expected": [
+   "Independent Contractor"
+  ],
+  "top_docs": [
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines",
+   "UC Independent Contractor Guidelines"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 32,
+  "top_score": 2.239
+ },
+ {
+  "q": 19,
+  "difficulty": "simple",
+  "intent": "data_security",
+  "expected": [
+   "Business Associate Agreement"
+  ],
+  "top_docs": [
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 5.612
+ },
+ {
+  "q": 20,
+  "difficulty": "scenario",
+  "intent": "data_security",
+  "expected": [
+   "Business Associate Agreement"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 4,
+  "first_hit_rank": 2,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -2.674
+ },
+ {
+  "q": 21,
+  "difficulty": "edge_case",
+  "intent": "data_security",
+  "expected": [
+   "Business Associate Agreement"
+  ],
+  "top_docs": [
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)",
+   "Appendix: Business Associate Agreement (BAA)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -2.785
+ },
+ {
+  "q": 22,
+  "difficulty": "simple",
+  "intent": "data_security",
+  "expected": [
+   "Data Security",
+   "IS-3"
+  ],
+  "top_docs": [
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 30,
+  "top_score": 6.811
+ },
+ {
+  "q": 23,
+  "difficulty": "scenario",
+  "intent": "data_security",
+  "expected": [
+   "Data Security",
+   "IS-3"
+  ],
+  "top_docs": [
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "BFB-IS-3: Electronic Information Security",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 34,
+  "top_score": -2.841
+ },
+ {
+  "q": 24,
+  "difficulty": "edge_case",
+  "intent": "data_security",
+  "expected": [
+   "Data Security",
+   "IS-3"
+  ],
+  "top_docs": [
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "BFB-IS-3: Electronic Information Security",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 30,
+  "top_score": -0.667
+ },
+ {
+  "q": 25,
+  "difficulty": "simple",
+  "intent": "post_employment_coi",
+  "expected": [
+   "Post-Employment"
+  ],
+  "top_docs": [
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 32,
+  "top_score": 6.631
+ },
+ {
+  "q": 26,
+  "difficulty": "scenario",
+  "intent": "post_employment_coi",
+  "expected": [
+   "Post-Employment"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-G-13: Moving & Relocation Policy",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Conflict of Interest Training: Procurement 2024",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 4,
+  "first_hit_rank": 4,
+  "hit_in_pool": true,
+  "pool_size": 39,
+  "top_score": 0.383
+ },
+ {
+  "q": 27,
+  "difficulty": "edge_case",
+  "intent": "post_employment_coi",
+  "expected": [
+   "Post-Employment"
+  ],
+  "top_docs": [
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules",
+   "Post-Employment Conflict of Interest Rules"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 33,
+  "top_score": 4.117
+ },
+ {
+  "q": 28,
+  "difficulty": "simple",
+  "intent": "sole_source",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 35,
+  "top_score": 4.448
+ },
+ {
+  "q": 29,
+  "difficulty": "scenario",
+  "intent": "sole_source",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Regents Policy 5402: Policy Generally Prohibiting Contracting for Services",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -4.76
+ },
+ {
+  "q": 30,
+  "difficulty": "edge_case",
+  "intent": "sole_source",
+  "expected": [
+   "BUS-43",
+   "Source Selection & Price Reasonableness"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 36,
+  "top_score": -2.161
+ },
+ {
+  "q": 31,
+  "difficulty": "simple",
+  "intent": "equipment_tagging",
+  "expected": [
+   "BUS-29"
+  ],
+  "top_docs": [
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 29,
+  "top_score": 1.326
+ },
+ {
+  "q": 32,
+  "difficulty": "scenario",
+  "intent": "equipment_tagging",
+  "expected": [
+   "BUS-29"
+  ],
+  "top_docs": [
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 33,
+  "top_score": -9.502
+ },
+ {
+  "q": 33,
+  "difficulty": "edge_case",
+  "intent": "equipment_tagging",
+  "expected": [
+   "BUS-29"
+  ],
+  "top_docs": [
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": 0.817
+ },
+ {
+  "q": 34,
+  "difficulty": "simple",
+  "intent": "sspr_form",
+  "expected": [
+   "Tax-Free Alcohol"
+  ],
+  "top_docs": [
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 6.957
+ },
+ {
+  "q": 35,
+  "difficulty": "scenario",
+  "intent": "conflict_of_interest",
+  "expected": [
+   "Tax-Free Alcohol"
+  ],
+  "top_docs": [
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -3.779
+ },
+ {
+  "q": 36,
+  "difficulty": "edge_case",
+  "intent": "federal_funding",
+  "expected": [
+   "Tax-Free Alcohol"
+  ],
+  "top_docs": [
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations",
+   "UCPS-120031: Tax-Free Alcohol Permits, Records & Operations"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -1.357
+ },
+ {
+  "q": 37,
+  "difficulty": "simple",
+  "intent": "risk_insurance",
+  "expected": [
+   "BUS-63",
+   "UC Terms and Conditions",
+   "Operating Lease"
+  ],
+  "top_docs": [
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "BFB-BUS-63: Risk Transfer & Insurance Requirements",
+   "BFB-BUS-63: Risk Transfer & Insurance Requirements",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 35,
+  "top_score": 2.067
+ },
+ {
+  "q": 38,
+  "difficulty": "scenario",
+  "intent": "risk_insurance",
+  "expected": [
+   "BUS-63",
+   "UC Terms and Conditions",
+   "Operating Lease"
+  ],
+  "top_docs": [
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -3.586
+ },
+ {
+  "q": 39,
+  "difficulty": "edge_case",
+  "intent": "risk_insurance",
+  "expected": [
+   "BUS-63",
+   "UC Terms and Conditions",
+   "Operating Lease"
+  ],
+  "top_docs": [
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "BFB-BUS-63: Risk Transfer & Insurance Requirements",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -0.865
+ },
+ {
+  "q": 40,
+  "difficulty": "simple",
+  "intent": "post_employment_coi",
+  "expected": [
+   "Regents Policy 5402",
+   "Article 5",
+   "Contracting for Services"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Contracting for Services Guide",
+   "Article 5: Contracting Out",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "Article 5: Contracting Out",
+   "Regents Policy 5402: Policy Generally Prohibiting Contracting for Services",
+   "Article 5: Contracting Out"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 3,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 6.732
+ },
+ {
+  "q": 41,
+  "difficulty": "scenario",
+  "intent": "contracting_out",
+  "expected": [
+   "Regents Policy 5402",
+   "Article 5",
+   "Contracting for Services"
+  ],
+  "top_docs": [
+   "Article 5: Contracting Out",
+   "Regents Policy 5402: Policy Generally Prohibiting Contracting for Services",
+   "Contracting for Services Guide",
+   "Article 5: Contracting Out",
+   "Article 5: Contracting Out",
+   "Article 5: Contracting Out",
+   "Article 5: Contracting Out",
+   "Article 5: Contracting Out"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -1.558
+ },
+ {
+  "q": 42,
+  "difficulty": "edge_case",
+  "intent": "post_employment_coi",
+  "expected": [
+   "Regents Policy 5402",
+   "Article 5",
+   "Contracting for Services"
+  ],
+  "top_docs": [
+   "Article 5: Contracting Out",
+   "BFB-BUS-63: Risk Transfer & Insurance Requirements",
+   "UC Independent Contractor Guidelines",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-IS-3: Electronic Information Security",
+   "UCFO-000180: Financial Policy (a0007)",
+   "Source Selection & Price Reasonableness FAQ",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 1,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -2.439
+ },
+ {
+  "q": 43,
+  "difficulty": "simple",
+  "intent": "conflict_of_interest",
+  "expected": [
+   "Conflict of Interest"
+  ],
+  "top_docs": [
+   "Conflict of Interest Training: Procurement 2024",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Appendix: Data Security Requirements",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Conflict of Interest Training: Procurement 2024"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 2,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -7.14
+ },
+ {
+  "q": 44,
+  "difficulty": "scenario",
+  "intent": "conflict_of_interest",
+  "expected": [
+   "Conflict of Interest"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form",
+   "Federal Funds Checklist",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Conflict of Interest Training: Procurement 2024",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 3,
+  "first_hit_rank": 6,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -6.495
+ },
+ {
+  "q": 45,
+  "difficulty": "edge_case",
+  "intent": "conflict_of_interest",
+  "expected": [
+   "Conflict of Interest"
+  ],
+  "top_docs": [
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Conflict of Interest Training: Procurement 2024",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)",
+   "Compendium of Conflict of Interest & Related Policies (formerly BFB-G-39)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 39,
+  "top_score": -6.914
+ },
+ {
+  "q": 46,
+  "difficulty": "simple",
+  "intent": "federal_funding",
+  "expected": [
+   "Federal Funds Checklist",
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Federal Funds Checklist",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Federal Funds Checklist"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 4,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 34,
+  "top_score": 5.237
+ },
+ {
+  "q": 47,
+  "difficulty": "scenario",
+  "intent": "data_security",
+  "expected": [
+   "Federal Funds Checklist",
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Federal Funds Checklist"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 3,
+  "first_hit_rank": 2,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 2.713
+ },
+ {
+  "q": 48,
+  "difficulty": "edge_case",
+  "intent": "sole_source",
+  "expected": [
+   "Federal Funds Checklist",
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Federal Funds Checklist",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 2,
+  "first_hit_rank": 3,
+  "hit_in_pool": true,
+  "pool_size": 37,
+  "top_score": -0.228
+ },
+ {
+  "q": 49,
+  "difficulty": "simple",
+  "intent": "sole_source",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "BUS-43"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 24,
+  "top_score": 1.927
+ },
+ {
+  "q": 50,
+  "difficulty": "scenario",
+  "intent": "sole_source",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "BUS-43"
+  ],
+  "top_docs": [
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-29: Management & Control of University Equipment",
+   "Appendix: Data Security Requirements"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 1,
+  "first_hit_rank": 6,
+  "hit_in_pool": true,
+  "pool_size": 36,
+  "top_score": -4.368
+ },
+ {
+  "q": 51,
+  "difficulty": "edge_case",
+  "intent": "sole_source",
+  "expected": [
+   "Source Selection & Price Reasonableness",
+   "BUS-43"
+  ],
+  "top_docs": [
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "Conflict of Interest Training: Procurement 2024",
+   "Source Selection & Price Reasonableness Justification Form (SSPR, Rev. 12-2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 28,
+  "top_score": -2.303
+ },
+ {
+  "q": 52,
+  "difficulty": "simple",
+  "intent": "data_security",
+  "expected": [
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Federal Funds Checklist",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 8.025
+ },
+ {
+  "q": 53,
+  "difficulty": "scenario",
+  "intent": "data_security",
+  "expected": [
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "BFB-BUS-43: Procurement & Supply Chain Management (Interim, Jan 2026)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental",
+   "UC Terms and Conditions of Purchase (April 2025)"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 5,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 1.555
+ },
+ {
+  "q": 54,
+  "difficulty": "edge_case",
+  "intent": "data_security",
+  "expected": [
+   "UC Terms and Conditions"
+  ],
+  "top_docs": [
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "UC Terms and Conditions of Purchase (April 2025)",
+   "Terms & Conditions: Operating Lease / Equipment Rental"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 7,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 4.227
+ },
+ {
+  "q": 55,
+  "difficulty": "simple",
+  "intent": "risk_insurance",
+  "expected": [
+   "G-13"
+  ],
+  "top_docs": [
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 7.068
+ },
+ {
+  "q": 56,
+  "difficulty": "scenario",
+  "intent": "post_employment_coi",
+  "expected": [
+   "G-13"
+  ],
+  "top_docs": [
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 0.293
+ },
+ {
+  "q": 57,
+  "difficulty": "edge_case",
+  "intent": "sspr_form",
+  "expected": [
+   "G-13"
+  ],
+  "top_docs": [
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-G-13: Moving & Relocation Policy"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 38,
+  "top_score": 1.386
+ },
+ {
+  "q": 58,
+  "difficulty": "simple",
+  "intent": "sspr_form",
+  "expected": [
+   "BUS-79"
+  ],
+  "top_docs": [
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 2.161
+ },
+ {
+  "q": 59,
+  "difficulty": "scenario",
+  "intent": "data_security",
+  "expected": [
+   "BUS-79"
+  ],
+  "top_docs": [
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-G-13: Moving & Relocation Policy",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "UCFO-000190: Financial Policy (a25327)",
+   "BFB-BUS-79: Business Meetings & Entertainment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 6,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": 1.611
+ },
+ {
+  "q": 60,
+  "difficulty": "edge_case",
+  "intent": "split_order",
+  "expected": [
+   "BUS-79"
+  ],
+  "top_docs": [
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment",
+   "BFB-BUS-79: Business Meetings & Entertainment"
+  ],
+  "hit_at_5": true,
+  "hits_in_top5": 8,
+  "first_hit_rank": 1,
+  "hit_in_pool": true,
+  "pool_size": 40,
+  "top_score": -4.212
+ }
+]

@@ -13,8 +13,10 @@ DEFAULT_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 
 class Reranker:
-    def __init__(self, model_name=DEFAULT_MODEL):
-        self.model = CrossEncoder(model_name)
+    def __init__(self, model_name=None):
+        # model_name may be a fine-tuned checkpoint (HF repo id or local path);
+        # None falls back to the public base model
+        self.model = CrossEncoder(model_name or DEFAULT_MODEL)
 
     def rerank(self, query: str, chunks: list[dict], top_k: int = 5) -> list[dict]:
         # chunks = list of dicts with "document" + "metadata" from the retriever

@@ -14,11 +14,14 @@
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
-JUDGE_MODEL = "qwen3:8b"
+# override with JUDGE_MODEL=qwen3:14b to grade with a different (ideally stronger) model
+# than the one being evaluated
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "qwen3:8b")
 JUDGE_PROMPT = """/no_think
 You are grading answers from a UC procurement policy assistant against a reference answer.
 
@@ -58,8 +61,12 @@ def score_numeric(r):
 def score_judge(r, model=JUDGE_MODEL):
     import ollama
     answer = re.sub(r"<think>.*?</think>", "", r['system_answer'], flags=re.DOTALL).strip()
+    # qwen3 grades a blank or errored answer CORRECT about half the time (seen on 3 of 4
+    # empty answers in one run), so don't ask it
+    if not answer or answer.startswith('ERROR:'):
+        return 'wrong'
     prompt = JUDGE_PROMPT.format(question=r['question'], truth=r['ground_truth'], answer=answer[:6000])
-    resp = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}],
+    resp = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}], think=False,
                        options={"temperature": 0})
     raw = re.sub(r"<think>.*?</think>", "", resp["message"]["content"], flags=re.DOTALL).upper()
     for label, out in (("INCORRECT", "wrong"), ("PARTIAL", "partial"), ("CORRECT", "correct")):

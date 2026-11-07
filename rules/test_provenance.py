@@ -145,7 +145,11 @@ def test_all_documents_are_used():
     for key in SOURCES:
         for src in SOURCES[key]:
             cited.add(src.document_id)
-    unused = sorted(set(DOCUMENTS) - cited)
+    # Some registered documents support retrieved explanations rather than rules.
+    retrieval_only = {key for key, doc in DOCUMENTS.items() if doc.get("retrieval_only") is True}
+    for key in retrieval_only:
+        assert DOCUMENTS[key]["files"] and DOCUMENTS[key]["url"], key
+    unused = sorted(set(DOCUMENTS) - cited - retrieval_only)
     assert not unused, f"DOCUMENTS records no source cites: {unused}"
 
 

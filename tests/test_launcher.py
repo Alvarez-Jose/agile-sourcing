@@ -97,6 +97,20 @@ def test_existing_ollama_is_reused_and_only_owned_process_groups_are_stopped(pro
     assert all((p.pid, signal.SIGTERM) in kills for p in processes)
 
 
+def test_environment_model_slots_are_read_without_importing_ml(project):
+    (project / "backend/rag/pipeline.py").write_text(
+        "import os\nCHROMA_DIR = 'data/index'\n"
+        "COLLECTION_NAME = os.environ.get('CHROMA_COLLECTION', 'uc_policies')\n"
+        "LLM_MODEL = os.environ.get('LLM_MODEL', 'qwen3:8b')\n"
+    )
+    with (project / "secret/.env").open("a") as stream:
+        stream.write("\nCHROMA_COLLECTION=custom_index\nLLM_MODEL=custom-model\n")
+    with sqlite3.connect(project / "data/index/chroma.sqlite3") as db:
+        db.execute("UPDATE collections SET name='custom_index'")
+    processes, _, _ = run_launcher(project)
+    assert ["ollama", "pull", "custom-model"] in [p.command for p in processes]
+
+
 def test_missing_ollama_is_started_and_stopped_with_launcher(project):
     processes, kills, _ = run_launcher(project, existing_ollama=False)
     assert processes[0].command == ["ollama", "serve"]

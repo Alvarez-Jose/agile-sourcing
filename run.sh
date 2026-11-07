@@ -87,7 +87,17 @@ for statement in ast.parse((root / "backend/rag/pipeline.py").read_text()).body:
     if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
         name = getattr(statement.targets[0], "id", "")
         if name in ("CHROMA_DIR", "COLLECTION_NAME", "LLM_MODEL"):
-            constants[name] = ast.literal_eval(statement.value)
+            value = statement.value
+            if (isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute)
+                    and isinstance(value.func.value, ast.Attribute)
+                    and isinstance(value.func.value.value, ast.Name)
+                    and value.func.value.value.id == "os"
+                    and value.func.value.attr == "environ" and value.func.attr == "get"
+                    and len(value.args) == 2):
+                key, default = (ast.literal_eval(arg) for arg in value.args)
+                constants[name] = config.get(key) or default
+            else:
+                constants[name] = ast.literal_eval(value)
 database = root / constants["CHROMA_DIR"] / "chroma.sqlite3"
 indexed = False
 if database.is_file():
@@ -119,7 +129,8 @@ def start(name, command, cwd=root):
     log = (logs / f"{name}.log").open("w")
     try:
         process = subprocess.Popen(command, cwd=cwd, stdout=log, stderr=subprocess.STDOUT,
-                                   start_new_session=True)
+                                   start_new_session=True,
+                                   env={key: value for key, value in config.items() if value is not None})
     finally:
         log.close()
     children.append((name, process))
@@ -145,7 +156,7 @@ def interrupt(signum, frame):
 
 signal.signal(signal.SIGTERM, interrupt)
 try:
-    ollama_url = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+    ollama_url = (config.get("OLLAMA_HOST") or "http://127.0.0.1:11434").rstrip("/")
     if not ollama_url.startswith(("http://", "https://")):
         ollama_url = "http://" + ollama_url
     try:

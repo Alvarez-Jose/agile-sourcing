@@ -5,6 +5,7 @@ Call ask() from your API routes to get answers from the UC policy corpus.
 """
 
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -22,18 +23,25 @@ from rag_pipeline.indexer.hybrid_index import HybridRetriever
 from rag_pipeline.retriever.intent_classifier import IntentClassifier
 from rag_pipeline.retriever.reranker import Reranker
 from rules import RuleEngine, parse_query, should_use_rule_engine
-from rules.answer_format import (format_rule_answer, is_pure_threshold_question, source_citations,
-                                 templated_answer)
+from rules.answer_format import (NOT_TEMPLATED_TOPICS, format_rule_answer, is_pure_threshold_question,
+                                 source_citations, templated_answer)
 from rules.query_parser import RULE_TOPICS
 
 logger = logging.getLogger("agile_sourcing.rag")
 
 CHROMA_DIR      = "data/embeddings/chroma_store"
-COLLECTION_NAME = "uc_policies"
-EMBED_MODEL     = "all-MiniLM-L6-v2"
-LLM_MODEL       = "qwen3:8b"
+COLLECTION_NAME = os.environ.get("CHROMA_COLLECTION", "uc_policies")
+# fine-tuned weights drop in via env (a HF repo id or a local path); unset = public
+# base models, so the pipeline works for everyone out of the box
+EMBED_MODEL     = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
+RERANKER_MODEL  = os.environ.get("RERANKER_MODEL")   # None -> the reranker's public default
+# the Ollama client also honors OLLAMA_HOST, so a rented GPU box running Ollama is a
+# drop-in: OLLAMA_HOST=http://<box>:11434 LLM_MODEL=qwen3:32b python evaluation/benchmarks/run_benchmark.py
+LLM_MODEL       = os.environ.get("LLM_MODEL", "qwen3:8b")
 TOP_K           = 8     # chunks to the LLM when the reranker is off
-RERANK_TOP_K    = 5     # chunks to the LLM after reranking
+# 8 instead of 5: the right document was always in the reranker's top 5 but the specific
+# detail often wasn't (benchmark: 47 -> 50 correct on the corrected key, no latency cost)
+RERANK_TOP_K    = 8     # chunks to the LLM after reranking
 RERANK_POOL     = 20    # candidates per query that go into the reranker
 
 SYSTEM_PROMPT = (
@@ -105,7 +113,7 @@ def _get_retriever(collection):
 def _get_reranker():
     global _reranker
     if _reranker is None:
-        _reranker = Reranker()
+        _reranker = Reranker(RERANKER_MODEL)
     return _reranker
 
 
@@ -148,6 +156,7 @@ def _rewrite_query(question: str, intent: dict) -> str:
         response = llm.chat(
             model=LLM_MODEL,
             messages=[{"role": "user", "content": prompt}],
+            think=False,
             keep_alive=LLM_KEEP_ALIVE,
             options={"num_predict": REWRITE_MAX_TOKENS},
         )
@@ -159,6 +168,28 @@ def _rewrite_query(question: str, intent: dict) -> str:
 def _strip_think(raw: str) -> str:
     # drop <think> blocks, including one cut off by the token cap
     return re.sub(r"<think>.*?(</think>|$)", "", raw, flags=re.DOTALL).strip()
+
+
+def _generate_answer(prompt: str, think: bool) -> str:
+    # qwen3 sometimes ignores the /no_think tag and spends the whole token budget thinking
+    # (4 of 60 benchmark answers came back empty: done_reason=length, eval_count=1024,
+    # content=''). the API-level think flag is a hard switch, so pass it explicitly; the
+    # retry is a backstop for anything else that yields an empty completion
+    for attempt in range(2):
+        response = llm.chat(
+            model=LLM_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            think=think,
+            keep_alive=LLM_KEEP_ALIVE,
+            # /think spends tokens on reasoning first, so give it more room. a retry gets
+            # a little sampling noise so it doesn't just reproduce the empty output
+            options={"num_predict": ANSWER_MAX_TOKENS * (4 if think else 1),
+                     **({"temperature": 0.3, "seed": attempt} if attempt else {})},
+        )
+        answer = _strip_think(response["message"]["content"])
+        if answer:
+            return answer
+    return ""
 
 
 def _retrieve_reranked(search_query: str, question: str, collection):
@@ -175,6 +206,13 @@ def _retrieve_reranked(search_query: str, question: str, collection):
                 candidates.append({"document": doc, "metadata": meta})
     ranked = _get_reranker().rerank(question, candidates, top_k=RERANK_TOP_K)
     return [c["document"] for c in ranked], [c["metadata"] for c in ranked], [c["rerank_score"] for c in ranked]
+
+
+def _is_reference_only(result) -> bool:
+    # no purchase to decide on, nothing required or blocked, and the topic is one that
+    # needs an explanation rather than a number (sole source, split orders, covered services)
+    return (not result.is_substantive and result.request.amount == 0 and not result.request.items
+            and bool(result.reference) and bool(result.topics & NOT_TEMPLATED_TOPICS))
 
 
 def _evaluate_rules(question: str, intent: dict):
@@ -239,6 +277,9 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
     context = ""
     sources = []
     for i, (chunk, meta, score) in enumerate(zip(chunks, metas, scores)):
+        # enriched collections carry the un-enriched chunk in raw_text; serve that to the
+        # LLM so generated headers/questions aid retrieval without eating answer context
+        chunk = meta.get("raw_text") or chunk
         policy = meta.get("policy_name") or meta.get("source", "Unknown")
         page = meta.get("page", "")
         context += f"\n[{i+1}] {citation_line(policy, page, meta.get("section", ""))}\n{chunk}\n"
@@ -251,7 +292,27 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         return _refusal(question, sources, intent, "low_retrieval_score")
 
     mode_tag = "/think" if think else "/no_think"
-    if rule_result:
+    reference_only = rule_result is not None and _is_reference_only(rule_result)
+    if reference_only:
+        # the engine only has background facts (what counts as a sole source reason, that
+        # splitting is prohibited...). presenting those as a FIXED DETERMINATION made qwen
+        # lead with whatever dollar figure was in them instead of answering the question
+        # (benchmark Q49), so they go in as extra context and the answer stays free-form
+        prompt = (
+            f"{mode_tag}\n\n"
+            f"{SYSTEM_PROMPT}\n\n"
+            "RULES:\n"
+            "- Read every excerpt carefully before answering.\n"
+            "- If ANY excerpt contains the answer, use it.\n"
+            "- Cite source numbers [1], [2] etc. for every claim.\n"
+            "- Be direct and specific. Answer the question that was asked.\n\n"
+            "POLICY REFERENCE (authoritative summary; use only the parts relevant to the question):\n"
+            + "\n".join(f"- {r}" for r in rule_result.reference) + "\n\n"
+            f"POLICY EXCERPTS:\n{context}\n"
+            f"QUESTION: {question}\n\n"
+            "ANSWER:"
+        )
+    elif rule_result:
         prompt = (
             f"{mode_tag}\n\n"
             f"{SYSTEM_PROMPT}\n\n"
@@ -276,23 +337,22 @@ def ask(question: str, think: bool = False, use_rules: bool = True, use_reranker
         )
 
     try:
-        response = llm.chat(
-            model=LLM_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            keep_alive=LLM_KEEP_ALIVE,
-            # /think spends tokens on reasoning first, so give it more room
-            options={"num_predict": ANSWER_MAX_TOKENS * (4 if think else 1)},
-        )
-        answer = _strip_think(response["message"]["content"])
+        answer = _generate_answer(prompt, think)
     except Exception:
         if not rule_result:
             raise
         answer = ""     # the engine's determination still answers it (format_rule_answer)
 
+    if not rule_result and not answer:
+        return _refusal(question, sources, intent, "empty_llm_output")
     if not rule_result and VAGUE_ANSWER.search(answer):
         return _refusal(question, sources, intent, "llm_found_no_answer")
 
-    if rule_result:
+    if reference_only:
+        if not answer:
+            # the engine's facts are still a real answer to a "what counts as..." question
+            answer = " ".join(rule_result.reference)
+    elif rule_result:
         answer = format_rule_answer(rule_result, answer)
 
     for s in sources:
