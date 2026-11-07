@@ -7,6 +7,7 @@
 # POLICY_SOURCE_DIRS (os.pathsep-separated) adds more folders, e.g. one holding the
 # official SSPR PDF that the page numbers refer to.
 
+import ast
 import os
 import re
 import unicodedata
@@ -28,24 +29,31 @@ DIRS = [RAW] + [Path(p) for p in os.environ.get("POLICY_SOURCE_DIRS", "").split(
 def locate(filename: str):
     return next((d / filename for d in DIRS if (d / filename).exists()), None)
 
-CONSTANTS = {
-    "COMPETITIVE_BID_THRESHOLD": T.COMPETITIVE_BID_THRESHOLD,
-    "SIMPLIFIED_ACQUISITION_THRESHOLD": T.SIMPLIFIED_ACQUISITION_THRESHOLD,
-    "FEDERAL_MICRO_PURCHASE": T.FEDERAL_MICRO_PURCHASE,
-    "CAMPUS_GRANT_MICRO_PURCHASE_MAX": T.CAMPUS_GRANT_MICRO_PURCHASE_MAX,
-    "SMALL_BUSINESS_LIMIT": T.SMALL_BUSINESS_LIMIT,
-    "SMALL_BUSINESS_FEDERAL_SSPR_LIMIT": T.SMALL_BUSINESS_FEDERAL_SSPR_LIMIT,
-    "SMALL_BUSINESS_TWO_QUOTES_ABOVE": T.SMALL_BUSINESS_TWO_QUOTES_ABOVE,
-    "SSPR_FEDERAL_CONTRACT": T.SSPR_FEDERAL_CONTRACT,
-    "SSPR_FEDERAL_GRANT": T.SSPR_FEDERAL_GRANT,
-    "SSPR_NON_FEDERAL": T.SSPR_NON_FEDERAL,
-    "CERTIFIED_COST_PRICING_THRESHOLD": T.CERTIFIED_COST_PRICING_THRESHOLD,
-    "ANTI_LOBBYING_THRESHOLD": T.ANTI_LOBBYING_THRESHOLD,
-    "EQUIPMENT_TAG_THRESHOLD": C.EQUIPMENT_TAG_THRESHOLD,
-    "EQUIPMENT_TAG_THRESHOLD_PRE_JULY_2004": C.EQUIPMENT_TAG_THRESHOLD_PRE_JULY_2004,
-    "AFSCME_NOTICE_THRESHOLD": C.AFSCME_NOTICE_THRESHOLD,
-    "WAGE_PARITY_MIN_DAYS": C.WAGE_PARITY_MIN_DAYS,
-}
+def discover_numeric_constants(modules) -> dict:
+    # thresholds are discovered from the module source instead of being mirrored by hand
+    # here, so a constant added to rules/ cannot ship without a SOURCES record - the
+    # hand-maintained dict went stale the moment someone forgot to update it. dict
+    # constants (MIXED_FUNDING_FEDERAL_TRIGGERS) are left to the mixed-funding test below.
+    out = {}
+    for module in modules:
+        tree = ast.parse(Path(module.__file__).read_text())
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target = node.targets[0]
+                if isinstance(target, ast.Name):
+                    name = target.id
+                    value = node.value
+                    numeric = isinstance(value, ast.Constant)
+                    if name.isupper() and numeric:
+                        raw = value.value
+                        is_number = isinstance(raw, (int, float))
+                        not_bool = not isinstance(raw, bool)
+                        if is_number and not_bool:
+                            out[name] = getattr(module, name)
+    return out
+
+
+CONSTANTS = discover_numeric_constants((T, C, FR))
 
 TYPOGRAPHY = str.maketrans({"‐": "-", "‑": "-", "–": "-", "—": "-", "’": "'", "‘": "'", "“": '"', "”": '"'})
 
@@ -113,6 +121,51 @@ def test_mixed_trigger_values_match_sspr_thresholds():
 def test_topic_sources_point_at_known_constants():
     for keys in TOPIC_SOURCES.values():
         assert set(keys) <= set(SOURCES)
+
+
+# structural checks on the provenance records themselves - these need no policy files,
+# so CI still enforces them when data/raw_policies is absent
+
+
+def test_sources_are_well_formed():
+    for key in SOURCES:
+        for src in SOURCES[key]:
+            assert src.document_id in DOCUMENTS, f"{key}: unknown document {src.document_id}"
+            assert src.quote.strip() and src.section.strip(), f"{key}: empty quote or section"
+            assert src.page is None or (isinstance(src.page, int) and src.page > 0), f"{key}: bad page {src.page}"
+            files = DOCUMENTS[src.document_id]["files"]
+            # the quote test pins PDF quotes to a stated physical page, so a PDF-backed
+            # source without one can never be verified
+            if any(f.lower().endswith(".pdf") for f in files):
+                assert isinstance(src.page, int) and src.page > 0, f"{key}: PDF source needs a physical page"
+
+
+def test_all_documents_are_used():
+    cited = set()
+    for key in SOURCES:
+        for src in SOURCES[key]:
+            cited.add(src.document_id)
+    unused = sorted(set(DOCUMENTS) - cited)
+    assert not unused, f"DOCUMENTS records no source cites: {unused}"
+
+
+def test_no_orphan_source_keys():
+    # a source key nothing references is dead data - a renamed constant or a typo
+    literals = set()
+    for p in Path(__file__).parent.glob("*.py"):
+        if p.name == "provenance.py" or p.name.startswith("test_"):
+            continue
+        for node in ast.walk(ast.parse(p.read_text())):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                literals.add(node.value)
+    referenced = set(CONSTANTS)
+    for topic in TOPIC_SOURCES:
+        for k in TOPIC_SOURCES[topic]:
+            referenced.add(k)
+    referenced |= literals
+    orphans = sorted(set(SOURCES) - referenced)
+    assert not orphans, f"source keys nothing references: {orphans}"
+
 
 
 # determinations carry their sources

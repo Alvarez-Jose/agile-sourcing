@@ -93,3 +93,35 @@ def test_ask_returns_citations_with_supporting_text(client):
     assert body["citations"][0]["text"] and body["citations"][0]["section"]
     assert body["rule_sources"][0]["quote"] == "$100,000 or more"
     assert body["refused"] is False and body["refusal_reason"] is None
+
+
+def test_approved_request_preserves_teammate_grounding_diagnostics(client):
+    from backend.rag.grounding import evaluate_response
+
+    def ask(question, think=False):
+        result = {
+            "answer": "The unsupported amount is $999 [8].",
+            "sources": [SOURCE],
+            "rule_sources": [],
+            "llm_called": True,
+        }
+        result["grounding"] = evaluate_response({**result, "question": question})
+        return result
+
+    client.stub.ask = ask
+    response = client.post("/api/ask", json={"question": "What is the threshold?"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["grounding"]["review_needed"] is True
+    assert body["grounding"]["invalid_references"] == "8"
+    assert "$999.00" in body["grounding"]["unmatched_dollar_amounts"]
+    assert body["llm_called"] is True
+    assert body["elapsed_ms"] >= 0
+    assert body["sources"][0]["text"] == SOURCE["text"]
+    assert body["sources"][0]["citation_id"] == SOURCE["ref"]
+
+
+def test_older_pipeline_response_keeps_optional_diagnostics_compatible(client):
+    body = client.post("/api/ask", json={"question": "bid threshold?"}).json()
+    assert body["grounding"] is None
+    assert body["elapsed_ms"] >= 0

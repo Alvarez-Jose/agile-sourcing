@@ -4,6 +4,7 @@ import pytest
 
 from rules import EquipmentItem, PurchaseRequest, RuleEngine, parse_query, should_use_rule_engine
 from rules import form_router as F
+from rules import thresholds as T
 
 engine = RuleEngine()
 
@@ -211,6 +212,26 @@ def test_fully_federal_under_10k_still_federal():
     r = ev(amount=8_000, funding="federal_grant")
     assert r.federal_rules_apply is True
     assert F.DEBARMENT in r.form_names
+
+
+def test_answer_header_uses_bid_threshold_constant(monkeypatch):
+    # AGENTS.md #1: no hardcoded dollar threshold outside rules/. if this literal ever
+    # comes back in engine.py's to_answer_header, the header drifts silently on a policy
+    # update while the YES/NO booleans stay right
+    monkeypatch.setattr(T, "COMPETITIVE_BID_THRESHOLD", 123_456)
+    r = ev(amount=50_000)
+    assert "threshold $123,456" in r.to_answer_header()
+
+
+def test_certified_cost_pricing_form_uses_threshold_constant(monkeypatch):
+    # the trigger is evaluated in thresholds.py but the form detail string lives in
+    # form_router.py, so both modules must read the constant
+    monkeypatch.setattr(T, "CERTIFIED_COST_PRICING_THRESHOLD", 1_234_567)
+    monkeypatch.setattr(F, "CERTIFIED_COST_PRICING_THRESHOLD", 1_234_567)
+    r = ev(amount=1_500_000, funding="federal_contract", source_selection="sole_source",
+           sole_source_justification="one_of_a_kind", commercial_item=False)
+    detail = next(f.reason for f in r.forms if f.name == F.CERTIFIED_COST_PRICING)
+    assert "$1,234,567 or more" in detail
 
 
 # sole source
@@ -431,3 +452,32 @@ def test_nl_reference_question_q7():
 ])
 def test_should_use_rule_engine(text, expected):
     assert should_use_rule_engine(text) is expected
+
+
+# malformed numerics used to slip past comparisons (nan > 0 is false) or fail later
+# in the engine with a misleading "federal_amount cannot exceed amount" error
+
+@pytest.mark.parametrize("kwargs,message", [
+    ({"amount": -1}, "amount"),
+    ({"amount": float("nan")}, "amount"),
+    ({"amount": float("inf")}, "amount"),
+    ({"amount": "100"}, "amount"),
+    ({"amount": 1, "contract_years": 0}, "contract_years"),
+    ({"amount": 1, "duration_days": -1}, "duration_days"),
+    ({"amount": 1, "related_orders": ["x"]}, "related_orders"),
+    ({"amount": 1, "items": [("x", -1)]}, "cost"),
+])
+def test_malformed_numeric_values_are_rejected(kwargs, message):
+    with pytest.raises(ValueError, match=message):
+        PurchaseRequest(**kwargs)
+
+
+def test_zero_amount_and_equipment_only_requests_stay_valid():
+    assert PurchaseRequest(amount=0).amount == 0
+    req = PurchaseRequest(amount=0, items=[("x", 5_000)])
+    assert req.items[0].cost == 5_000
+
+
+def test_non_string_question_is_rejected():
+    with pytest.raises(TypeError, match="str"):
+        parse_query(None)

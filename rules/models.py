@@ -1,10 +1,22 @@
 # rules/models.py
 # dataclasses shared by the rule engine modules
 
+import math
 from dataclasses import dataclass, field
 from typing import Optional
 
 FUNDING_TYPES = ("non_federal", "federal_grant", "federal_contract")
+
+
+def _finite_number(name: str, value, *, minimum: float, exclusive: bool = False) -> float:
+    # NaN/inf slip past naive comparisons (`nan > 0` is false), so check finiteness
+    # explicitly. bools are ints in Python and are not valid purchase amounts.
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{name} must be a number, got {value!r}")
+    if not math.isfinite(value) or (value <= minimum if exclusive else value < minimum):
+        bound = ">" if exclusive else ">="
+        raise ValueError(f"{name} must be finite and {bound} {minimum:g}, got {value!r}")
+    return float(value)
 
 SOURCE_SELECTIONS = (
     "competitive_bid",
@@ -51,18 +63,29 @@ class PurchaseRequest:
     contracting_out_exception: Optional[str] = None
 
     def __post_init__(self):
+        self.amount = _finite_number("amount", self.amount, minimum=0)
+        self.contract_years = _finite_number("contract_years", self.contract_years, minimum=0, exclusive=True)
+        if self.duration_days is not None and (
+                isinstance(self.duration_days, bool) or not isinstance(self.duration_days, int)
+                or self.duration_days <= 0):
+            raise ValueError(f"duration_days must be a positive int or None, got {self.duration_days!r}")
+        self.related_orders = [_finite_number("related_orders entry", order, minimum=0)
+                               for order in self.related_orders]
         if self.funding not in FUNDING_TYPES:
             raise ValueError(f"funding must be one of {FUNDING_TYPES}, got {self.funding!r}")
         if self.source_selection is not None and self.source_selection not in SOURCE_SELECTIONS:
             raise ValueError(f"source_selection must be one of {SOURCE_SELECTIONS}")
         if self.federal_amount is None:
             self.federal_amount = self.amount if self.funding != "non_federal" else 0.0
+        self.federal_amount = _finite_number("federal_amount", self.federal_amount, minimum=0)
         if self.funding == "non_federal" and self.federal_amount:
             raise ValueError("federal_amount given but funding is non_federal; "
                              "use federal_grant or federal_contract with a partial federal_amount")
         if self.federal_amount > self.amount and self.amount:
             raise ValueError("federal_amount cannot exceed amount")
         self.items = [i if isinstance(i, EquipmentItem) else EquipmentItem(*i) for i in self.items]
+        for item in self.items:
+            item.cost = _finite_number(f"item {item.name!r} cost", item.cost, minimum=0)
 
     @property
     def award_type(self) -> Optional[str]:

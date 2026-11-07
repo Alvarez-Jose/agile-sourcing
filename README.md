@@ -81,6 +81,25 @@ agile-sourcing/
 
 ## First-time setup
 
+After completing the setup below, start everything from one terminal:
+
+```sh
+./run.sh
+```
+
+The launcher starts Ollama if needed, downloads the configured Qwen model if missing,
+starts FastAPI, and runs the extension development server/browser. Press Ctrl+C to
+stop the services it started; an existing Ollama service is left running. Log paths
+are printed in the terminal. It works when invoked from any directory.
+
+Use `./run.sh --check` to check installed tools, configuration, and index presence
+without starting services. If the main policy index has not been built, review the
+intended PDF/DOCX files in `data/raw_policies`, then use `./run.sh --index` once to
+build it and launch the project. This explicitly rebuilds the main index from all
+top-level policy PDFs/DOCX, so exclude held documents unless their use is authorized.
+The launcher does not install Python/frontend dependencies or configure Firebase;
+complete those first-time steps below first.
+
 Install **Git**, **Python 3.12**, **Node.js 22.13+ with Corepack**, and **Ollama**
 before starting. The commands below use macOS/Linux shell syntax. Run them from
 the repository root unless a step says otherwise.
@@ -196,6 +215,12 @@ Firestore, then click **Sync Session with Backend** in extension settings. Try:
 
 ## Testing
 
+For the limited two-source CruzBuy cart-to-SSPR workflow, see the
+[cart demo instructions](docs/cart-demo.md). Open **Cart helper** in the extension
+popup while viewing your signed-in CruzBuy Simple Shopping Cart. It previews cart
+details and asks for funding/charge confirmation before checking SSPR applicability.
+It requires the two reviewed PDFs but does not use the general RAG or call Qwen.
+
 ```sh
 ./venv/bin/python -m pytest rules tests -q
 cd frontend
@@ -212,9 +237,38 @@ The team's RAG tools remain unchanged:
 ./venv/bin/python -m evaluation.check_citation_grounding /path/to/saved-api-responses.json --output data/evaluation/citation_grounding.csv
 ```
 
-The existing benchmark runner retains its own defaults and output format. Its saved
-rows omit the `sources`/`rule_sources` needed by the citation checker; supply saved
-complete `/api/ask` responses to that checker. 
+The original `run_benchmark` runner retains its defaults and output format; its
+saved rows omit the evidence needed by the citation checker. On `cb-integration`,
+the new evidence-preserving runner supports a short smoke evaluation:
+
+```sh
+./venv/bin/python -m evaluation.benchmarks.run_grounding_benchmark --limit 5 --out data/evaluation/cb_grounding_responses.json
+./venv/bin/python -m evaluation.summarize_grounding data/evaluation/cb_grounding_responses.json --output data/evaluation/cb_grounding_summary.csv
+./venv/bin/python -m evaluation.check_citation_grounding data/evaluation/cb_grounding_responses.json --output data/evaluation/cb_grounding_details.csv
+```
+
+Ollama, cached/downloaded models, and the main `uc_policies` index from setup step 5
+are required. Increase `--limit` to 60 for the full question set. The runner stops
+without writing results when that index is missing. These commands run the local
+pipeline directly for developer evaluation; the browser-facing `/api/ask` endpoint
+still verifies the Firebase token and requires account approval before invoking it.
+
+Grounding checks flag invalid citation numbers, empty cited evidence, and dollar
+amounts absent from evidence. They are diagnostics, not correctness grades or
+automatic answer blocking. Purchase amounts supplied in a question may legitimately
+be flagged for human review. The summary separates execution errors and refusals
+from evaluated answers. An unflagged answer is not proof of a correct answer.
+
+For a tool-only smoke check without Ollama, use the deliberately synthetic fixtures:
+
+```sh
+./venv/bin/python -m evaluation.summarize_grounding evaluation/results/citation_grounding_test.json --output data/evaluation/cb_fixture_summary.csv
+```
+
+Those four fixtures intentionally include three faulty responses; their counts are
+not live Qwen benchmark results. See [the integration notes](docs/cb-integration.md)
+for imported branch versions and validation limits. The performance table above is
+the historical team baseline and was not rerun for these integration changes.
 
 ## Key Rules the System Enforces
 

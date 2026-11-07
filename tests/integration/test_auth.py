@@ -95,11 +95,13 @@ def test_missing_bearer_is_rejected_before_firebase(server, path, method, header
         auth.UserDisabledError("Disabled"),
     ],
 )
-def test_invalid_tokens_cannot_load_profiles(server, error):
+@pytest.mark.parametrize("path", ["/auth/session", "/api/ask"])
+def test_invalid_tokens_cannot_load_profiles(server, error, path):
     server.verifier.side_effect = error
-    response = server.client.post("/auth/session", headers=HEADERS)
+    response = server.client.post(path, headers=HEADERS, json={"question": "Hello"})
     assert response.status_code == 401
     server.document.get.assert_not_called()
+    server.pipeline.assert_not_called()
 
 
 def test_first_login_creates_pending_profile_from_verified_identity(server):
