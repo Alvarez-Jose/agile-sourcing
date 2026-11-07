@@ -34,6 +34,7 @@ data/raw_policies/
 # documents must never be committed
 data/policies/*
 !data/policies/.gitkeep
+!data/policies/document_manifest.json
 data/embeddings/chroma_store/
 data/parsed/policy_index.sqlite*
 data/graphs/policy_index/

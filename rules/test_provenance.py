@@ -3,8 +3,8 @@
 # every rule-engine threshold must have a source record, and every source quote must
 # still appear in the current policy file (on its stated page, for PDFs). if a policy is
 # replaced and the wording/number changes, this fails instead of the rules going stale.
-# CONSTANTS is hand-written, so the last check derives the constants from the modules:
-# a threshold added there and not listed here fails instead of passing silently.
+# CONSTANTS is discovered from source; a second check compares module values so
+# future changes to that discovery cannot silently omit a numeric threshold.
 # files live in data/raw_policies (gitignored); a document that isn't there is skipped.
 # POLICY_SOURCE_DIRS (os.pathsep-separated) adds more folders, e.g. one holding the
 # official SSPR PDF that the page numbers refer to.
@@ -106,15 +106,14 @@ def test_every_threshold_constant_has_a_source():
     assert set(CONSTANTS) <= set(SOURCES)
     for award in FR.MIXED_FUNDING_FEDERAL_TRIGGERS:
         assert "MIXED_FUNDING_FEDERAL_TRIGGERS" in SOURCES, award
-    # CONSTANTS is hand-written, so nothing above notices a threshold added to the
-    # modules and left out of it. derive the set the same way a reader would.
+    # Independently check module values against the AST-discovered constants.
     derived = {name for module in (T, C) for name, value in vars(module).items()
                if name.isupper() and isinstance(value, (int, float))
                and not isinstance(value, bool)}
     unlisted = sorted(derived - set(CONSTANTS))
     assert not unlisted, (
-        f"{unlisted} missing from CONSTANTS in rules/test_provenance.py; add them there "
-        "and to rules/provenance.py (document, physical PDF page, section, exact quote)")
+        f"{unlisted} missing from CONSTANTS; extend discover_numeric_constants and "
+        "rules/provenance.py (document, physical PDF page, section, exact quote)")
 
 
 @pytest.mark.parametrize("key", sorted(CONSTANTS))
