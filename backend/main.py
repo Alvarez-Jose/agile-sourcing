@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.api.routes import router
 from backend.api.auth_routes import router as auth_router
 from backend.api.cart_routes import router as cart_router
+from backend.api.relevance_routes import router as relevance_router
 
 
 @asynccontextmanager
@@ -47,3 +48,5 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 app.include_router(auth_router)
 app.include_router(cart_router)
+app.include_router(relevance_router, prefix="/api")
+

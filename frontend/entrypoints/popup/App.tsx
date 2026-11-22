@@ -14,7 +14,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex h-[600px] w-[500px] overflow-hidden bg-[#f8f4fb] text-slate-800 font-sans">
+    <div className="flex h-[500px] w-[510px] overflow-hidden bg-[#f8f4fb] text-slate-800 font-sans">
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} onOpenNewTab={handleOpenNewTab} />
       <main className="flex-1 p-4 overflow-y-auto">
         <SessionNotice />
