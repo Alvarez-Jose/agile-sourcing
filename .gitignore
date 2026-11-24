@@ -8,6 +8,7 @@ build/
 venv/
 /venv-backup-*/
 .venv/
+.venv-py311/
 .env
 *.env.local
 
@@ -234,3 +235,7 @@ web-ext.config.ts
 *.pem
 /secret/
 *-firebase-adminsdk-*.json
+
+# Generated robustness evaluation results
+evaluation/results/robustness/
+evaluation/results/robustness_v2/

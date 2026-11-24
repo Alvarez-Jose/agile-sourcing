@@ -151,3 +151,16 @@ def test_rag_defaults_to_full_benchmark_and_honors_short_trial(monkeypatch, tmp_
     assert runner.main(["rag", "--output-dir", str(tmp_path / "full")]) == 0
     assert runner.main(["rag", "--limit", "5", "--output-dir", str(tmp_path / "short")]) == 0
     assert seen == [60, 5]
+
+
+@pytest.mark.parametrize("mode", ["rules", "pipeline"])
+def test_robustness_group_forwards_mode_output_and_failure(monkeypatch, tmp_path, mode):
+    from evaluation.benchmarks import run_robustness
+    import dotenv
+
+    monkeypatch.setattr(dotenv, "load_dotenv", lambda *_: False)
+    run = Mock(return_value=1)
+    monkeypatch.setattr(run_robustness, "main", run)
+    output = tmp_path / "robustness"
+    assert runner.main(["robustness", "--mode", mode, "--output-dir", str(output)]) == 1
+    run.assert_called_once_with(["--mode", mode, "--output-dir", str(output)])
