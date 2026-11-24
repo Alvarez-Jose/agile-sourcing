@@ -151,6 +151,8 @@ separate so they do not run accidentally.
 | Running API health | `./test.sh health` | HTTP status and response time. Start `./run.sh` first. |
 | RAG answer quality | `./test.sh rag` | All 60 questions, corrected-key LLM-judged accuracy, partial/incorrect counts, latency and citation diagnostics. Needs Ollama, models and the policy index. |
 | Retrieval quality | `./test.sh retrieval` | Expected-document recall@1, recall@5 and candidate-pool recall over 60 questions. Needs the embedding/reranking models and policy index; no answer generation or running API needed. |
+| Wording, funding and threshold robustness | `./test.sh robustness` | 18 synthetic parser/rule scenarios covering paraphrases, boundary amounts and funding changes. No Ollama needed. |
+| Pipeline robustness and explanation consistency | `./test.sh robustness --mode pipeline` | The same scenarios through the answer pipeline, plus narrow checks for contradictory bidding/SSPR explanations. Needs Ollama, models and the policy index. |
 
 The long RAG check shows a loading indicator, an **Answering** progress bar and a
 **Grading** progress bar. Retrieval has its own progress bar. In an interactive

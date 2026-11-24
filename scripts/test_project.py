@@ -165,7 +165,9 @@ def rag(args, output):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="./test.sh", description="One command per test group; long model checks are opt-in.")
-    parser.add_argument("group", choices=["all", "backend", "auth", "frontend", "cart", "health", "rag", "retrieval"])
+    parser.add_argument("group", choices=["all", "backend", "auth", "frontend", "cart", "health", "rag", "retrieval", "robustness"])
+    parser.add_argument("--mode", choices=["rules", "pipeline"], default="rules",
+                        help="Robustness: fast parser/rules checks or the full model pipeline")
     parser.add_argument("--limit", type=int, default=60, help="RAG/retrieval questions (1–60; default: 60)")
     parser.add_argument("--url", default="http://localhost:8000", help="Base API URL for health")
     parser.add_argument("--judge-model", help="Installed Ollama judge model for RAG; default JUDGE_MODEL or qwen3:8b")
@@ -203,6 +205,9 @@ def main(argv=None):
         output = args.output_dir or ROOT / "data/evaluation" / (args.group + "_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
         if output.exists():
             raise RuntimeError(f"Output directory already exists; choose a new directory: {output}")
+        if args.group == "robustness":
+            from evaluation.benchmarks.run_robustness import main as run_robustness
+            return run_robustness(["--mode", args.mode, "--output-dir", str(output)])
         if args.group == "rag":
             return rag(args, output)
         output.mkdir(parents=True)
