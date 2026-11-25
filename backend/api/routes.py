@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from backend.auth.dependencies import require_approved_user
 from backend.auth.models import UserProfile
 from backend.api.citations import frontend_sources
+from backend.chat.models import ChatContext, ChatTurn
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,6 +23,8 @@ class AskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     question: str = Field(min_length=1, max_length=4000)
     think: bool = False
+    chat_context: ChatContext | None = None
+    history: list[ChatTurn] = Field(default_factory=list, max_length=8)
 
     @field_validator("question")
     @classmethod
@@ -44,6 +47,10 @@ class AskResponse(BaseModel):
     llm_called: bool = False
     grounding: dict | None = None
     elapsed_ms: int | None = None
+    chat_context: ChatContext | None = None
+    follow_up: dict | None = None
+    purchase_results: list[dict] = Field(default_factory=list)
+    tool_request: dict | None = None
 
 
 @router.get("/health")
@@ -59,9 +66,13 @@ def ask_endpoint(
     # Unauthorized requests are rejected before importing or running the pipeline.
     started = time.perf_counter()
     try:
-        from backend.rag.pipeline import ask
+        from backend.chat.coordinator import answer_chat
 
-        result = ask(req.question, think=req.think)
+        def ask(question, **options):
+            from backend.rag.pipeline import ask as pipeline_ask
+            return pipeline_ask(question, **options)
+
+        result = answer_chat(req.question, req.chat_context, req.history, ask, think=req.think)
     except ModuleNotFoundError as error:
         logger.exception("Assistant dependency is missing: %s", error.name)
         raise HTTPException(

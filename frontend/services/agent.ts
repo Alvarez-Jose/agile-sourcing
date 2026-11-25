@@ -1,7 +1,12 @@
 import { API_BASE_URL, getFreshIdToken, SessionError } from "./auth";
+import type { ChatContext, ChatTurn, FollowUp } from './chat';
 
 export interface AskResponse {
   answer: string;
+  tool_request?: {name: 'read_cart'; question: string} | null;
+  chat_context?: ChatContext | null;
+  follow_up?: FollowUp | null;
+  purchase_results?: Array<{supplier: string; funding: string; assessed_amount: string | null; known_assessed_amount?: string; provisional?: boolean; missing_charges?: string[]; sspr_required: boolean | null; forms: Array<{name: string; url: string}>}>;
   sources: Array<{
     citation_id: number;
     policy: string;
@@ -27,14 +32,14 @@ export function citationUrl(source: AskResponse['sources'][number]): string | un
   }
 }
 
-export async function askQuestion(question: string): Promise<AskResponse> {
+export async function askQuestion(question: string, chat_context?: ChatContext | null, history: ChatTurn[] = []): Promise<AskResponse> {
   const token = await getFreshIdToken();
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify({ question, ...(chat_context ? {chat_context} : {}), ...(history.length ? {history} : {}) }),
       signal: AbortSignal.timeout(360000),
     });
   } catch {
@@ -42,8 +47,11 @@ export async function askQuestion(question: string): Promise<AskResponse> {
   }
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+    const detail = typeof body?.detail === 'string' ? body.detail
+      : Array.isArray(body?.detail) && typeof body.detail[0]?.msg === 'string'
+        ? body.detail[0].msg.replace(/^Value error, /, '') : 'The assistant could not answer. Please retry.';
     throw new SessionError(
-      typeof body?.detail === "string" ? body.detail : "The assistant could not answer. Please retry.",
+      detail,
       response.status,
     );
   }

@@ -17,7 +17,7 @@ export interface CartGuide {
 export function readCruzBuyCart(): CartSnapshot {
   if (location.hostname !== 'solutions.sciquest.com' ||
       !/^\/apps\/Router\/SimpleCart\/?$/i.test(location.pathname)) {
-    throw new Error('Open the CruzBuy Simple Shopping Cart, then click Use my cart.');
+    throw new Error('Open the CruzBuy Simple Shopping Cart, then ask about your cart in the extension chat.');
   }
   const text = (node: Element | null) => node?.textContent?.replace(/\s+/g, ' ').trim() || '';
   const money = (value: string): string => {

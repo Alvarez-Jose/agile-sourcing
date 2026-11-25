@@ -135,6 +135,42 @@ place of `--index` to check setup without starting services.
 Optional model settings and troubleshooting: [auth/setup guide](docs/auth-setup.md).
 Changing the embedder requires rebuilding a matching index.
 
+### Chat with your CruzBuy cart
+
+Open CruzBuy's Simple Shopping Cart, then open **Start Chat** in the extension
+popup and ask **"What forms do I need for my cart?"** The assistant requests the
+read-only `read_cart` browser tool, captures the cart, and resumes your question.
+There is no checkbox or separate form to fill out. The optional **Use my CruzBuy
+cart** button starts the same flow with a cart summary.
+
+The assistant asks in chat whether supplier groups are independent goods
+purchases, which funding pays for each supplier, and the federal award type.
+Missing tax/shipping/handling does not block guidance: unknown
+charges stay unknown and results are provisional where they could change the
+threshold decision. Multiple-choice buttons beneath a question
+fill the message box; review or edit the reply, then press **Send**. Amounts are
+typed in chat when you want to add them (for example, **"handling is 200"**);
+reply `0` only after confirming no charge. A new estimate can change the updated
+total without rewriting the captured CruzBuy total. With multiple suppliers,
+name the supplier, for example **"Supplier name: handling is 200"**.
+Related orders, services, multi-year agreements and mixed funding need separate
+review. Paperwork guidance checks the
+reviewed SSPR form, not every possible form or purchasing exception. Other policy
+explanations use the existing RAG pipeline.
+
+If an intake question is unclear, ask **"Explain this in simpler terms."** Qwen
+rephrases the question while preserving the original purchase request. **"I'm
+not sure"** explains where to find the missing information; the check can be
+paused without guessing. If Qwen is unavailable, a plain-language fallback is used.
+
+Ask **"Refresh my cart"** after changes in CruzBuy. Messages, draft input and
+purchase details are cached in browser-session memory, so closing the popup or
+navigating away does not lose the conversation. On reopening, the assistant
+re-reads the cart when needed; unchanged carts retain their funding details,
+while changed carts need fresh answers. Sign-out, **Clear conversation**,
+extension reload or ending the browser session clears the cache.
+The earlier standalone cart demo remains available at `/cart.html`.
+
 ## Testing
 
 Run these commands from the repository root after completing setup. Start with
@@ -147,7 +183,7 @@ separate so they do not run accidentally.
 | Backend, rules and evaluation helpers | `./test.sh backend` | Passed, failed, skipped and test pass rate. Firebase and model calls are simulated in integration tests. |
 | Authentication and sessions | `./test.sh auth` | Backend token/approval tests and frontend sign-in/session tests. No live Google login needed. |
 | Frontend | `./test.sh frontend` | Test counts, TypeScript check and extension build result. |
-| Cart paperwork helper | `./test.sh cart` | API/rule test counts plus eight synthetic cart scenarios. Needs the reviewed BUS-43 and SSPR PDFs. |
+| Cart guidance and chat context | `./test.sh cart` | Cart/chat API tests plus eight synthetic cart scenarios. Needs the reviewed BUS-43 and SSPR PDFs. |
 | Running API health | `./test.sh health` | HTTP status and response time. Start `./run.sh` first. |
 | RAG answer quality | `./test.sh rag` | All 60 questions, corrected-key LLM-judged accuracy, partial/incorrect counts, latency and citation diagnostics. Needs Ollama, models and the policy index. |
 | Retrieval quality | `./test.sh retrieval` | Expected-document recall@1, recall@5 and candidate-pool recall over 60 questions. Needs the embedding/reranking models and policy index; no answer generation or running API needed. |

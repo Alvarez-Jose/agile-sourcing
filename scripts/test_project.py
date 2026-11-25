@@ -196,7 +196,7 @@ def main(argv=None):
                   f"frontend {'FAIL' if frontend_code else 'PASS'}.")
             return 1 if backend_code or frontend_code else 0
         if args.group == "cart":
-            code = run_pytest(["tests/integration/test_cart_guide.py"])
+            code = run_pytest(["tests/integration/test_cart_guide.py", "tests/integration/test_chat_context.py"])
             if code:
                 return code
             return subprocess.run([sys.executable, "-m", "scripts.evaluate_cart_demo"], cwd=ROOT).returncode

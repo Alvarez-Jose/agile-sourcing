@@ -1,35 +1,84 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Login from './Login';
-import { askQuestion, AskResponse, citationUrl } from '../../services/agent';
+import { askQuestion, citationUrl } from '../../services/agent';
 import { SessionError } from '../../services/auth';
+import { captureCart } from '../../services/cart';
+import { attachCart, recentHistory, ChatContext, FollowUp } from '../../services/chat';
+import { ChatCartPanel } from '../ChatCartPanel';
+import { clearChatDraft, loadChatDraft, saveChatDraft, ChatMessage } from '../../services/chatCache';
 
 export function ChatPage() {
   const { userProfile, isAuthenticated, isApproved, isLoading, refreshSession } = useAuth();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string; sources?: AskResponse['sources'] }>>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+  const [cartContext, setCartContext] = useState<ChatContext | null>(null);
+  const [followUp, setFollowUp] = useState<FollowUp | null>(null);
+  const [isReadingCart, setIsReadingCart] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [cacheNotice, setCacheNotice] = useState<string | null>(null);
   const sessionKey = `${userProfile?.uid ?? ''}:${isAuthenticated}:${isApproved}:${userProfile?.clearance ?? 'none'}`;
   const currentSession = useRef({ key: sessionKey, generation: 0 });
+  const restored = useRef<string | null>(null);
+  const sending = useRef(false);
+  const input = useRef<HTMLInputElement | null>(null);
   if (currentSession.current.key !== sessionKey) {
     currentSession.current = { key: sessionKey, generation: currentSession.current.generation + 1 };
   }
 
   useEffect(() => {
+    restored.current = null;
     setMessages([]);
     setChatError(null);
     setInputMessage('');
     setIsSending(false);
+    sending.current = false;
+    setCartContext(null);
+    setFollowUp(null);
+    setIsReadingCart(false);
+    setCacheNotice(null);
+    setIsRestoring(false);
+    if (!isApproved || !userProfile?.uid) return;
+    setIsRestoring(true);
+    const generation = currentSession.current.generation;
+    loadChatDraft(sessionKey).then(draft => {
+      if (currentSession.current.key !== sessionKey || currentSession.current.generation !== generation) return;
+      if (draft) {
+        setMessages(draft.messages);
+        setInputMessage(draft.input || (draft.interrupted ? draft.messages.filter(m => m.sender === 'user').at(-1)?.text ?? '' : ''));
+        setCartContext(draft.context);
+        setFollowUp(draft.followUp);
+        setCacheNotice(draft.interrupted
+          ? 'Conversation restored. The previous request may have been interrupted; resend it if needed.'
+          : 'Conversation restored. I will refresh the cart when it is needed again.');
+      }
+      restored.current = sessionKey;
+      setIsRestoring(false);
+    }).catch(() => {
+      if (currentSession.current.key !== sessionKey || currentSession.current.generation !== generation) return;
+      restored.current = sessionKey;
+      setCacheNotice('Conversation caching is unavailable. Keep this chat open to avoid losing messages.');
+      setIsRestoring(false);
+    });
   }, [sessionKey]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || !isApproved || isSending || isLoading) return;
+  useEffect(() => {
+    if (!isApproved || isLoading || restored.current !== sessionKey || isRestoring) return;
+    const generation = currentSession.current.generation;
+    void saveChatDraft(sessionKey, {messages, input: inputMessage, context: cartContext, followUp, interrupted: isSending}).catch(() => {
+      if (currentSession.current.generation === generation) setCacheNotice('Recent messages could not be cached. Keep this chat open to avoid losing them.');
+    });
+  }, [sessionKey, messages, inputMessage, cartContext, followUp, isSending, isRestoring, isLoading]);
 
-    const userText = inputMessage.trim();
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || !isApproved || sending.current || isSending || isLoading || isReadingCart || isRestoring) return;
+    sending.current = true;
+
+    const userText = text.trim();
     setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
     setInputMessage('');
 
@@ -37,9 +86,25 @@ export function ChatPage() {
     setIsSending(true);
     const requestSession = currentSession.current.generation;
     try {
-      const result = await askQuestion(userText);
+      let result = await askQuestion(userText, cartContext, recentHistory(messages));
+      if (currentSession.current.generation !== requestSession) return;
+      if (result.tool_request) {
+        // The server can request only this allowlisted, read-only browser tool.
+        if (result.tool_request.name !== 'read_cart') throw new Error('Unsupported assistant tool.');
+        setIsReadingCart(true);
+        setCartContext(null);
+        setFollowUp(null);
+        const snapshot = await captureCart();
+        if (currentSession.current.generation !== requestSession) return;
+        const next = attachCart(snapshot, result.chat_context ?? cartContext);
+        setCartContext(next);
+        result = await askQuestion(result.tool_request.question, next, recentHistory(messages));
+        if (result.tool_request) throw new Error('Could not finish reading the cart. Open the CruzBuy Simple Cart and retry.');
+      }
       if (currentSession.current.generation !== requestSession) return;
       setMessages((prev) => [...prev, { sender: 'bot', text: result.answer, sources: result.sources }]);
+      if (result.chat_context) setCartContext(result.chat_context);
+      setFollowUp(result.follow_up ?? null);
     } catch (error) {
       if (currentSession.current.generation !== requestSession) return;
       setChatError(error instanceof Error ? error.message : 'Could not send your message.');
@@ -47,8 +112,28 @@ export function ChatPage() {
         await refreshSession();
       }
     } finally {
-      if (currentSession.current.generation === requestSession) setIsSending(false);
+      if (currentSession.current.generation === requestSession) {sending.current = false; setIsSending(false); setIsReadingCart(false);}
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessage(inputMessage);
+  };
+
+  const updateCart = (next: ChatContext | null) => {
+    const confirmationOnly = next && cartContext &&
+      JSON.stringify({...next, cart: {...next.cart, reviewed: false}}) ===
+      JSON.stringify({...cartContext, cart: {...cartContext.cart, reviewed: false}});
+    currentSession.current.generation++;
+    setCartContext(next ? {...next, pending_question: next.pending_question ?? next.last_question} : null);
+    if (!confirmationOnly) {
+      setMessages([]);
+      setFollowUp(null);
+    }
+    setChatError(null);
+    setIsSending(false);
+    sending.current = false;
   };
 
   const handleRefresh = async () => {
@@ -183,6 +268,15 @@ export function ChatPage() {
       {/* State 3: Authenticated and Approved */}
       {isAuthenticated && isApproved && (
         <div className="flex-1 flex flex-col border border-gray-200 rounded-xl bg-white shadow-xs p-4 min-h-[300px]">
+          {isRestoring && <p role="status" className="mb-2 text-xs text-blue-800">Restoring your conversation…</p>}
+          {isReadingCart && <p role="status" className="mb-2 text-xs text-blue-800">Reading your current CruzBuy cart…</p>}
+          {cacheNotice && <p role="status" className="mb-2 text-xs text-slate-600">{cacheNotice}</p>}
+          <button type="button" disabled={isRestoring || isSending || isReadingCart} onClick={() => {updateCart(null); setInputMessage(''); setCacheNotice(null); void clearChatDraft().catch(() => setCacheNotice('Could not clear the cached conversation.'));}} className="mb-2 text-right text-xs text-blue-800 underline">Clear conversation</button>
+          {!cartContext && <div className="mb-3 text-xs">
+            <button type="button" onClick={() => sendMessage('Summarize my cart')} disabled={isReadingCart || isSending || isLoading || isRestoring} className="rounded bg-blue-50 px-3 py-2 font-semibold text-[#00539b] disabled:opacity-50">{isReadingCart ? 'Reading cart…' : 'Use my CruzBuy cart'}</button>
+            <p className="mt-1 text-slate-500">Ask about your cart and I will read it automatically. Keep the CruzBuy Simple Cart active while using the extension popup.</p>
+          </div>}
+          {cartContext && <ChatCartPanel context={cartContext} disabled={isSending || isReadingCart || isLoading || isRestoring} onRefresh={() => sendMessage('Refresh my cart')} onClear={() => updateCart(null)}/>}
           {/* Chat Messages */}
           <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
             {messages.length === 0 ? (
@@ -209,6 +303,18 @@ export function ChatPage() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{m.text}</p>
+                    {m.sender === 'bot' && i === messages.length - 1 && !!followUp?.choices.length && (
+                      <div role="group" aria-label="Choose a reply" className="mt-3 flex flex-col gap-2">
+                        {followUp.choices.map(choice => <button
+                          type="button" key={choice.value}
+                          disabled={isSending || isLoading || isReadingCart || isRestoring}
+                          onClick={() => {setInputMessage(choice.value); input.current?.focus();}}
+                          aria-pressed={inputMessage === choice.value}
+                          className={`rounded-xl border px-3 py-2 text-left text-xs font-medium text-[#00539b] hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-50 ${inputMessage === choice.value ? 'border-blue-500 bg-blue-50' : 'border-blue-200 bg-white'}`}
+                        >{choice.label}</button>)}
+                        <span className="text-[11px] text-slate-500">Choose an option to fill your reply, then press Send. You can edit it or type your own answer.</span>
+                      </div>
+                    )}
                     {!!m.sources?.length && (
                       <ul className="mt-2 border-t border-gray-200 pt-2 text-xs">
                         {m.sources.map((source) => {
@@ -243,16 +349,18 @@ export function ChatPage() {
           {chatError && <p role="alert" className="mb-2 text-xs text-red-700">{chatError}</p>}
           <form onSubmit={handleSendMessage} className="mt-auto flex gap-2">
             <input
+              ref={input}
               type="text"
+              inputMode={followUp?.kind === 'charges' ? 'decimal' : 'text'}
               value={inputMessage}
-              disabled={isSending || isLoading}
+              disabled={isSending || isLoading || isReadingCart || isRestoring}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask about purchasing policies or required forms..."
+              placeholder={followUp?.kind === 'charges' ? 'Type the estimated amount in USD, e.g. 5.00' : followUp?.choices.length ? 'Choose an option above or type your answer...' : 'Ask about purchasing policies or required forms...'}
               className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#00539b] focus:border-transparent transition-all"
             />
             <button
               type="submit"
-              disabled={!inputMessage.trim() || isSending || isLoading}
+              disabled={!inputMessage.trim() || isSending || isLoading || isReadingCart || isRestoring}
               className="px-4 py-2 bg-[#00539b] hover:bg-[#003d6f] active:scale-95 text-white rounded-lg text-xs sm:text-sm font-medium transition-all disabled:opacity-50 cursor-pointer shadow-xs"
             >
               {isSending ? 'Thinking…' : 'Send'}

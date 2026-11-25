@@ -3,6 +3,7 @@ import { onIdTokenChanged } from "firebase/auth";
 import { browser } from "wxt/browser";
 import { UserProfile } from "../types/auth";
 import { auth } from "../firebase/firebaseConfig";
+import { clearChatDraft } from '../services/chatCache';
 import {
   signInWithGoogle,
   signOutUser,
@@ -41,6 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleError = useCallback(async (error: unknown) => {
     setSessionError(error instanceof Error ? error.message : "Could not load your account.");
     await clearProfile();
+    if (error instanceof SessionError && (error.status === 401 || error.status === 403)) {
+      await clearChatDraft().catch(() => {});
+    }
     if (error instanceof SessionError && error.status === 401) {
       await signOutUser();
     }
@@ -56,10 +60,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (!user) {
           await clearProfile();
+          await clearChatDraft().catch(() => {});
           return;
         }
         const token = await user.getIdToken();
         const profile = await establishSession(token);
+        if (currentRevision !== revision.current) return;
+        if (!profile.is_approved) await clearChatDraft().catch(() => {});
         if (currentRevision !== revision.current) return;
         setIdToken(token);
         setUserProfile(profile);
@@ -98,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setSessionError(null);
     await clearProfile();
+    await clearChatDraft().catch(() => {});
     try {
       await signOutUser();
     } finally {
