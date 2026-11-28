@@ -5,6 +5,7 @@ import type {CartSnapshot} from './cart';
 export type Funding = 'unknown' | 'federal' | 'non_federal' | 'federal_grant' | 'federal_contract' | 'mixed';
 export interface SupplierDetails {
   supplier: string; funding: Funding;
+  funding_confirmed?: boolean;
   tax: string | null; shipping: string | null; handling: string | null;
 }
 export interface ChatContext {
@@ -14,6 +15,8 @@ export interface ChatContext {
   captured_at: string;
   pending_question: string | null;
   last_question: string | null;
+  purchase_question?: string | null;
+  sspr_answer_hash?: string | null;
   awaiting_supplier: string | null;
   awaiting_kind: string | null;
   awaiting_field: 'tax' | 'shipping' | 'handling' | null;
@@ -47,6 +50,6 @@ export function attachCart(snapshot: CartSnapshot, previous?: ChatContext | null
   };
 }
 
-export function recentHistory(messages: Array<{sender: 'user' | 'bot'; text: string}>): ChatTurn[] {
-  return messages.slice(-8).map(message => ({role: message.sender === 'user' ? 'user' : 'assistant', content: message.text.slice(0, 4000)}));
+export function recentHistory(messages: Array<{sender: 'user' | 'bot'; text: string; detailText?: string}>): ChatTurn[] {
+  return messages.slice(-8).map(message => ({role: message.sender === 'user' ? 'user' : 'assistant', content: (message.sender === 'bot' ? message.detailText ?? message.text : message.text).slice(0, 4000)}));
 }

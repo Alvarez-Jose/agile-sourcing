@@ -1,0 +1,27 @@
+{
+  "description": "Synthetic cart conversations; assertions test routing and state, not expert policy accuracy.",
+  "cart": {
+    "items": [{"description": "Demo stereo microscope", "supplier": "Demo Lab Supplier", "quantity": "1", "unit_price": "2274.18", "line_total": "2274.18"}],
+    "currency": "USD", "subtotal": "2274.18", "tax": "221.73", "total": "2495.91", "reviewed": true
+  },
+  "scenarios": [
+    {"id": "natural_replies_and_correction", "turns": [
+      {"question": "What is in my cart right now?", "expect": {"answer_contains": "Demo Lab Supplier"}},
+      {"question": "What do I need to fill out to purchase this?", "expect": {"awaiting": "scope"}},
+      {"question": "this is a one time purchase", "expect": {"awaiting": "funding", "independent_purchases": true}},
+      {"question": "Federal funds", "expect": {"awaiting": "award_type", "funding": "federal"}},
+      {"question": "Federal grant", "expect": {"funding": "federal_grant", "intent": "cart_sspr"}},
+      {"question": "can you explain these steps in easy words", "expect": {"funding": "federal_grant"}},
+      {"question": "I realized I wrote the wrong information about funding. I have non federal funds. What do I need to do now?", "expect": {"funding": "non_federal", "intent": "cart_sspr"}}
+    ]},
+    {"id": "uncertainty_and_estimates", "turns": [
+      {"question": "What forms do I need for my cart?", "expect": {"awaiting": "scope"}},
+      {"question": "Yes, separate purchases", "expect": {"awaiting": "funding"}},
+      {"question": "I'm not sure where the funding comes from", "expect": {"funding_confirmed": false}},
+      {"question": "Non-federal funds", "expect": {"funding": "non_federal", "intent": "cart_sspr"}},
+      {"question": "There is no shipping charge", "expect": {"shipping": "0"}},
+      {"question": "Handling is 200", "expect": {"handling": "200", "funding": "non_federal"}},
+      {"question": "Sum that up", "expect": {"funding": "non_federal"}}
+    ]}
+  ]
+}

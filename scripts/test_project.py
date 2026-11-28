@@ -165,7 +165,7 @@ def rag(args, output):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="./test.sh", description="One command per test group; long model checks are opt-in.")
-    parser.add_argument("group", choices=["all", "backend", "auth", "frontend", "cart", "health", "rag", "retrieval", "robustness"])
+    parser.add_argument("group", choices=["all", "backend", "auth", "frontend", "cart", "chat", "health", "rag", "retrieval", "robustness"])
     parser.add_argument("--mode", choices=["rules", "pipeline"], default="rules",
                         help="Robustness: fast parser/rules checks or the full model pipeline")
     parser.add_argument("--limit", type=int, default=60, help="RAG/retrieval questions (1–60; default: 60)")
@@ -208,6 +208,9 @@ def main(argv=None):
         if args.group == "robustness":
             from evaluation.benchmarks.run_robustness import main as run_robustness
             return run_robustness(["--mode", args.mode, "--output-dir", str(output)])
+        if args.group == "chat":
+            from evaluation.benchmarks.run_chat_conversations import main as run_chat
+            return run_chat(["--limit", str(args.limit), "--output-dir", str(output)])
         if args.group == "rag":
             return rag(args, output)
         output.mkdir(parents=True)

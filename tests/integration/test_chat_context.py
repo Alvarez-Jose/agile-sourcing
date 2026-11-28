@@ -30,6 +30,8 @@ def approved(server, monkeypatch):
     monkeypatch.setattr(coordinator, 'reviewed_sources', lambda: [{'citation_id': 1, 'policy': 'Reviewed form'}])
     from backend.chat.explanations import MEANINGS
     monkeypatch.setattr(coordinator, 'explain_question', lambda kind, question: (MEANINGS[kind], False))
+    from backend.chat import conversation
+    monkeypatch.setattr(conversation, 'rewrite_answer', lambda original, mode: (original, False))
     return server
 
 
@@ -514,3 +516,146 @@ def test_unknown_charges_are_handled_independently_for_multiple_suppliers(approv
     assert result['follow_up'] is None
     assert len(result['purchase_results']) == 2
     assert all(entry['known_assessed_amount'] == '30000.00' and entry['sspr_required'] is None for entry in result['purchase_results'])
+
+
+def test_plain_language_followup_uses_prior_answer_and_keeps_purchase_state(approved, monkeypatch):
+    from backend.chat import conversation
+    rewrite = Mock(return_value=('Simpler explanation [1].', True))
+    monkeypatch.setattr(conversation, 'rewrite_answer', rewrite)
+    purchase = context()
+    result = send(approved, 'Can you make that easier to understand?', purchase,
+        history=[{'role': 'assistant', 'content': 'Earlier detailed answer [1].'}]).json()
+    assert result['answer'] == 'Simpler explanation [1].'
+    assert result['original_answer'] == 'Earlier detailed answer [1].'
+    assert result['inherit_sources'] is True
+    assert result['chat_context']['suppliers'][0]['funding'] == 'non_federal'
+    assert result['follow_up'] is None
+    approved.pipeline.assert_not_called()
+
+
+def test_summary_without_a_cart_does_not_restart_purchase_intake(approved, monkeypatch):
+    from backend.chat import conversation
+    monkeypatch.setattr(conversation, 'rewrite_answer', lambda original, mode: ('Short version', True))
+    result = approved.client.post('/api/ask', headers=HEADERS, json={'question': 'Sum that up',
+        'history': [{'role': 'assistant', 'content': 'A longer answer'}]}).json()
+    assert result['answer'] == 'Short version'
+    assert result['tool_request'] is None
+    approved.pipeline.assert_not_called()
+
+
+def test_more_detail_recalls_full_answer_without_new_policy_claims(approved):
+    result = approved.client.post('/api/ask', headers=HEADERS, json={'question': 'Give me the full answer',
+        'history': [{'role': 'assistant', 'content': 'Full answer with conditions [1].'}]}).json()
+    assert result['answer'] == 'Full answer with conditions [1].'
+    assert result['inherit_sources'] is True
+    approved.pipeline.assert_not_called()
+
+
+def test_short_purchase_summary_preserves_unknowns_and_full_detail(approved):
+    purchase = context();purchase['cart']['shipping'] = None;purchase['suppliers'][0]['shipping'] = None
+    result = send(approved, purchase=purchase).json()
+    assert result['summary'] and len(result['summary']) < len(result['answer'])
+    assert 'provisional' in result['summary'] and 'Still unknown:' in result['summary']
+    assert result['purchase_results'][0]['sspr_required'] is None
+    assert result['form_links'][0]['url'].startswith('https://financial.ucsc.edu/')
+
+
+def test_form_mentioned_by_rag_gets_canonical_link_not_model_url(approved):
+    approved.pipeline.return_value = {'answer': 'See [SSPR](https://evil.example/form).', 'sources': []}
+    result = approved.client.post('/api/ask', headers=HEADERS, json={'question': 'What is an SSPR?'}).json()
+    assert result['form_links'][0]['url'] == coordinator.DOCUMENTS['sspr-form']['url']
+    assert len(result['form_links']) == 1
+
+
+def test_greeting_is_conversational_and_does_not_read_cart_or_load_models(approved):
+    result = send(approved, 'Hi').json()
+    assert 'Hi!' in result['answer']
+    assert result['chat_context'] is not None
+    assert result['tool_request'] is None
+    approved.pipeline.assert_not_called()
+
+
+def test_unavailable_rewrite_does_not_silently_repeat_as_if_simplified(approved):
+    result = approved.client.post('/api/ask', headers=HEADERS, json={
+        'question': 'Make that simpler', 'history': [{'role': 'assistant', 'content': 'Original answer with conditions.'}]}).json()
+    assert 'could not safely simplify' in result['answer']
+    assert result['original_answer'] == 'Original answer with conditions.'
+    assert result['inherit_sources'] is True
+
+
+def test_shared_conversation_retracts_funding_and_resumes_checked_nonfederal_result(approved):
+    purchase = context(ready=False)
+    purchase['cart'].update(items=[{'description': 'Motic K-400 microscope', 'supplier': 'VWR International LLC',
+        'quantity': '1', 'unit_price': '2274.18', 'line_total': '2274.18'}], subtotal='2274.18',
+        total='2495.91', tax='221.73', shipping=None, handling=None)
+    purchase['suppliers'] = [{'supplier': 'VWR International LLC', 'funding': 'unknown',
+        'tax': '221.73', 'shipping': None, 'handling': None}]
+    purchase['independent_purchases'] = False
+    original = 'What do I need to submit to purchase these items?'
+    result = send(approved, original, purchase).json()
+    result = send(approved, 'Yes, separate purchases', result['chat_context']).json()
+    result = send(approved, 'Federal funds', result['chat_context']).json()
+    result = send(approved, 'Federal grant', result['chat_context']).json()
+    assert result['purchase_results'][0]['known_assessed_amount'] == '2495.91'
+    assert result['purchase_results'][0]['sspr_required'] is None
+    explained = send(approved, 'Explain that question in simpler terms.', result['chat_context'],
+        history=[{'role': 'assistant', 'content': result['answer'][:4000]}]).json()
+    assert 'could not safely simplify' not in explained['answer']
+    assert explained['answer'] != result['summary']
+    assert 'could change when those costs are known' in explained['answer']
+    assert 'provisional' in explained['answer'] and 'unknown, not zero' in explained['answer']
+    assert explained['chat_context']['purchase_question'] == original
+    uncertain = send(approved, 'I’m not sure where the funding comes from.', explained['chat_context']).json()
+    assert uncertain['follow_up']['kind'] == 'funding'
+    assert uncertain['chat_context']['suppliers'][0]['funding_confirmed'] is False
+    assert uncertain['purchase_results'] == []
+    assert 'unconfirmed' in uncertain['answer']
+    reasked = send(approved, 'What forms do I need?', uncertain['chat_context']).json()
+    assert reasked['follow_up']['kind'] == 'funding'
+    corrected = send(approved, 'It is non-federal funding.', uncertain['chat_context']).json()
+    assert corrected['intent'] == 'cart_sspr'
+    assert corrected['chat_context']['suppliers'][0]['funding_confirmed'] is True
+    assert corrected['chat_context']['purchase_question'] == original
+    assert corrected['purchase_results'][0]['known_assessed_amount'] == '2274.18'
+    assert corrected['purchase_results'][0]['sspr_required'] is None
+    assert 'before tax' in corrected['summary']
+    assert 'not every possible form' in corrected['summary']
+    assert 'No further action is required' not in corrected['answer']
+    approved.pipeline.assert_not_called()
+
+
+def test_old_cached_uncertainty_question_cannot_route_funding_correction_to_rag(approved):
+    purchase = context()
+    purchase['last_question'] = 'I’m not sure where the funding comes from.'
+    purchase['pending_question'] = None
+    result = send(approved, 'It is non-federal funding.', purchase).json()
+    assert result['intent'] == 'cart_sspr'
+    approved.pipeline.assert_not_called()
+
+
+def test_tentative_change_to_confirmed_grant_blocks_new_determinations(approved):
+    purchase = context();purchase['suppliers'][0]['funding'] = 'federal_grant'
+    first = send(approved, purchase=purchase).json()
+    unsure = send(approved, 'It might be federal funding', first['chat_context']).json()
+    assert unsure['chat_context']['suppliers'][0]['funding_confirmed'] is False
+    result = send(approved, 'What forms do I need now?', unsure['chat_context']).json()
+    assert result['follow_up']['kind'] == 'funding'
+    assert result['purchase_results'] == []
+    approved.pipeline.assert_not_called()
+
+
+def test_safe_summary_fallback_does_not_apply_to_unrelated_previous_answer(approved):
+    first = send(approved).json()
+    result = send(approved, 'Make that simpler', first['chat_context'], history=[
+        {'role': 'assistant', 'content': 'A different policy answer with unrelated conditions.'}]).json()
+    assert 'could not safely simplify' in result['answer']
+    assert result['original_answer'] == 'A different policy answer with unrelated conditions.'
+
+
+def test_unknown_funding_across_multiple_suppliers_is_not_carried_forward(approved):
+    first = send(approved, purchase=context(multiple=True)).json()
+    result = send(approved, 'I do not know where the funding comes from', first['chat_context']).json()
+    assert all(not entry['funding_confirmed'] for entry in result['chat_context']['suppliers'])
+    corrected = send(approved, 'Non-federal funds', result['chat_context']).json()
+    assert corrected['follow_up']['supplier'] == 'Supplier B'
+    assert corrected['purchase_results'] == []

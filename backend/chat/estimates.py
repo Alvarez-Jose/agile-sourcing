@@ -5,6 +5,12 @@ from decimal import Decimal
 from rules import thresholds as T
 
 
+def sspr_threshold(details):
+    return {'non_federal': T.SSPR_NON_FEDERAL,
+            'federal_contract': T.SSPR_FEDERAL_CONTRACT,
+            'federal_grant': T.SSPR_FEDERAL_GRANT}[details.funding]
+
+
 def known_amount(items, details):
     fields = ['shipping', 'handling']
     if details.funding != 'non_federal':
@@ -31,11 +37,7 @@ def estimate_note(context, items, details):
 
 def provisional_guidance(items, details, *, bidding=False):
     amount, missing = known_amount(items, details)
-    threshold = T.COMPETITIVE_BID_THRESHOLD if bidding else {
-        'non_federal': T.SSPR_NON_FEDERAL,
-        'federal_contract': T.SSPR_FEDERAL_CONTRACT,
-        'federal_grant': T.SSPR_FEDERAL_GRANT,
-    }[details.funding]
+    threshold = T.COMPETITIVE_BID_THRESHOLD if bidding else sspr_threshold(details)
     reached = amount >= threshold
     topic = 'competitive-bidding' if bidding else 'SSPR'
     basis = 'excluding tax' if details.funding == 'non_federal' else 'including any known tax'

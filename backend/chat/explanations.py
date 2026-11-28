@@ -33,6 +33,9 @@ MEANINGS = {
 def explain_question(kind, question):
     """Return (explanation, model_called); unavailable models use a useful fallback."""
     meaning = MEANINGS[kind]
+    if kind == 'award_type':
+        # Both award types remain possible until the buyer confirms one.
+        return meaning, False
     called = False
     try:
         import ollama

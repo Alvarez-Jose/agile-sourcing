@@ -14,6 +14,7 @@ class SupplierDetails(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
     supplier: str = Field(min_length=1, max_length=200)
     funding: Funding = 'unknown'
+    funding_confirmed: StrictBool = True
     tax: Money | None = None
     shipping: Money | None = None
     handling: Money | None = None
@@ -26,6 +27,8 @@ class ChatContext(BaseModel):
     independent_purchases: StrictBool = False
     pending_question: str | None = Field(default=None, max_length=4000)
     last_question: str | None = Field(default=None, max_length=4000)
+    purchase_question: str | None = Field(default=None, max_length=4000)
+    sspr_answer_hash: str | None = Field(default=None, pattern=r'^[a-f0-9]{64}$')
     awaiting_supplier: str | None = Field(default=None, max_length=200)
     awaiting_kind: str | None = Field(default=None, max_length=40)
     awaiting_field: Literal['tax', 'shipping', 'handling'] | None = None

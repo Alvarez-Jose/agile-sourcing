@@ -27,6 +27,7 @@ HEADERS = {"Authorization": "Bearer test-firebase-token"}
 
 @pytest.fixture
 def server(monkeypatch):
+    monkeypatch.setenv('CHAT_MODEL_CONVERSATION', '0')
     records = {}
     document = Mock()
 
@@ -193,17 +194,17 @@ def test_pending_user_cannot_invoke_pipeline(server):
 def test_approval_is_reloaded_on_each_protected_request(server):
     server.records[IDENTITY["uid"]] = {"is_approved": True, "department": "Chemistry"}
     response = server.client.post(
-        "/api/ask", headers=HEADERS, json={"question": "Hello"}
+        "/api/ask", headers=HEADERS, json={"question": "What is the bidding threshold?"}
     )
     assert response.status_code == 200
     assert response.json()["answer"] == "Policy answer"
     assert response.json()["sources"] == []
     server.records[IDENTITY["uid"]]["is_approved"] = False
     response = server.client.post(
-        "/api/ask", headers=HEADERS, json={"question": "Hello"}
+        "/api/ask", headers=HEADERS, json={"question": "What is the bidding threshold?"}
     )
     assert response.status_code == 403
-    server.pipeline.assert_called_once_with("Hello", think=False)
+    server.pipeline.assert_called_once_with("What is the bidding threshold?", think=False)
 
 
 def test_invalid_permission_data_fails_closed(server):
@@ -257,7 +258,7 @@ def test_pipeline_failures_return_an_actionable_response(
     server.records[IDENTITY["uid"]] = {"is_approved": True}
     server.pipeline.side_effect = error
     response = server.client.post(
-        "/api/ask", headers=HEADERS, json={"question": "Hello"}
+        "/api/ask", headers=HEADERS, json={"question": "What is the bidding threshold?"}
     )
     assert response.status_code == 503
     assert response.json() == {"detail": expected_detail}

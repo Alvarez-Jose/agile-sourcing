@@ -62,6 +62,7 @@ function chatFixture(options={}) {
       saveChatDraft:async()=>{},clearChatDraft:async()=>{},
     };
     if(name.endsWith('ChatCartPanel'))return{ChatCartPanel:function ChatCartPanel(){}};
+    if(name.endsWith('ChatAnswerText'))return{ChatAnswerText:function ChatAnswerText(){}};
     if(name.endsWith('services/auth'))return{SessionError:Error};
     throw Error(name);
   }});
@@ -272,4 +273,27 @@ test('rapid repeated submissions cannot send the selected answer twice',async()=
   const submit=find(f.render(),'form').props.onSubmit;
   const first=submit({preventDefault(){}});const second=submit({preventDefault(){}});
   assert.equal(f.calls.length,1);f.resolve({answer:'Next question',sources:[]});await Promise.all([first,second]);
+});
+
+test('chat defaults to the short answer and preserves full detail and form links',async()=>{
+  const links=[{title:'SSPR form',url:'https://financial.ucsc.edu/form.pdf',aliases:['SSPR']}];
+  const f=chatFixture({ask:async()=>({answer:'Long answer with conditions [1].',summary:'Short SSPR guidance.',sources:[],form_links:links})});
+  f.render();await send(f,'What is an SSPR?');
+  const answer=f.values[1].at(-1);assert.equal(answer.text,'Short SSPR guidance.');
+  assert.equal(answer.detailText,'Long answer with conditions [1].');assert.equal(answer.formLinks[0].url,links[0].url);
+  assert.equal(chatHelpers().recentHistory(f.values[1]).at(-1).content,'Long answer with conditions [1].');
+});
+
+test('a simpler version retains the sources from the exact previous answer',async()=>{
+  const source={citation_id:1,policy:'Reviewed policy',page:'1',section:'',source_url:null,evidence:[]};
+  const f=chatFixture({ask:async()=>({answer:'Simpler explanation [1].',original_answer:'Full earlier answer [1].',sources:[],inherit_sources:true})});
+  f.render();f.values[1]=[{sender:'bot',text:'Full earlier answer [1].',sources:[source]}];
+  await send(f,'Explain that in simpler terms');const answer=f.values[1].at(-1);
+  assert.equal(answer.sources[0].policy,'Reviewed policy');assert.equal(answer.detailText,'Full earlier answer [1].');
+});
+
+test('a clarification with no sources cannot inherit citations from an older answer',async()=>{
+  const f=chatFixture({ask:async()=>({answer:'Simpler question.',sources:[],inherit_sources:true})});f.render();
+  f.values[1]=[{sender:'bot',text:'Earlier policy',sources:[{citation_id:1,policy:'Earlier'}]},{sender:'bot',text:'Which funding?'}];
+  await send(f,'Explain that');assert.equal(f.values[1].at(-1).sources.length,0);
 });

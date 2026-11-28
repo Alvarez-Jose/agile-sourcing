@@ -40,4 +40,10 @@ def test_empty_malformed_or_policy_decisions_use_known_meaning(monkeypatch, repl
 def test_model_timeout_falls_back_without_losing_the_question(monkeypatch):
     _, client = model(monkeypatch, '')
     client.chat.side_effect = TimeoutError('Model busy')
-    assert explain_question('award_type', 'Explain the difference') == (MEANINGS['award_type'], True)
+    assert explain_question('funding', 'Explain the difference') == (MEANINGS['funding'], True)
+
+
+def test_uncertain_award_keeps_both_options_open(monkeypatch):
+    factory, _ = model(monkeypatch, '{"explanation":"Your award is a grant."}')
+    assert explain_question('award_type', "I'm not sure") == (MEANINGS['award_type'], False)
+    factory.assert_not_called()

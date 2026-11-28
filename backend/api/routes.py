@@ -51,6 +51,12 @@ class AskResponse(BaseModel):
     follow_up: dict | None = None
     purchase_results: list[dict] = Field(default_factory=list)
     tool_request: dict | None = None
+    summary: str | None = None
+    original_answer: str | None = None
+    inherit_sources: bool = False
+    form_links: list[dict] = Field(default_factory=list)
+    dialogue: dict | None = None
+    canonical_answer: str | None = None
 
 
 @router.get("/health")
@@ -73,6 +79,12 @@ def ask_endpoint(
             return pipeline_ask(question, **options)
 
         result = answer_chat(req.question, req.chat_context, req.history, ask, think=req.think)
+        from backend.chat.conversation import prepare_response
+        from backend.chat.forms import form_links
+        result = prepare_response(result)
+        from backend.chat.dialogue import narrate_result
+        result = narrate_result(result)
+        result['form_links'] = form_links('\n'.join(result.get(field) or '' for field in ('answer', 'summary', 'original_answer')))
     except ModuleNotFoundError as error:
         logger.exception("Assistant dependency is missing: %s", error.name)
         raise HTTPException(

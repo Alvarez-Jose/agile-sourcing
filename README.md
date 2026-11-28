@@ -162,6 +162,17 @@ If an intake question is unclear, ask **"Explain this in simpler terms."** Qwen
 rephrases the question while preserving the original purchase request. **"I'm
 not sure"** explains where to find the missing information; the check can be
 paused without guessing. If Qwen is unavailable, a plain-language fallback is used.
+If you become unsure about funding after an answer, the earlier choice is marked
+unconfirmed. Confirming the funding again resumes the original purchase check.
+
+Answers show a short, plain-language version by default when available; expand
+**Full answer and conditions** for the original calculation and explanation.
+Follow-ups such as **"Sum that up"**, **"Make that easier to understand"** and
+**"Give me the full answer"** refer to the previous answer without restarting
+purchase intake. Rephrasing keeps the original answer and citations available;
+if the model is unavailable or changes protected details, it keeps the original.
+Form mentions link only to existing verified UC/UCSC source URLs. Currently the
+SSPR form has such a link; forms without a verified URL remain plain text.
 
 Ask **"Refresh my cart"** after changes in CruzBuy. Messages, draft input and
 purchase details are cached in browser-session memory, so closing the popup or
@@ -184,6 +195,7 @@ separate so they do not run accidentally.
 | Authentication and sessions | `./test.sh auth` | Backend token/approval tests and frontend sign-in/session tests. No live Google login needed. |
 | Frontend | `./test.sh frontend` | Test counts, TypeScript check and extension build result. |
 | Cart guidance and chat context | `./test.sh cart` | Cart/chat API tests plus eight synthetic cart scenarios. Needs the reviewed BUS-43 and SSPR PDFs. |
+| Real-model chat conversations | `./test.sh chat` | Replays two synthetic cart conversations through Qwen and the API, with progress and state/routing checks. Needs Ollama and the reviewed BUS-43/SSPR PDFs. |
 | Running API health | `./test.sh health` | HTTP status and response time. Start `./run.sh` first. |
 | RAG answer quality | `./test.sh rag` | All 60 questions, corrected-key LLM-judged accuracy, partial/incorrect counts, latency and citation diagnostics. Needs Ollama, models and the policy index. |
 | Retrieval quality | `./test.sh retrieval` | Expected-document recall@1, recall@5 and candidate-pool recall over 60 questions. Needs the embedding/reranking models and policy index; no answer generation or running API needed. |
@@ -196,6 +208,15 @@ terminal, elapsed time keeps updating during each model call; ETA is an estimate
 RAG answers and grades are saved after each question so completed work survives
 interruption. Model logs and reports go to a new, ignored folder under
 `data/evaluation/`; the terminal prints its location.
+
+The chat replay saves every question, answer, model interpretation, cart state,
+timing and assertion in `conversations.json`, plus `summary.json`. Use
+`./test.sh chat --limit 1` for one conversation. It uses saved synthetic carts and
+a local approved-user test override; it does not test live scraping, Google login,
+or expert policy correctness. Review the saved wording as well as the checks.
+Qwen interprets conversational turns and rephrases checked guidance; existing rules
+still decide calculations and form requirements. Unsupported fact updates require
+clarification. If interpretation is unavailable, deterministic routing remains available.
 
 For a short trial before the full 60-question run:
 

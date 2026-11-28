@@ -7,6 +7,7 @@ import { captureCart } from '../../services/cart';
 import { attachCart, recentHistory, ChatContext, FollowUp } from '../../services/chat';
 import { ChatCartPanel } from '../ChatCartPanel';
 import { clearChatDraft, loadChatDraft, saveChatDraft, ChatMessage } from '../../services/chatCache';
+import { ChatAnswerText } from '../ChatAnswerText';
 
 export function ChatPage() {
   const { userProfile, isAuthenticated, isApproved, isLoading, refreshSession } = useAuth();
@@ -102,7 +103,11 @@ export function ChatPage() {
         if (result.tool_request) throw new Error('Could not finish reading the cart. Open the CruzBuy Simple Cart and retry.');
       }
       if (currentSession.current.generation !== requestSession) return;
-      setMessages((prev) => [...prev, { sender: 'bot', text: result.answer, sources: result.sources }]);
+      const previous = messages.slice().reverse().find(message => message.sender === 'bot');
+      setMessages((prev) => [...prev, {sender: 'bot', text: result.summary ?? result.answer,
+        detailText: result.summary ? result.answer : result.original_answer ?? undefined,
+        formLinks: result.form_links ?? [],
+        sources: result.inherit_sources ? previous?.sources ?? [] : result.sources}]);
       if (result.chat_context) setCartContext(result.chat_context);
       setFollowUp(result.follow_up ?? null);
     } catch (error) {
@@ -302,7 +307,11 @@ export function ChatPage() {
                         : 'bg-gray-100 text-gray-800 rounded-bl-none'
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{m.text}</p>
+                    <p className="whitespace-pre-wrap">{m.sender === 'bot' ? <ChatAnswerText text={m.text} links={m.formLinks}/> : m.text}</p>
+                    {m.detailText && m.detailText !== m.text && <details className="mt-2 border-t border-gray-200 pt-2">
+                      <summary className="cursor-pointer text-xs text-[#00539b]">Full answer and conditions</summary>
+                      <div className="mt-2"><ChatAnswerText text={m.detailText} links={m.formLinks}/></div>
+                    </details>}
                     {m.sender === 'bot' && i === messages.length - 1 && !!followUp?.choices.length && (
                       <div role="group" aria-label="Choose a reply" className="mt-3 flex flex-col gap-2">
                         {followUp.choices.map(choice => <button

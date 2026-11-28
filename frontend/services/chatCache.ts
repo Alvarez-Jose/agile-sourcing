@@ -1,10 +1,10 @@
 // frontend/services/chatCache.ts
 // browser-session memory survives popup closure, but never establishes identity.
 import {browser} from 'wxt/browser';
-import type {AskResponse} from './agent';
+import type {AskResponse, FormLink} from './agent';
 import type {ChatContext, FollowUp} from './chat';
 
-export interface ChatMessage {sender: 'user' | 'bot'; text: string; sources?: AskResponse['sources']}
+export interface ChatMessage {sender: 'user' | 'bot'; text: string; sources?: AskResponse['sources']; detailText?: string; formLinks?: FormLink[]}
 export interface ChatDraft {
   messages: ChatMessage[];
   input: string;
@@ -34,6 +34,9 @@ export async function loadChatDraft(owner: string): Promise<ChatDraft | null> {
       typeof draft.interrupted !== 'boolean') return null;
   for (const message of draft.messages) {
     if (!message || !['user', 'bot'].includes(message.sender) || typeof message.text !== 'string') return null;
+    if (message.detailText !== undefined && typeof message.detailText !== 'string') return null;
+    if (message.formLinks !== undefined && (!Array.isArray(message.formLinks) || !message.formLinks.every(link =>
+      link && typeof link.title === 'string' && typeof link.url === 'string' && Array.isArray(link.aliases)))) return null;
     if (message.sources !== undefined) {
       if (!Array.isArray(message.sources)) return null;
       for (const source of message.sources) {

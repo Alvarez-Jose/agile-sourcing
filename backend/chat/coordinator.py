@@ -3,6 +3,7 @@
 import json
 import re
 from decimal import Decimal
+from hashlib import sha256
 
 from pydantic import ValidationError
 
@@ -10,6 +11,7 @@ from backend.api.cart_routes import CartRequest, guide, reviewed_sources
 from backend.chat.models import ChatContext, SupplierDetails
 from backend.chat.explanations import explain_question
 from backend.chat.estimates import estimate_note, known_amount, provisional_guidance
+from backend.chat.conversation import conversation_mode, conversation_reply
 from rules import PurchaseRequest, RuleEngine
 from rules.answer_format import format_rule_answer, source_citations
 from rules.provenance import DOCUMENTS
@@ -37,7 +39,7 @@ FUNDING_REPLIES = {
 FOLLOWUP = re.compile(r'^(?:why|why not|why is that|what does that mean|can you explain(?: that)?|explain(?: that)?|tell me more)[?.! ]*$', re.I)
 GENERAL = re.compile(r'\b(?:what (?:is|does)|define|explain|how (?:do|should)|where (?:is|can))\b', re.I)
 CART_REFERENCE = re.compile(r'\b(?:my|our|this|these|cart)\b', re.I)
-PAPERWORK = re.compile(r'\b(?:forms?|paperwork|sspr|(?:need|required) to submit|submit to (?:purchase|buy)|documents? (?:do i need|required))\b', re.I)
+PAPERWORK = re.compile(r'\b(?:forms?|paperwork|sspr|(?:need|required) to submit|submit to (?:purchase|buy)|documents? (?:do i need|required)|what (?:do|will) (?:i|we) need to (?:buy|purchase|order))\b', re.I)
 BIDDING = re.compile(r'\b(?:competitive bid(?:ding|s)?|bidding|need to bid)\b', re.I)
 HYPOTHETICAL = re.compile(r'\b(?:what if|suppose|hypothetical|instead|if (?:i|we|the|this))\b', re.I)
 CART_SUMMARY = re.compile(r"\b(?:summari[sz]e (?:my |the |this )?cart|what(?:'s| is) in (?:my |the |this )?cart|(?:my |the |this )?cart (?:total|subtotal)|total (?:of|for) (?:my |the |this )?cart)\b", re.I)
@@ -71,6 +73,11 @@ def _groups(context):
                 handling=context.cart.handling if single else None)
     context.suppliers = [details[key] for key in groups]
     return [(items, details[key]) for key, items in groups.items()]
+
+
+def _purchase_request(question):
+    return bool((PAPERWORK.search(question) or BIDDING.search(question)) and
+                not (GENERAL.search(question) and not CART_REFERENCE.search(question)))
 
 
 def _response(context, answer, *, follow_up=None, **extra):
@@ -175,7 +182,41 @@ def _intake_help(context, question, reason):
 
 
 def answer_chat(question, context, history, ask, *, think=False):
+    from backend.chat.dialogue import enabled, interpret_turn
+    if context is None or not enabled():
+        return _coordinate_chat(question, context, history, ask, think=think)
+    if CART_SUMMARY.search(question):
+        # Reading captured facts requires no inference or model fact updates.
+        result = _coordinate_chat(question, context, history, ask, think=think)
+        result['dialogue'] = {'attempted': False, 'accepted': True, 'action': 'cart_summary', 'route': 'captured_cart'}
+        return result
+    context = context.model_copy(deep=True)
+    _groups(context)
+    canonical, context, trace = interpret_turn(question, context, history)
+    if trace.get('rejected_fact'):
+        result = _response(context, 'I could not safely confirm that change. Please state the supplier and the confirmed funding type, purchase scope, or charge amount directly. Your previous details are unchanged.')
+    else:
+        def contextual_ask(text, **options):
+            # A missed fact update must not become a free-form policy answer.
+            if not re.match(
+                    r'^(?:what|which|why|how|when|where|can|could|would|do|does|is|are|will|should|explain|define|tell|give|summarize)\b', question.strip(), re.I):
+                return _response(context, 'I could not confidently interpret that reply. Please state the confirmed funding or charge directly, or ask a policy question. Your previous details are unchanged.')
+            return ask(text, **options)
+        result = _coordinate_chat(canonical, context, history, contextual_ask, think=think)
+    result['dialogue'] = trace
+    return result
+
+
+def _coordinate_chat(question, context, history, ask, *, think=False):
+    mode = conversation_mode(question)
+    if mode == 'greeting':
+        result = conversation_reply(question, history)
+        if context is not None:
+            result['chat_context'] = context.model_dump(mode='json')
+        return result
     if context is None:
+        if mode:
+            return conversation_reply(question, history)
         if _cart_question(question):
             return _read_cart(question)
         resolved = _history_question(question, history)
@@ -184,12 +225,25 @@ def answer_chat(question, context, history, ask, *, think=False):
         return _read_cart(context.pending_question or context.last_question or 'Summarize my cart')
     context = context.model_copy(deep=True)
     groups = _groups(context)
+    if not context.purchase_question:
+        candidates = [context.pending_question, context.last_question] + [turn.content for turn in reversed(history) if turn.role == 'user']
+        context.purchase_question = next((text for text in candidates if text and _purchase_request(text)), None)
+    normalized = question.lower().replace('’', "'")
+    funding_uncertainty = (re.search(r"not sure|don't know|do not know|uncertain|unsure", normalized) and
+                           re.search(r'\b(?:funding|money|grant|contract|paying|pays|paid)\b', normalized))
+    if funding_uncertainty:
+        for _, entry in groups:
+            entry.funding_confirmed = False
+        context.pending_question = context.purchase_question or context.pending_question or 'What forms do I need for this cart?'
+        supplier = next((entry.supplier for _, entry in groups if entry.supplier == context.awaiting_supplier), groups[0][1].supplier)
+        return _ask_for(context, 'Thanks for clarifying. I will treat the earlier funding choice as unconfirmed, so the previous purchase guidance needs to be rechecked. Funding means the money paying for this purchase. Check the award record or ask your department; you can still ask general policy questions meanwhile.', kind='funding', supplier=supplier, choices=FUNDING_CHOICES)
     unknown_charge_reply = context.awaiting_kind == 'charges' and _help_reply(question, 'charges') == 'uncertain'
     if re.search(r'\b(?:might|may|maybe|possibly|probably|think|not sure)\b', question, re.I) and re.search(r'\b(?:federal|grant|contract|mixed)\b', question, re.I):
         target = next((entry for _, entry in groups if entry.supplier == context.awaiting_supplier), None)
         if target is None and len(groups) == 1:
             target = groups[0][1]
         if target is not None:
+            target.funding_confirmed = False
             award_unknown = target.funding == 'federal' and re.search(r'\b(?:grant|contract)\b', question, re.I)
             kind, choices = ('award_type', AWARD_CHOICES) if award_unknown else ('funding', FUNDING_CHOICES)
             previous = ' You previously selected mixed funding; I will keep it recorded until you confirm a correction.' if target.funding == 'mixed' else ''
@@ -201,8 +255,12 @@ def answer_chat(question, context, history, ask, *, think=False):
     # question. In particular, it must not overwrite pending_question or facts.
     if context.awaiting_kind in ('scope', 'funding', 'award_type', 'charges'):
         help_kind = _help_reply(question, context.awaiting_kind)
+        if mode in ('summary', 'simple', 'detail') and not help_kind:
+            help_kind = 'explain'
         if help_kind and not unknown_charge_reply:
             return _intake_help(context, question, help_kind)
+    if mode:
+        return {**conversation_reply(question, history, context), 'chat_context': context.model_dump(mode='json')}
     target = next((details for _, details in groups if details.supplier == context.awaiting_supplier), None)
     charge_question = question
     if ':' in question:
@@ -234,6 +292,7 @@ def answer_chat(question, context, history, ask, *, think=False):
             context.independent_purchases = True
             detail_reply = True
         elif text in ('no', 'no, they are related', 'no, services or related orders'):
+            context.independent_purchases = False
             return _ask_for(context, 'Related orders, services or multi-year agreements need Procurement review. I cannot check these as separate standalone goods purchases.', kind='review_required')
     if charge_field and target:
         value = _charge_reply(charge_question, charge_field)
@@ -256,11 +315,14 @@ def answer_chat(question, context, history, ask, *, think=False):
             target = groups[0][1]
         if target is not None:
             target.funding = funding
+            target.funding_confirmed = True
         else:
             supplier = groups[0][1].supplier
             return _ask_for(context, f'I need funding separately for each supplier. What funding will pay for {supplier}?', kind='funding', supplier=supplier, choices=FUNDING_CHOICES)
     resume = detail_reply or funding is not None or question.lower().strip('.! ') in ('continue', 'continue with these details', "i'm not sure", 'i don\'t know')
-    effective = (context.pending_question or context.last_question or question) if resume else question
+    effective = (context.pending_question or context.purchase_question or
+                 (context.last_question if context.last_question and _purchase_request(context.last_question) else None) or
+                 'What forms do I need for this cart?') if resume else question
     if context.pending_question and context.awaiting_supplier and not funding and not re.match(
             r'^(?:what|which|why|how|can|do|does|should|is|are|will|would|could|when|where)\b', question.strip(), re.I):
         effective = context.pending_question
@@ -275,6 +337,8 @@ def answer_chat(question, context, history, ask, *, think=False):
         return _ask_for(context, 'This chat is using your current cart. To test another purchase, ask me to refresh the cart or tell me its new funding type. Remove the cart to ask a separate hypothetical policy question.', kind='scenario_change')
     if not resume and not is_followup:
         context.pending_question = effective
+    if _purchase_request(effective):
+        context.purchase_question = effective
     if not context.cart.reviewed:
         return _read_cart(context.pending_question or effective, context)
     if CART_SUMMARY.search(effective):
@@ -286,10 +350,10 @@ def answer_chat(question, context, history, ask, *, think=False):
                           'Are these separate one-time goods purchases from each supplier, rather than services or parts of a larger related purchase?')
         return _ask_for(context, scope_question, kind='scope', choices=[{'label': 'Yes, just these goods', 'value': 'Yes, separate purchases'}, {'label': 'No / needs review', 'value': 'No, services or related orders'}])
     for _, details in groups:
-        if details.funding == 'unknown':
+        if details.funding == 'unknown' or not details.funding_confirmed:
             return _ask_for(context, f'What funding will pay for the purchase from {details.supplier}? If you are unsure, check with your department or funding administrator.', kind='funding', supplier=details.supplier, choices=FUNDING_CHOICES)
         if details.funding == 'federal':
-            return _ask_for(context, f'For {details.supplier}, is that a federal grant/cooperative agreement or a federal contract?', kind='award_type', supplier=details.supplier, choices=AWARD_CHOICES)
+            return _ask_for(context, f'Which federal award is paying for your purchase from {details.supplier}: a grant or cooperative agreement, or a contract awarded to the university?', kind='award_type', supplier=details.supplier, choices=AWARD_CHOICES)
         if details.funding == 'mixed':
             return _ask_for(context, f'The purchase from {details.supplier} has mixed funding. Its federal share and award conditions need Procurement review; this workflow cannot determine its forms.', kind='review_required', supplier=details.supplier)
     context.awaiting_supplier = None
@@ -317,7 +381,9 @@ def answer_chat(question, context, history, ask, *, think=False):
                             'provisional': bool(missing), 'missing_charges': missing,
                             'sspr_required': result.get('sspr_required_by_threshold'),
                             'forms': result['forms']})
-        return _response(context, '\n\n'.join(answers), sources=sources,
+        answer = '\n\n'.join(answers)
+        context.sspr_answer_hash = sha256(answer[:4000].encode()).hexdigest()
+        return _response(context, answer, sources=sources,
                          intent='cart_sspr', purchase_results=results)
     if BIDDING.search(effective) and not is_followup:
         answers, sources, records = [], [], []

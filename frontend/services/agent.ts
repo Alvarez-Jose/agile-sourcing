@@ -3,6 +3,10 @@ import type { ChatContext, ChatTurn, FollowUp } from './chat';
 
 export interface AskResponse {
   answer: string;
+  summary?: string | null;
+  original_answer?: string | null;
+  inherit_sources?: boolean;
+  form_links?: FormLink[];
   tool_request?: {name: 'read_cart'; question: string} | null;
   chat_context?: ChatContext | null;
   follow_up?: FollowUp | null;
@@ -17,6 +21,8 @@ export interface AskResponse {
     evidence: Array<{ quote: string; start?: number; end?: number }>;
   }>;
 }
+
+export interface FormLink {title: string; url: string; aliases: string[]}
 
 export function citationUrl(source: AskResponse['sources'][number]): string | undefined {
   if (!source.source_url) return undefined;
